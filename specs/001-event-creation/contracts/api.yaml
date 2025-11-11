@@ -1,0 +1,842 @@
+openapi: 3.0.3
+info:
+  title: YURUBO API - Phase 1 Event Creation
+  description: |
+    フェーズ1：イベント作成機能のAPI仕様
+
+    **Feature Branch**: `001-event-creation`
+
+    このAPIは以下の機能を提供します:
+    - イベント作成（匿名投稿）
+    - タイムライン取得（つながりリストベース）
+    - イベント詳細取得
+    - イベント編集（参加者承認前のみ）
+    - イベント中止
+
+    すべてのエンドポイントはSupabase RLSによるアクセス制御が適用されます。
+  version: 1.0.0
+  contact:
+    name: YURUBO Development Team
+
+servers:
+  - url: https://your-project.supabase.co/rest/v1
+    description: Supabase REST API (Production)
+  - url: http://localhost:54321/rest/v1
+    description: Supabase Local Development
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: events
+    description: イベント操作（作成、取得、編集、中止）
+
+paths:
+  /events:
+    post:
+      tags:
+        - events
+      summary: イベント作成
+      description: |
+        新しいイベントを作成します（匿名投稿）。
+
+        **機能要件**: FR-001, FR-002, FR-003, FR-004, FR-005, FR-006, FR-007, FR-008, FR-009
+
+        **バリデーション**:
+        - カテゴリと開催日時は必須
+        - 開催日時（開始）は現在より未来
+        - 開催日時（終了）は開始より後
+        - 想定人数の最小値 ≤ 最大値
+        - 受付締切日時 < 開催日時（開始）
+        - 同一カテゴリの投稿は1日3件まで
+
+        **処理フロー**:
+        1. リクエストボディをバリデーション
+        2. 1日の投稿上限チェック（同一カテゴリ3件まで）
+        3. 匿名ID生成（カテゴリ絵文字 + 連番アルファベット）
+        4. イベントをデータベースに保存（status: recruiting）
+        5. 投稿者を仮幹事として登録
+        6. つながりリスト内の該当カテゴリOKユーザーに配信
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+            examples:
+              drinking_event:
+                summary: 飲みイベント
+                value:
+                  category: drinking
+                  date_start: "2025-11-15T19:00:00+09:00"
+                  date_end: "2025-11-15T22:00:00+09:00"
+                  capacity_min: 3
+                  capacity_max: 5
+                  price_min: 3000
+                  price_max: 5000
+                  comment: "仕事終わりに軽く一杯どうですか?"
+              travel_event:
+                summary: 旅行イベント
+                value:
+                  category: travel
+                  date_start: "2025-12-01T09:00:00+09:00"
+                  date_end: "2025-12-03T18:00:00+09:00"
+                  capacity_min: 4
+                  capacity_max: 8
+                  price_min: 20000
+                  price_max: 30000
+                  deadline: "2025-11-25T23:59:59+09:00"
+                  comment: "温泉旅行に行きませんか?"
+      responses:
+        '201':
+          description: イベント作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "イベントを投稿しました"
+                code: "EVENT_CREATED"
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  anon_id: "🍶A"
+                  category: "drinking"
+                  date_start: "2025-11-15T19:00:00+09:00"
+                  date_end: "2025-11-15T22:00:00+09:00"
+                  capacity_min: 3
+                  capacity_max: 5
+                  price_min: 3000
+                  price_max: 5000
+                  comment: "仕事終わりに軽く一杯どうですか?"
+                  status: "recruiting"
+                  created_at: "2025-11-11T10:00:00+09:00"
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                missing_required:
+                  summary: 必須項目未入力
+                  value:
+                    success: false
+                    message: "カテゴリと開催日時は必須です"
+                    code: "VALIDATION_ERROR"
+                past_date:
+                  summary: 過去の日時
+                  value:
+                    success: false
+                    message: "開催日時は現在より未来の日時を指定してください"
+                    code: "VALIDATION_ERROR"
+                invalid_date_range:
+                  summary: 日時の前後関係エラー
+                  value:
+                    success: false
+                    message: "終了時刻は開始時刻より後に設定してください"
+                    code: "VALIDATION_ERROR"
+                invalid_capacity:
+                  summary: 人数の前後関係エラー
+                  value:
+                    success: false
+                    message: "最小人数は最大人数以下である必要があります"
+                    code: "VALIDATION_ERROR"
+                invalid_deadline:
+                  summary: 受付締切エラー
+                  value:
+                    success: false
+                    message: "受付締切は開催開始時刻より前に設定してください"
+                    code: "VALIDATION_ERROR"
+        '429':
+          description: 投稿上限エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "1日の投稿上限（3件）に達しました"
+                code: "DAILY_LIMIT_EXCEEDED"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    get:
+      tags:
+        - events
+      summary: タイムライン取得（イベント一覧）
+      description: |
+        つながりリスト内の該当カテゴリOKのイベント投稿を取得します。
+
+        **機能要件**: FR-010, FR-011, FR-012
+
+        **フィルタリングルール**（RLSポリシーで自動適用）:
+        - 自分の投稿は常に表示
+        - つながりリスト内で該当カテゴリOKの投稿のみ表示
+        - ステータスが`recruiting`のみ表示（募集中）
+
+        **ページネーション**:
+        - Cursor-based pagination（range方式）
+        - デフォルト20件ずつ取得
+        - 無限スクロール対応
+      operationId: getEventTimeline
+      parameters:
+        - name: offset
+          in: query
+          description: 取得開始位置（0から開始）
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: limit
+          in: query
+          description: 取得件数（最大100件）
+          required: false
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: category
+          in: query
+          description: カテゴリフィルタ（任意）
+          required: false
+          schema:
+            type: string
+            enum:
+              - drinking
+              - travel
+              - tennis
+              - other
+      responses:
+        '200':
+          description: タイムライン取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "タイムラインを取得しました"
+                  code:
+                    type: string
+                    example: "TIMELINE_FETCHED"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                  pagination:
+                    type: object
+                    properties:
+                      offset:
+                        type: integer
+                        example: 0
+                      limit:
+                        type: integer
+                        example: 20
+                      total:
+                        type: integer
+                        example: 50
+                      has_more:
+                        type: boolean
+                        example: true
+              example:
+                success: true
+                message: "タイムラインを取得しました"
+                code: "TIMELINE_FETCHED"
+                data:
+                  - id: "550e8400-e29b-41d4-a716-446655440000"
+                    anon_id: "🍶A"
+                    category: "drinking"
+                    date_start: "2025-11-15T19:00:00+09:00"
+                    date_end: "2025-11-15T22:00:00+09:00"
+                    capacity_min: 3
+                    capacity_max: 5
+                    price_min: 3000
+                    price_max: 5000
+                    comment: "仕事終わりに軽く一杯どうですか?"
+                    status: "recruiting"
+                    created_at: "2025-11-11T10:00:00+09:00"
+                pagination:
+                  offset: 0
+                  limit: 20
+                  total: 50
+                  has_more: true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /events/{event_id}:
+    get:
+      tags:
+        - events
+      summary: イベント詳細取得
+      description: |
+        特定のイベントの詳細情報を取得します。
+
+        **アクセス制御**（RLSポリシーで自動適用）:
+        - 自分の投稿は常に閲覧可
+        - つながりリスト内で該当カテゴリOKの投稿のみ閲覧可
+      operationId: getEventById
+      parameters:
+        - name: event_id
+          in: path
+          description: イベントID（UUID）
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: イベント詳細取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: "イベント詳細を取得しました"
+                  code:
+                    type: string
+                    example: "EVENT_FETCHED"
+                  data:
+                    $ref: '#/components/schemas/Event'
+        '404':
+          description: イベントが見つからない、またはアクセス権限なし
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "イベントが見つかりません"
+                code: "EVENT_NOT_FOUND"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    patch:
+      tags:
+        - events
+      summary: イベント編集
+      description: |
+        イベント情報を編集します。
+
+        **機能要件**: FR-013, FR-014
+
+        **編集条件**:
+        - 投稿者本人のみ編集可能
+        - 参加者承認前（status: recruiting）のみ編集可能
+        - 参加者が承認された後は編集不可
+
+        **バリデーション**:
+        - イベント作成時と同じバリデーションを適用
+      operationId: updateEvent
+      parameters:
+        - name: event_id
+          in: path
+          description: イベントID（UUID）
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventRequest'
+            example:
+              date_start: "2025-11-16T20:00:00+09:00"
+              date_end: "2025-11-16T23:00:00+09:00"
+              comment: "日時を変更しました！"
+      responses:
+        '200':
+          description: イベント編集成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "イベントを更新しました"
+                code: "EVENT_UPDATED"
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  anon_id: "🍶A"
+                  category: "drinking"
+                  date_start: "2025-11-16T20:00:00+09:00"
+                  date_end: "2025-11-16T23:00:00+09:00"
+                  capacity_min: 3
+                  capacity_max: 5
+                  price_min: 3000
+                  price_max: 5000
+                  comment: "日時を変更しました！"
+                  status: "recruiting"
+                  updated_at: "2025-11-11T12:00:00+09:00"
+        '400':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "終了時刻は開始時刻より後に設定してください"
+                code: "VALIDATION_ERROR"
+        '403':
+          description: 編集権限なし（参加者承認済み）
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "参加者確定後は編集できません"
+                code: "FORBIDDEN"
+        '404':
+          description: イベントが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "イベントが見つかりません"
+                code: "EVENT_NOT_FOUND"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - events
+      summary: イベント中止
+      description: |
+        イベントを中止します（タイムラインから非表示、参加者に通知）。
+
+        **機能要件**: FR-020
+
+        **処理フロー**:
+        1. イベントのステータスを`cancelled`に変更
+        2. タイムラインから非表示
+        3. 参加者全員に中止通知を送信（フェーズ2以降で実装）
+
+        **中止条件**:
+        - 投稿者（幹事）本人のみ中止可能
+        - いずれのステータスからでも中止可能
+      operationId: cancelEvent
+      parameters:
+        - name: event_id
+          in: path
+          description: イベントID（UUID）
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: イベント中止成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: "イベントを中止しました"
+                code: "EVENT_CANCELLED"
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  status: "cancelled"
+        '404':
+          description: イベントが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                message: "イベントが見つかりません"
+                code: "EVENT_NOT_FOUND"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Supabase JWT Token（`auth.users`から取得）
+
+  schemas:
+    CreateEventRequest:
+      type: object
+      required:
+        - category
+        - date_start
+        - date_end
+        - capacity_min
+        - capacity_max
+      properties:
+        category:
+          type: string
+          enum:
+            - drinking
+            - travel
+            - tennis
+            - other
+          description: イベントカテゴリ（必須）
+        date_start:
+          type: string
+          format: date-time
+          description: 開催開始日時（必須、ISO 8601形式、現在より未来）
+        date_end:
+          type: string
+          format: date-time
+          description: 開催終了日時（必須、ISO 8601形式、開始より後）
+        deadline:
+          type: string
+          format: date-time
+          description: 受付締切日時（任意、ISO 8601形式、開始より前）
+        capacity_min:
+          type: integer
+          minimum: 1
+          description: 想定最小人数（必須、1人以上）
+        capacity_max:
+          type: integer
+          minimum: 1
+          description: 想定最大人数（必須、最小人数以上）
+        price_min:
+          type: integer
+          minimum: 0
+          description: 価格帯最小値（任意、0円以上）
+        price_max:
+          type: integer
+          minimum: 0
+          description: 価格帯最大値（任意、最小値以上）
+        comment:
+          type: string
+          maxLength: 500
+          description: コメント（任意、500文字以内）
+
+    UpdateEventRequest:
+      type: object
+      properties:
+        date_start:
+          type: string
+          format: date-time
+          description: 開催開始日時（任意、現在より未来）
+        date_end:
+          type: string
+          format: date-time
+          description: 開催終了日時（任意、開始より後）
+        deadline:
+          type: string
+          format: date-time
+          description: 受付締切日時（任意、開始より前）
+        capacity_min:
+          type: integer
+          minimum: 1
+          description: 想定最小人数（任意、1人以上）
+        capacity_max:
+          type: integer
+          minimum: 1
+          description: 想定最大人数（任意、最小人数以上）
+        price_min:
+          type: integer
+          minimum: 0
+          description: 価格帯最小値（任意、0円以上）
+        price_max:
+          type: integer
+          minimum: 0
+          description: 価格帯最大値（任意、最小値以上）
+        comment:
+          type: string
+          maxLength: 500
+          description: コメント（任意、500文字以内）
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: イベントID
+        anon_id:
+          type: string
+          description: 匿名ID（例: 🍶A）
+        category:
+          type: string
+          enum:
+            - drinking
+            - travel
+            - tennis
+            - other
+          description: カテゴリ
+        date_start:
+          type: string
+          format: date-time
+          description: 開催開始日時（ISO 8601形式）
+        date_end:
+          type: string
+          format: date-time
+          description: 開催終了日時（ISO 8601形式）
+        deadline:
+          type: string
+          format: date-time
+          nullable: true
+          description: 受付締切日時（ISO 8601形式）
+        capacity_min:
+          type: integer
+          description: 想定最小人数
+        capacity_max:
+          type: integer
+          description: 想定最大人数
+        price_min:
+          type: integer
+          nullable: true
+          description: 価格帯最小値
+        price_max:
+          type: integer
+          nullable: true
+          description: 価格帯最大値
+        comment:
+          type: string
+          nullable: true
+          description: コメント
+        status:
+          type: string
+          enum:
+            - recruiting
+            - confirmed
+            - completed
+            - cancelled
+          description: イベントステータス
+        created_at:
+          type: string
+          format: date-time
+          description: 作成日時（ISO 8601形式）
+        updated_at:
+          type: string
+          format: date-time
+          description: 更新日時（ISO 8601形式）
+
+    SuccessResponse:
+      type: object
+      required:
+        - success
+        - message
+        - code
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: 成功フラグ
+        message:
+          type: string
+          description: 成功メッセージ（日本語）
+        code:
+          type: string
+          description: 成功コード（大文字スネークケース）
+        data:
+          type: object
+          description: レスポンスデータ（任意）
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - message
+        - code
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: 成功フラグ
+        message:
+          type: string
+          description: エラーメッセージ（日本語）
+        code:
+          type: string
+          description: エラーコード（大文字スネークケース）
+
+  responses:
+    Unauthorized:
+      description: 認証エラー（トークン未提供または無効）
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "認証が必要です"
+            code: "UNAUTHORIZED"
+
+    InternalServerError:
+      description: サーバーエラー
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            success: false
+            message: "サーバーエラーが発生しました。しばらくしてから再試行してください"
+            code: "INTERNAL_SERVER_ERROR"
+
+  examples:
+    DrinkingEvent:
+      summary: 飲みイベント
+      value:
+        category: drinking
+        date_start: "2025-11-15T19:00:00+09:00"
+        date_end: "2025-11-15T22:00:00+09:00"
+        capacity_min: 3
+        capacity_max: 5
+        price_min: 3000
+        price_max: 5000
+        comment: "仕事終わりに軽く一杯どうですか?"
+
+    TravelEvent:
+      summary: 旅行イベント
+      value:
+        category: travel
+        date_start: "2025-12-01T09:00:00+09:00"
+        date_end: "2025-12-03T18:00:00+09:00"
+        capacity_min: 4
+        capacity_max: 8
+        price_min: 20000
+        price_max: 30000
+        deadline: "2025-11-25T23:59:59+09:00"
+        comment: "温泉旅行に行きませんか?"
+
+# エラーコード一覧
+
+## 成功コード (2xx)
+- `EVENT_CREATED`: イベント作成成功
+- `TIMELINE_FETCHED`: タイムライン取得成功
+- `EVENT_FETCHED`: イベント詳細取得成功
+- `EVENT_UPDATED`: イベント編集成功
+- `EVENT_CANCELLED`: イベント中止成功
+
+## クライアントエラーコード (4xx)
+- `VALIDATION_ERROR`: バリデーションエラー（必須項目未入力、日時の前後関係エラー等）
+- `DAILY_LIMIT_EXCEEDED`: 1日の投稿上限エラー（3件）
+- `UNAUTHORIZED`: 認証エラー（トークン未提供または無効）
+- `FORBIDDEN`: 権限エラー（編集権限なし、参加者承認済み等）
+- `EVENT_NOT_FOUND`: イベントが見つからない
+
+## サーバーエラーコード (5xx)
+- `INTERNAL_SERVER_ERROR`: サーバーエラー
+- `DATABASE_ERROR`: データベースエラー
+- `NETWORK_ERROR`: ネットワークエラー
+
+# 実装ノート
+
+## Server Actions vs API Routes
+
+このAPI仕様はOpenAPI形式で記述されていますが、Next.js 15ではServer Actionsを推奨します。
+
+**Server Actions実装例**:
+
+```typescript
+// app/actions/createEvent.ts
+'use server';
+
+import { eventSchema } from '@/lib/validations/event';
+import { createClient } from '@/lib/supabase/server';
+import { generateAnonId } from '@/lib/utils/generateAnonId';
+
+export async function createEvent(formData: FormData) {
+  // バリデーション
+  const result = eventSchema.safeParse(Object.fromEntries(formData));
+  if (!result.success) {
+    return {
+      success: false,
+      message: result.error.errors[0].message,
+      code: 'VALIDATION_ERROR',
+    };
+  }
+
+  // 1日の投稿上限チェック
+  const supabase = createClient();
+  const { count } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('host_id', userId)
+    .eq('category', result.data.category)
+    .gte('created_at', new Date().toISOString().split('T')[0]);
+
+  if (count >= 3) {
+    return {
+      success: false,
+      message: '1日の投稿上限（3件）に達しました',
+      code: 'DAILY_LIMIT_EXCEEDED',
+    };
+  }
+
+  // 匿名ID生成
+  const anonId = generateAnonId(result.data.category, count);
+
+  // イベント作成
+  const { data, error } = await supabase
+    .from('events')
+    .insert({
+      ...result.data,
+      anon_id: anonId,
+      host_id: userId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    return {
+      success: false,
+      message: 'イベントの作成に失敗しました',
+      code: 'INTERNAL_SERVER_ERROR',
+    };
+  }
+
+  return {
+    success: true,
+    message: 'イベントを投稿しました',
+    code: 'EVENT_CREATED',
+    data,
+  };
+}
+```
+
+## Supabase RLSによる自動フィルタリング
+
+タイムライン取得時、つながりリストベースのフィルタリングはRLSポリシーで自動的に適用されます。アプリケーションコード側でフィルタリングロジックを実装する必要はありません。
+
+```typescript
+// タイムライン取得（RLSポリシーが自動適用）
+const { data, error } = await supabase
+  .from('events')
+  .select('*')
+  .eq('status', 'recruiting')
+  .order('created_at', { ascending: false })
+  .range(0, 19);
+```
+
+## 日本語エラーメッセージ
+
+すべてのエラーメッセージは日本語で記述し、ユーザーにとって明確で実行可能な内容にします（spec.md FR-016）。
