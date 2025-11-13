@@ -139,9 +139,9 @@
 
 #### 統合
 
-- [ ] T058 [US1] Integrate PostEventModal with createEvent Server Action
-- [ ] T059 [US1] Add toast notification on successful event creation
-- [ ] T060 [US1] Add loading state during event creation
+- [x] T058 [US1] Integrate PostEventModal with createEvent Server Action
+- [x] T059 [US1] Add toast notification on successful event creation
+- [x] T060 [US1] Add loading state during event creation
 
 ### E2E Tests for User Story 1（TDD Phase 4）
 
