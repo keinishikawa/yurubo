@@ -103,29 +103,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 種別                         | 命名例                       | 内容                                        |
 | -------------------------- | ------------------------- | ----------------------------------------- |
-| **機能開発（ユーザーストーリー単位）**     | `feature/{3桁数字}-{機能名}`    | 例：`feature/001-event-creation`（UI+API+テスト） |
+| **機能開発（User Story単位）** ⭐CRITICAL | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting`（UI+API+テスト） |
 | **Phase/基盤構築**            | `feature/000-{説明}`        | 例：`feature/000-phase2-foundation`         |
 | 環境構築                       | `infra/<対象>`              | 例：`infra/setup-ci`                        |
 | バグ修正                       | `fix/<内容>`                | 例：`fix/ui-modal-close`                    |
 | リファクタ                      | `refactor/<範囲>`           | 例：`refactor/event-schema`                 |
 | 実験／検証                      | `exp/<内容>`                | 例：`exp/claude-prompt-tuning`              |
 
+**⭐ CRITICAL: Epic vs User Story の重要な違い**:
+- **Epic**: 複数のUser Storyを含む大きな機能単位（例: Epic 001 = イベント作成機能全体）
+- **User Story**: 独立して完結できる小さな機能単位（例: US1 = イベント投稿、US2 = タイムライン閲覧）
+- **必須**: 1つのEpicに複数User Storyがある場合、**必ずUser Story単位でブランチを分ける**
+- **命名**: `feature/{Epic番号}-us{US番号}-{機能名}` 形式を厳守
+
 **重要原則**:
-- **1ストーリー = 1ブランチ = UI + API + テスト全部含む**
+- **1 User Story = 1ブランチ = 1 PR = UI + API + テスト全部含む**
 - SpecKit機能は必ず`feature/{3桁数字}-`形式を使用
 - Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
 
 **アンチパターン（禁止）**:
+❌ Epic単位のブランチ（例: `feature/001-event-creation`に複数User Storyを混在）
+  → 複数セッションでの作業衝突、tasks.md競合、PRが巨大化
 ❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
   → SpecKitスクリプトが競合し、spec.md編集が衝突する
 
 ### 運用ルール
 
-- 1つのブランチは「1ユーザーストーリー完結」に対応
+- 1つのブランチは「**1 User Story完結**」に対応（Epicではない）
 - UI/API分割せず、1ストーリーを1ブランチで完結させる
 - 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
-- 作業終了後、PRを作成しCI通過後に`main`へマージ
+- 作業終了後、PRを作成しCI通過後に`main`へマージ（1 PR = 1 User Story）
 - マージ後はブランチ自動削除（GitHub設定推奨）
+- 複数User Storyを含むEpicの場合、各User Storyごとに独立したブランチを作成
 
 ### 並行開発戦略（Claude複数セッション運用）
 
@@ -135,12 +144,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 基盤構築（依存: なし）
 feature/000-phase2-foundation ← 最優先でマージ
 
-# 並列開発可能（依存: Phase 2のみ）
-feature/001-event-creation    ← UI + API + E2E
-feature/002-timeline-view     ← UI + API + E2E
+# Epic 001の並列開発（依存: Phase 2のみ）
+feature/001-us1-event-posting  ← User Story 1（イベント投稿）
+feature/001-us2-timeline-view  ← User Story 2（タイムライン閲覧）
+feature/001-us3-event-edit     ← User Story 3（イベント編集）
 
-# 依存あり（001マージ後に着手）
-feature/003-event-edit        ← 依存: 001
+# 各User Storyは独立してマージ可能
+# US1とUS2は並行開発可能（ファイル衝突なし）
+# US3はUS1に依存（イベント作成後に編集機能）
 ```
 
 **実運用例:**
@@ -148,13 +159,15 @@ feature/003-event-edit        ← 依存: 001
 | セッション     | ブランチ                            | 依存関係          | 状態   |
 | --------- | ------------------------------- | ------------- | ---- |
 | Claude #1 | `feature/000-phase2-foundation` | なし            | マージ済 |
-| Claude #2 | `feature/001-event-creation`    | Phase 2マージ済み  | 並列開発 |
-| Claude #3 | `feature/002-timeline-view`     | Phase 2マージ済み  | 並列開発 |
-| Claude #4 | `feature/003-event-edit`        | 001マージ待ち     | 待機中  |
+| Claude #2 | `feature/001-us1-event-posting` | Phase 2マージ済み  | 並列開発 |
+| Claude #3 | `feature/001-us2-timeline-view` | Phase 2マージ済み  | 並列開発 |
+| Claude #4 | `feature/001-us3-event-edit`    | US1マージ待ち     | 待機中  |
 
 **原則:**
-- 依存のないストーリー同士は並列開発OK
-- 依存のあるストーリーは前のストーリーのmainマージを待つ
+- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
+- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
+- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
+- Epic全体を1つのPRにまとめない（レビューが困難になるため）
 - 各セッションは独立したストーリー番号で作業
 - main更新後は `git pull origin main` で差分を早期吸収
 
