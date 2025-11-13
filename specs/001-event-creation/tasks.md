@@ -126,16 +126,16 @@
 #### UIコンポーネント
 
 - [x] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
-- [ ] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
-- [ ] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
-- [ ] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
-- [ ] T051 [US1] Add capacity range input to PostEventModal (想定人数: 最小・最大)
-- [ ] T052 [US1] Add price range slider to PostEventModal (価格帯: 3000~5000円デフォルト)
-- [ ] T053 [US1] Add comment textarea to PostEventModal
-- [ ] T054 [US1] Integrate React Hook Form with Zod validation in PostEventModal
-- [ ] T055 [US1] Add error message display to PostEventModal
-- [ ] T056 [US1] Write unit test for PostEventModal in components/events/PostEventModal.test.tsx
-- [ ] T057 [P] [US1] Create FloatingPostButton component (右下「＋投稿」ボタン) in components/layout/FloatingPostButton.tsx
+- [x] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
+- [x] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
+- [x] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
+- [x] T051 [US1] Add capacity range input to PostEventModal (想定人数: 最小・最大)
+- [x] T052 [US1] Add price range slider to PostEventModal (価格帯: 3000~5000円デフォルト)
+- [x] T053 [US1] Add comment textarea to PostEventModal
+- [x] T054 [US1] Integrate React Hook Form with Zod validation in PostEventModal
+- [x] T055 [US1] Add error message display to PostEventModal
+- [x] T056 [US1] Write unit test for PostEventModal in components/events/PostEventModal.test.tsx
+- [x] T057 [P] [US1] Create FloatingPostButton component (右下「＋投稿」ボタン) in components/layout/FloatingPostButton.tsx
 
 #### 統合
 
