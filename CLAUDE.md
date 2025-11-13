@@ -182,7 +182,7 @@ SpecKitは仕様優先開発ワークフローです。
 2. **`/speckit.clarify`** - 仕様の曖昧な部分を質問
 3. **`/speckit.plan`** - 設計成果物と実装計画を生成
 4. **`/speckit.tasks`** - 依存関係順のタスクリスト生成
-5. **`/speckit.implement`** - タスクを処理して実装
+5. **`/speckit.implement`** - タスクを処理して実装（完了タスクを自動的に`[X]`マーク）
 6. **`/speckit.analyze`** - 成果物間の整合性分析
 7. **`/speckit.checklist`** - 機能固有チェックリスト生成
 
@@ -303,6 +303,7 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 - ✅ Phase 4: E2Eテスト作成済み、受入シナリオ全カバー
 - ✅ 型エラーなし
 - ✅ リントエラーなし
+- ✅ **tasks.md更新**: 完了したタスクは必ず`- [X]`でマーク（/speckit.implementが自動更新）
 
 ### CI/CD実行フロー
 

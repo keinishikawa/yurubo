@@ -12,6 +12,8 @@ description: "Task list template for feature implementation"
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
+**Progress Tracking**: `/speckit.implement` automatically marks completed tasks with `[X]` in this file. Manual updates are not required.
+
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies)
@@ -249,3 +251,4 @@ With multiple developers:
 - Commit after each task or logical group
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence
+- **IMPORTANT**: `/speckit.implement` automatically marks completed tasks as `[X]` - do not manually edit task checkboxes
