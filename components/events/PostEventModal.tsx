@@ -144,6 +144,12 @@ export function PostEventModal({
     reset() // 送信成功後にフォームをリセット
   }
 
+  // 【ステップ4】キャンセル時のリセットハンドラー
+  const handleCancel = () => {
+    reset() // フォーム状態をリセット
+    onOpenChange(false) // モーダルを閉じる
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
@@ -279,7 +285,7 @@ export function PostEventModal({
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={handleCancel}
               disabled={isLoading}
             >
               キャンセル
