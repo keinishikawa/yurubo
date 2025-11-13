@@ -112,7 +112,7 @@ export const createEventSchema = z
     capacity_max: z
       .number({ required_error: '最大参加人数を入力してください' })
       .int('最大参加人数は整数で入力してください')
-      .min(1, '最大参加人数は1人以上で入力してください'),
+      .max(100, '最大参加人数は100人以下で入力してください'),
 
     // 最小予算（オプション、0以上）
     price_min: z
@@ -127,7 +127,7 @@ export const createEventSchema = z
     price_max: z
       .number()
       .int('最大予算は整数で入力してください')
-      .min(0, '最大予算は0円以上で入力してください')
+      .max(1000000, '最大予算は1000,000円以下で入力してください')
       .optional()
       .nullable(),
 
