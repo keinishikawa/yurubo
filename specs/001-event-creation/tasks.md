@@ -269,6 +269,35 @@
 - [ ] T110 [US3] E2E test: 参加者承認後の編集不可（シナリオ3） in tests/e2e/user-story-3.spec.ts
 - [ ] T111 [US3] E2E test: 他ユーザーの投稿編集ボタン非表示（シナリオ4） in tests/e2e/user-story-3.spec.ts
 
+### イベント中止機能（FR-020対応）
+
+**Goal**: 幹事がイベント中止ボタンでイベントをキャンセルできる（タイムラインから非表示、参加者には通知）
+
+#### Unit Tests for イベント中止機能（TDD Phase 2）
+
+- [ ] T112 [P] Write unit test for event cancellation service in lib/services/event.service.test.ts
+- [ ] T113 [P] Write unit test for cancellation permission check (host only) in lib/services/event.service.test.ts
+
+#### Implementation for イベント中止機能（TDD Phase 3）
+
+- [ ] T114 Implement event cancellation service in lib/services/event.service.ts
+- [ ] T115 Update event status to 'cancelled' and set cancelled_at timestamp
+- [ ] T116 Create cancellation Server Action in app/actions/cancelEvent.ts
+- [ ] T117 Write integration test for cancellation Server Action in app/actions/cancelEvent.test.ts
+
+#### UIコンポーネント
+
+- [ ] T118 [P] Add cancel button to EventCard (visible only for host) in components/events/EventCard.tsx
+- [ ] T119 [P] Create CancelEventModal confirmation dialog in components/events/CancelEventModal.tsx
+- [ ] T120 Integrate CancelEventModal with cancelEvent Server Action
+- [ ] T121 Write unit test for CancelEventModal in components/events/CancelEventModal.test.tsx
+
+#### E2E Tests for イベント中止機能（TDD Phase 4）
+
+- [ ] T122 E2E test: イベント中止ボタン表示（幹事のみ） in tests/e2e/event-cancellation.spec.ts
+- [ ] T123 E2E test: イベント中止実行とタイムライン非表示 in tests/e2e/event-cancellation.spec.ts
+- [ ] T124 E2E test: 中止イベントの参加者への通知 in tests/e2e/event-cancellation.spec.ts
+
 **Checkpoint**: すべてのUser Storyが独立して機能
 
 ---
@@ -277,46 +306,38 @@
 
 **目的**: 複数のUser Storyに影響する改善・追加機能
 
-### イベント中止機能（FR-020）
-
-- [ ] T112 [P] Implement event cancellation service in lib/services/event.service.ts
-- [ ] T113 [P] Create event cancellation Server Action in app/actions/cancelEvent.ts
-- [ ] T114 Create cancel button UI in EventCard for host users
-- [ ] T115 Add confirmation dialog for event cancellation
-- [ ] T116 Write E2E test for event cancellation in tests/e2e/event-cancellation.spec.ts
-
 ### エラーハンドリング統一
 
-- [ ] T117 [P] Create unified error response format in lib/utils/apiResponse.ts
-- [ ] T118 [P] Add error code constants in lib/constants/errorCodes.ts
-- [ ] T119 Standardize all API error responses to {success, message, code} format
-- [ ] T120 Add error boundary for client-side errors
+- [ ] T125 [P] Create unified error response format in lib/utils/apiResponse.ts
+- [ ] T126 [P] Add error code constants in lib/constants/errorCodes.ts
+- [ ] T127 Standardize all API error responses to {success, message, code} format
+- [ ] T128 Add error boundary for client-side errors
 
 ### パフォーマンス最適化
 
-- [ ] T121 [P] Add database indexes verification (events_timeline, connections_category_flags)
-- [ ] T122 [P] Optimize timeline query with EXPLAIN ANALYZE
-- [ ] T123 [P] Add React.memo to EventCard component
-- [ ] T124 [P] Add image optimization with Next.js Image component
+- [ ] T129 [P] Add database indexes verification (events_timeline, connections_category_flags)
+- [ ] T130 [P] Optimize timeline query with EXPLAIN ANALYZE
+- [ ] T131 [P] Add React.memo to EventCard component
+- [ ] T132 [P] Add image optimization with Next.js Image component
 
 ### ローディング・トースト通知
 
-- [ ] T125 [P] Add loading skeleton for all async operations
-- [ ] T126 [P] Standardize toast notification messages
-- [ ] T127 [P] Add success toast for event creation
-- [ ] T128 [P] Add success toast for event update
-- [ ] T129 [P] Add success toast for event cancellation
+- [ ] T133 [P] Add loading skeleton for all async operations
+- [ ] T134 [P] Standardize toast notification messages
+- [ ] T135 [P] Add success toast for event creation
+- [ ] T136 [P] Add success toast for event update
+- [ ] T137 [P] Add success toast for event cancellation
 
 ### ドキュメント・品質保証
 
-- [ ] T130 [P] Update README.md with project setup instructions
-- [ ] T131 [P] Create API documentation from contracts/api.yaml
-- [ ] T132 [P] Run TypeScript type check (npm run type-check)
-- [ ] T133 [P] Run ESLint and fix all warnings (npm run lint)
-- [ ] T134 [P] Verify all E2E tests pass (npm run test:e2e)
-- [ ] T135 [P] Verify all unit/integration tests pass (npm test)
-- [ ] T136 Validate quickstart.md setup steps
-- [ ] T137 Create deployment guide in docs/deployment.md
+- [ ] T138 [P] Update README.md with project setup instructions
+- [ ] T139 [P] Create API documentation from contracts/api.yaml
+- [ ] T140 [P] Run TypeScript type check (npm run type-check)
+- [ ] T141 [P] Run ESLint and fix all warnings (npm run lint)
+- [ ] T142 [P] Verify all E2E tests pass (npm run test:e2e)
+- [ ] T143 [P] Verify all unit/integration tests pass (npm test)
+- [ ] T144 Validate quickstart.md setup steps
+- [ ] T145 Create deployment guide in docs/deployment.md
 
 ---
 

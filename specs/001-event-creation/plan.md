@@ -1,4 +1,4 @@
-# Implementation Plan: フェーズ1：イベント作成機能
+# Implementation Plan: フェーズ1：イベント投稿機能
 
 **Branch**: `001-event-creation` | **Date**: 2025-11-11 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/001-event-creation/spec.md`
@@ -137,7 +137,7 @@ app/                              # Next.js 15 App Router
 ├── (auth)/                       # 認証グループルート（将来実装）
 ├── api/                          # API Routes
 │   └── events/                   # イベント関連API
-│       ├── route.ts              # POST /api/events（イベント作成）
+│       ├── route.ts              # POST /api/events（イベント投稿）
 │       ├── route.test.ts         # 統合テスト
 │       └── [id]/
 │           ├── route.ts          # GET/PATCH /api/events/[id]
