@@ -113,6 +113,27 @@ function formatDateTimeLocal(date: Date | undefined, time: string): string {
 }
 
 /**
+ * 時刻に指定時間を加算
+ *
+ * @param time - HH:MM
+ * @param hours - 加算する時間数
+ * @returns { time: HH:MM, nextDay: boolean } 翌日にまたがる場合はnextDay=true
+ */
+function addHoursToTime(time: string, hours: number): { time: string; nextDay: boolean } {
+  const [h, m] = time.split(':').map(Number)
+  let newHour = h + hours
+  let nextDay = false
+
+  if (newHour >= 24) {
+    newHour = newHour % 24
+    nextDay = true
+  }
+
+  const newTime = `${newHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`
+  return { time: newTime, nextDay }
+}
+
+/**
  * DateRangePickerコンポーネント
  *
  * @param props - DateRangePickerのProps
@@ -150,25 +171,54 @@ export function DateRangePicker({
   // 【ステップ2】終了日時を分離
   const { date: endDate, time: endTime } = parseDateTimeLocal(value.end)
 
-  // 【ステップ3】開始日変更ハンドラー
+  // 【ステップ3】初回設定フラグ（終了時刻が未設定 or デフォルト値の場合）
+  const isEndTimeInitial = !value.end || value.end === ''
+
+  // 【ステップ4】開始日変更ハンドラー
   const handleStartDateChange = (date: Date | undefined) => {
     const newStart = formatDateTimeLocal(date, startTime)
-    onChange({ ...value, start: newStart })
+
+    // 初回のみ終了日時を自動設定（+4時間）
+    if (isEndTimeInitial && date) {
+      const autoEndDate = new Date(date)
+      const autoEndTime = addHoursToTime(startTime, 4)
+      // 時刻が翌日にまたがる場合は日付を+1
+      if (autoEndTime.nextDay) {
+        autoEndDate.setDate(autoEndDate.getDate() + 1)
+      }
+      const newEnd = formatDateTimeLocal(autoEndDate, autoEndTime.time)
+      onChange({ start: newStart, end: newEnd })
+    } else {
+      onChange({ ...value, start: newStart })
+    }
   }
 
-  // 【ステップ4】開始時刻変更ハンドラー
+  // 【ステップ5】開始時刻変更ハンドラー
   const handleStartTimeChange = (time: string) => {
     const newStart = formatDateTimeLocal(startDate, time)
-    onChange({ ...value, start: newStart })
+
+    // 初回のみ終了時刻を自動設定（+4時間）
+    if (isEndTimeInitial && startDate) {
+      const autoEndDate = new Date(startDate)
+      const autoEndTime = addHoursToTime(time, 4)
+      // 時刻が翌日にまたがる場合は日付を+1
+      if (autoEndTime.nextDay) {
+        autoEndDate.setDate(autoEndDate.getDate() + 1)
+      }
+      const newEnd = formatDateTimeLocal(autoEndDate, autoEndTime.time)
+      onChange({ start: newStart, end: newEnd })
+    } else {
+      onChange({ ...value, start: newStart })
+    }
   }
 
-  // 【ステップ5】終了日変更ハンドラー
+  // 【ステップ6】終了日変更ハンドラー
   const handleEndDateChange = (date: Date | undefined) => {
     const newEnd = formatDateTimeLocal(date, endTime)
     onChange({ ...value, end: newEnd })
   }
 
-  // 【ステップ6】終了時刻変更ハンドラー
+  // 【ステップ7】終了時刻変更ハンドラー
   const handleEndTimeChange = (time: string) => {
     const newEnd = formatDateTimeLocal(endDate, time)
     onChange({ ...value, end: newEnd })
@@ -196,7 +246,12 @@ export function DateRangePicker({
               mode="single"
               selected={startDate}
               onSelect={handleStartDateChange}
-              disabled={disabled}
+              disabled={(date) => {
+                // 過去の日付を無効化
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                return date < today || disabled
+              }}
               locale={ja}
               className="rounded-md border"
             />
@@ -234,7 +289,12 @@ export function DateRangePicker({
               mode="single"
               selected={endDate}
               onSelect={handleEndDateChange}
-              disabled={disabled}
+              disabled={(date) => {
+                // 過去の日付を無効化
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                return date < today || disabled
+              }}
               locale={ja}
               className="rounded-md border"
             />
