@@ -25,15 +25,15 @@
 
 **目的**: プロジェクトの基本構造とツール設定
 
-- [ ] T001 Create Next.js 15 project structure with TypeScript and App Router
-- [ ] T002 Install core dependencies (React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS)
-- [ ] T003 [P] Configure TypeScript strict mode in tsconfig.json
-- [ ] T004 [P] Configure ESLint and Prettier
-- [ ] T005 [P] Setup environment variables template in .env.example
-- [ ] T006 [P] Initialize Supabase CLI and link to project
-- [ ] T007 [P] Configure Jest for unit and integration tests in jest.config.js
-- [ ] T008 [P] Configure Playwright for E2E tests in playwright.config.ts
-- [ ] T009 Create project directory structure (app/, components/, lib/, tests/, supabase/)
+- [x] T001 Create Next.js 15 project structure with TypeScript and App Router
+- [x] T002 Install core dependencies (React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS)
+- [x] T003 [P] Configure TypeScript strict mode in tsconfig.json
+- [x] T004 [P] Configure ESLint and Prettier
+- [x] T005 [P] Setup environment variables template in .env.example
+- [x] T006 [P] Initialize Supabase CLI and link to project
+- [x] T007 [P] Configure Jest for unit and integration tests in jest.config.js
+- [x] T008 [P] Configure Playwright for E2E tests in playwright.config.ts
+- [x] T009 Create project directory structure (app/, components/, lib/, tests/, supabase/)
 
 ---
 
