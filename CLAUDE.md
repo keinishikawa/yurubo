@@ -90,6 +90,59 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## ブランチ戦略（Trunk-Based Development）
+
+### 基本方針
+
+- **Trunk-Based Development** を採用
+- `main` ブランチは常に動作保証された状態を維持
+- すべての変更は PR 経由で `main` に統合（直接 push 禁止）
+- Claude / Cursor のセッション単位で責務を分離し、各自専用ブランチで作業
+
+### ブランチ命名規則
+
+| 種別    | 命名例                 | 内容                                                   |
+| ----- | ------------------- | ---------------------------------------------------- |
+| 新機能   | `feature/<領域>-<機能>` | 例：`feature/api-create-event`、`feature/ui-event-form` |
+| 環境構築  | `infra/<対象>`        | 例：`infra/setup-ci`、`infra/supabase-auth`             |
+| バグ修正  | `fix/<内容>`          | 例：`fix/ui-modal-close`                               |
+| リファクタ | `refactor/<範囲>`     | 例：`refactor/event-schema`                            |
+| 実験／検証 | `exp/<内容>`          | 例：`exp/claude-prompt-tuning`                         |
+
+### 運用ルール
+
+- 1つのブランチは「1ユーザーストーリー」または「1API／1UI機能」に対応
+- 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
+- 作業終了後、PRを作成しCI通過後に`main`へマージ
+- マージ後はブランチ自動削除（GitHub設定推奨）
+
+### 並行開発（Claude複数セッション運用）
+
+| セッション     | ブランチ                       | 目的                    |
+| --------- | -------------------------- | --------------------- |
+| Claude #1 | `infra/setup`              | 開発環境構築（CI, Supabase等） |
+| Claude #2 | `feature/api-create-event` | API実装                 |
+| Claude #3 | `feature/ui-event-form`    | UI実装                  |
+| Claude #4 | `feature/ui-connect-event` | UIとAPIの統合確認           |
+
+- 各セッションは独立ブランチで作業
+- main 更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
+- Claudeセッションごとに目的を固定して干渉を防ぐ
+
+### CI / Branch Protection
+
+- `.github/workflows/ci.yml` に lint + test を自動化
+- PR時にCIが緑でない場合はマージ不可（保護ルール）
+- mainブランチは常にテスト通過済み状態を保証
+
+**GitHub設定例**:
+- Require PR before merge ✅
+- Require status checks ✅
+- Block force pushes ✅
+- Delete branch after merge ✅
+
+---
+
 ## 開発ワークフロー: SpecKit
 
 SpecKitは仕様優先開発ワークフローです。
@@ -133,11 +186,29 @@ SpecKitは仕様優先開発ワークフローです。
 
 ---
 
-## テスト要件と原則
+## テスト戦略と要件
 
-### TDD（Test-Driven Development）必須
+### テスト構成
 
-**🚨 すべての実装コードには対応するテストが必須**
+```
+tests/
+  unit/       ← Jest + React Testing Library
+  e2e/        ← Playwright
+```
+
+### テスト層の方針
+
+| 層               | 対象            | 主目的             | 推奨ツール      | 備考             |
+| --------------- | ------------- | --------------- | ---------- | -------------- |
+| 単体（Unit）        | ロジック・小コンポーネント | ロジック・描画テスト      | Jest + RTL | 状態変化やバリデーションなど |
+| 統合（Integration） | コンポーネント間連携    | storeやhooks動作確認 | RTL        | 状況に応じて         |
+| E2E（End-to-End） | 画面操作〜API応答    | UXと主要フロー保証      | Playwright | 初期段階はE2EメインでOK |
+
+### 実行ポリシー
+
+- **PR作成時**: Lint + Unit Test（GitHub Actions自動実行）
+- **mainマージ前 or 定期実行**: E2E（Playwright）を nightly で実行
+- **初期フェーズ**: E2E優先で体験保証、Unit Testは段階的に追加
 
 ### Bottom-Up TDD Workflow
 
@@ -154,17 +225,20 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 ### テストカバレッジ要件
 
 #### 1. 単体テスト（Jest）
-- **対象**: ユーティリティ関数、バリデーションロジック
+- **対象**: ユーティリティ関数、バリデーションロジック、ビジネスロジック
 - **配置**: 実装ファイルと同じディレクトリに `*.test.ts`
+- **実行**: `npm test`
 
 #### 2. 統合テスト（Jest）
-- **対象**: APIルート、データベース相互作用
-- **配置**: 実装ファイルと同じディレクトリに `route.test.ts`
+- **対象**: APIルート、データベース相互作用、コンポーネント間連携
+- **配置**: 実装ファイルと同じディレクトリに `route.test.ts` または `integration.test.ts`
+- **実行**: `npm test`
 
-#### 3. E2Eテスト（Playwright等）
-- **対象**: 重要なユーザーフロー
+#### 3. E2Eテスト（Playwright）
+- **対象**: 重要なユーザーフロー、受入シナリオ
 - **配置**: `tests/e2e/` にUser Story単位
 - **重要**: spec.mdの受入シナリオを**すべて**テストケースに含める
+- **実行**: `npm run test:e2e`
 
 ### テスト作成のガイドライン
 
@@ -200,6 +274,14 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 - ✅ Phase 4: E2Eテスト作成済み、受入シナリオ全カバー
 - ✅ 型エラーなし
 - ✅ リントエラーなし
+
+### CI/CD実行フロー
+
+**.github/workflows/ci.yml**:
+- Lint実行（ESLint）
+- 単体・統合テスト実行（Jest）
+- E2Eテスト実行（Playwright）
+- すべて通過で緑チェック → PRマージ可能
 
 ---
 

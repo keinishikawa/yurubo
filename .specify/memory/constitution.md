@@ -1,17 +1,18 @@
 <!--
 Sync Impact Report:
-Version: 0.0.0 → 1.0.0
-Modified principles: N/A (initial constitution creation)
+Version: 1.0.0 → 1.1.0
+Modified principles:
+  - Principle III: テストファースト → 初期フェーズはE2E優先に更新
 Added sections:
-  - Core Principles (I-VII)
-  - Development Workflow
-  - Quality Gates
-  - Governance
+  - ブランチ戦略（Trunk-Based Development）
+  - テスト層の方針詳細化
+  - 実行ポリシー明記
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section already present
   ✅ spec-template.md - User Scenarios & Requirements structure aligns with Principle I
   ✅ tasks-template.md - Test-first requirements align with Principle III
+  ⚠️ CLAUDE.md - Updated with branch strategy and test policy
 Follow-up TODOs: None
 -->
 
@@ -40,7 +41,7 @@ Follow-up TODOs: None
 
 **根拠**: 開発初期段階では効率を最大化し、冗長な実装や複雑な条件分岐を回避する。
 
-### III. テストファースト（TDD必須）
+### III. テストファースト（TDD推奨、初期フェーズはE2E優先）
 
 すべての実装コードには対応するテストが必須である。
 
@@ -50,12 +51,17 @@ Follow-up TODOs: None
 3. Phase 3: 統合テスト
 4. Phase 4: E2Eテスト（受入シナリオ全カバー）
 
-**テストカバレッジ要件**:
-- 単体テスト（Jest）: ユーティリティ関数、バリデーションロジック
-- 統合テスト（Jest）: APIルート、データベース相互作用
-- E2Eテスト（Playwright）: 重要なユーザーフロー、spec.mdの受入シナリオ全カバー
+**テスト層の方針**:
+- **単体テスト（Jest + RTL）**: ロジック・小コンポーネント、状態変化やバリデーション
+- **統合テスト（RTL）**: コンポーネント間連携、storeやhooks動作確認（状況に応じて）
+- **E2Eテスト（Playwright）**: 画面操作〜API応答、UXと主要フロー保証
 
-**根拠**: テストファーストにより品質を保証し、リファクタリングを安全に行う。
+**実行ポリシー**:
+- **PR作成時**: Lint + Unit Test（GitHub Actions自動実行）
+- **mainマージ前 or 定期実行**: E2E（Playwright）を nightly で実行
+- **初期フェーズ**: E2E優先で体験保証、Unit Testは段階的に追加
+
+**根拠**: 初期段階ではE2E中心でユーザー体験を保証し、拡張フェーズで単体・統合テストを併用。テストファーストにより品質を保証し、リファクタリングを安全に行う。
 
 ### IV. 型安全性とバリデーション
 
@@ -111,6 +117,32 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 **根拠**: コード内学習により、開発者のスキル向上とコードの可読性を同時に実現する。
 
 ## 開発ワークフロー
+
+### ブランチ戦略（Trunk-Based Development）
+
+**基本方針**:
+- Trunk-Based Development を採用
+- `main` ブランチは常に動作保証された状態を維持
+- すべての変更は PR 経由で `main` に統合（直接 push 禁止）
+- Claude / Cursor のセッション単位で責務を分離し、各自専用ブランチで作業
+
+**ブランチ命名規則**:
+- 新機能: `feature/<領域>-<機能>` 例: `feature/api-create-event`
+- 環境構築: `infra/<対象>` 例: `infra/setup-ci`
+- バグ修正: `fix/<内容>` 例: `fix/ui-modal-close`
+- リファクタ: `refactor/<範囲>` 例: `refactor/event-schema`
+- 実験／検証: `exp/<内容>` 例: `exp/claude-prompt-tuning`
+
+**運用ルール**:
+- 1つのブランチは「1ユーザーストーリー」または「1API／1UI機能」に対応
+- 作業時間の目安: 1〜3時間〜半日で完了できる粒度
+- 作業終了後、PRを作成しCI通過後に`main`へマージ
+- マージ後はブランチ自動削除（GitHub設定推奨）
+
+**並行開発**:
+- 各セッションは独立ブランチで作業
+- main 更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
+- Claudeセッションごとに目的を固定して干渉を防ぐ
 
 ### SpecKitワークフロー（必須）
 
@@ -182,4 +214,12 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 複雑性は正当化されなければならない。
 実行時の開発ガイダンスは`CLAUDE.md`を参照する。
 
-**Version**: 1.0.0 | **Ratified**: 2025-11-11 | **Last Amended**: 2025-11-11
+**Version**: 1.1.0 | **Ratified**: 2025-11-11 | **Last Amended**: 2025-11-13
+
+<!--
+Version 1.1.0 Change Log:
+- Added: ブランチ戦略（Trunk-Based Development）セクション
+- Modified: テストファースト原則を「初期フェーズはE2E優先」に更新
+- Added: テスト層の方針（Unit / Integration / E2E）詳細化
+- Added: 実行ポリシー（PR時/nightly実行）明記
+-->
