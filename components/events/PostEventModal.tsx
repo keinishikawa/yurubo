@@ -49,7 +49,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Slider } from '@/components/ui/slider'
+import { DualRangeSlider } from '@/components/ui/dual-range-slider'
+import { DateRangePicker } from '@/components/ui/date-range-picker'
 
 /**
  * PostEventModalのProps型
@@ -129,9 +130,13 @@ export function PostEventModal({
     },
   })
 
-  // 【ステップ2】価格帯スライダーの現在値を監視
+  // 【ステップ2】フォーム値を監視
   const priceMin = watch('price_min')
   const priceMax = watch('price_max')
+  const capacityMin = watch('capacity_min')
+  const capacityMax = watch('capacity_max')
+  const dateStart = watch('date_start')
+  const dateEnd = watch('date_end')
 
   // 【ステップ3】フォーム送信ハンドラー
   const onFormSubmit = async (data: CreateEventInput) => {
@@ -190,96 +195,60 @@ export function PostEventModal({
             )}
           </div>
 
-          {/* 日時ピッカー (T050) */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                開始日時 <span className="text-destructive">*</span>
-              </label>
-              <Input
-                type="datetime-local"
-                {...register('date_start')}
-              />
-              {errors.date_start && (
-                <p className="text-sm text-destructive">{errors.date_start.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                終了日時 <span className="text-destructive">*</span>
-              </label>
-              <Input
-                type="datetime-local"
-                {...register('date_end')}
-              />
-              {errors.date_end && (
-                <p className="text-sm text-destructive">{errors.date_end.message}</p>
-              )}
-            </div>
-          </div>
+          {/* 日時ピッカー (T050) - DateRangePicker使用 */}
+          <DateRangePicker
+            value={{
+              start: dateStart || '',
+              end: dateEnd || '',
+            }}
+            onChange={(range) => {
+              setValue('date_start', range.start)
+              setValue('date_end', range.end)
+            }}
+            startError={errors.date_start?.message}
+            endError={errors.date_end?.message}
+            disabled={isLoading}
+          />
 
-          {/* 想定人数 (T051) */}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                最小人数 <span className="text-destructive">*</span>
-              </label>
-              <Input
-                type="number"
-                {...register('capacity_min', { valueAsNumber: true })}
-                min={1}
-              />
-              {errors.capacity_min && (
-                <p className="text-sm text-destructive">{errors.capacity_min.message}</p>
-              )}
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                最大人数 <span className="text-destructive">*</span>
-              </label>
-              <Input
-                type="number"
-                {...register('capacity_max', { valueAsNumber: true })}
-                min={1}
-              />
-              {errors.capacity_max && (
-                <p className="text-sm text-destructive">{errors.capacity_max.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* 価格帯スライダー (T052) */}
+          {/* 想定人数 (T051) - DualRangeSlider使用 */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              価格帯（任意） - {priceMin?.toLocaleString()}〜{priceMax?.toLocaleString()}円
-            </label>
-            <div className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">最小予算</label>
-                <Slider
-                  min={0}
-                  max={20000}
-                  step={500}
-                  value={[priceMin ?? 3000]}
-                  onValueChange={(value) => setValue('price_min', value[0])}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs text-muted-foreground">最大予算</label>
-                <Slider
-                  min={0}
-                  max={20000}
-                  step={500}
-                  value={[priceMax ?? 5000]}
-                  onValueChange={(value) => setValue('price_max', value[0])}
-                />
-              </div>
-            </div>
-            {errors.price_min && (
-              <p className="text-sm text-destructive">{errors.price_min.message}</p>
+            <DualRangeSlider
+              value={[capacityMin ?? 2, capacityMax ?? 6]}
+              onValueChange={(values) => {
+                setValue('capacity_min', values[0])
+                setValue('capacity_max', values[1])
+              }}
+              min={1}
+              max={20}
+              step={1}
+              label={(values) => `想定人数: ${values[0]}〜${values[1]}人`}
+              disabled={isLoading}
+            />
+            {(errors.capacity_min || errors.capacity_max) && (
+              <p className="text-sm text-destructive">
+                {errors.capacity_min?.message || errors.capacity_max?.message}
+              </p>
             )}
-            {errors.price_max && (
-              <p className="text-sm text-destructive">{errors.price_max.message}</p>
+          </div>
+
+          {/* 価格帯スライダー (T052) - DualRangeSlider使用 */}
+          <div className="space-y-2">
+            <DualRangeSlider
+              value={[priceMin ?? 3000, priceMax ?? 5000]}
+              onValueChange={(values) => {
+                setValue('price_min', values[0])
+                setValue('price_max', values[1])
+              }}
+              min={0}
+              max={20000}
+              step={500}
+              label={(values) => `価格帯（任意）: ${values[0].toLocaleString()}〜${values[1].toLocaleString()}円`}
+              disabled={isLoading}
+            />
+            {(errors.price_min || errors.price_max) && (
+              <p className="text-sm text-destructive">
+                {errors.price_min?.message || errors.price_max?.message}
+              </p>
             )}
           </div>
 
