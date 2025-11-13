@@ -45,50 +45,50 @@
 
 ### データベースマイグレーション
 
-- [ ] T010 Create categories table migration in supabase/migrations/20251111000001_create_categories_table.sql
-- [ ] T011 Create users table migration in supabase/migrations/20251111000002_create_users_table.sql
-- [ ] T012 Create events table migration in supabase/migrations/20251111000003_create_events_table.sql
-- [ ] T013 Create connections table migration in supabase/migrations/20251111000004_create_connections_table.sql
-- [ ] T014 Create RLS policies for all tables in supabase/migrations/20251111000005_enable_rls_policies.sql
-- [ ] T015 Create triggers and functions (updated_at, daily post limit check) in supabase/migrations/20251111000006_create_triggers_and_functions.sql
-- [ ] T016 Create test seed data in supabase/seed.sql
-- [ ] T017 Run migrations and verify database setup with Supabase CLI
+- [x] T010 Create categories table migration in supabase/migrations/20251111000001_create_categories_table.sql
+- [x] T011 Create users table migration in supabase/migrations/20251111000002_create_users_table.sql
+- [x] T012 Create events table migration in supabase/migrations/20251111000003_create_events_table.sql
+- [x] T013 Create connections table migration in supabase/migrations/20251111000004_create_connections_table.sql
+- [x] T014 Create RLS policies for all tables in supabase/migrations/20251111000005_enable_rls_policies.sql
+- [x] T015 Create triggers and functions (updated_at, daily post limit check) in supabase/migrations/20251111000006_create_triggers_and_functions.sql
+- [x] T016 Create test seed data in supabase/seed.sql
+- [x] T017 Run migrations and verify database setup with Supabase CLI
 
 ### Supabaseクライアント設定
 
-- [ ] T018 [P] Create Supabase client for Server Components in lib/supabase/server.ts
-- [ ] T019 [P] Create Supabase client for Client Components in lib/supabase/client.ts
-- [ ] T020 [P] Generate TypeScript types from database schema in lib/supabase/types.ts
+- [x] T018 [P] Create Supabase client for Server Components in lib/supabase/server.ts
+- [x] T019 [P] Create Supabase client for Client Components in lib/supabase/client.ts
+- [x] T020 [P] Generate TypeScript types from database schema in lib/supabase/types.ts
 
 ### Zodバリデーションスキーマ
 
-- [ ] T021 [P] Create event validation schema with Zod in lib/validation/event.schema.ts
-- [ ] T022 [P] Write unit tests for event validation schema in lib/validation/event.schema.test.ts
-- [ ] T023 [P] Create connection validation schema in lib/validation/connection.schema.ts
-- [ ] T024 [P] Create user validation schema in lib/validation/user.schema.ts
+- [x] T021 [P] Create event validation schema with Zod in lib/validation/event.schema.ts
+- [x] T022 [P] Write unit tests for event validation schema in lib/validation/event.schema.test.ts
+- [x] T023 [P] Create connection validation schema in lib/validation/connection.schema.ts
+- [x] T024 [P] Create user validation schema in lib/validation/user.schema.ts
 
 ### ユーティリティ関数
 
-- [ ] T025 [P] Implement anonymous ID generation logic in lib/utils/generateAnonId.ts
-- [ ] T026 [P] Write unit tests for anonymous ID generation in lib/utils/generateAnonId.test.ts
-- [ ] T027 [P] Create error handling utility in lib/utils/errors.ts
-- [ ] T028 [P] Create date/time formatting utility in lib/utils/dateFormatter.ts
+- [x] T025 [P] Implement anonymous ID generation logic in lib/utils/generateAnonId.ts
+- [x] T026 [P] Write unit tests for anonymous ID generation in lib/utils/generateAnonId.test.ts
+- [x] T027 [P] Create error handling utility in lib/utils/errors.ts
+- [x] T028 [P] Create date/time formatting utility in lib/utils/dateFormatter.ts
 
 ### shadcn-ui基本コンポーネント
 
-- [ ] T029 [P] Setup shadcn-ui and add Button component to components/ui/button.tsx
-- [ ] T030 [P] Add Modal component to components/ui/modal.tsx
-- [ ] T031 [P] Add Input component to components/ui/input.tsx
-- [ ] T032 [P] Add Select component to components/ui/select.tsx
-- [ ] T033 [P] Add Textarea component to components/ui/textarea.tsx
-- [ ] T034 [P] Add Slider component to components/ui/slider.tsx
-- [ ] T035 [P] Add Toast notification component to components/ui/toast.tsx
+- [x] T029 [P] Setup shadcn-ui and add Button component to components/ui/button.tsx
+- [x] T030 [P] Add Modal component to components/ui/modal.tsx
+- [x] T031 [P] Add Input component to components/ui/input.tsx
+- [x] T032 [P] Add Select component to components/ui/select.tsx
+- [x] T033 [P] Add Textarea component to components/ui/textarea.tsx
+- [x] T034 [P] Add Slider component to components/ui/slider.tsx
+- [x] T035 [P] Add Toast notification component to components/ui/toast.tsx
 
 ### レイアウト・共通UI
 
-- [ ] T036 [P] Create root layout with navigation in app/layout.tsx
-- [ ] T037 [P] Create error boundary in app/error.tsx
-- [ ] T038 [P] Create loading state component in app/loading.tsx
+- [x] T036 [P] Create root layout with navigation in app/layout.tsx
+- [x] T037 [P] Create error boundary in app/error.tsx
+- [x] T038 [P] Create loading state component in app/loading.tsx
 
 **Checkpoint**: 基盤完了 - User Story実装を並行開始可能
 
