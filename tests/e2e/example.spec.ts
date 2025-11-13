@@ -23,7 +23,7 @@ test("ホームページが正常に表示される", async ({ page }) => {
   // Arrange & Act: ホームページにアクセス
   await page.goto("/");
 
-  // Assert: ページタイトルに"Create Next App"が含まれることを確認
-  // Phase 1では Next.jsのデフォルトタイトルを使用
-  await expect(page).toHaveTitle(/Create Next App/i);
+  // Assert: ページタイトルに"ゆるぼ"が含まれることを確認
+  // Phase 2で実装したカスタムタイトルを使用
+  await expect(page).toHaveTitle(/ゆるぼ/);
 });
