@@ -127,26 +127,34 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 - Claude / Cursor のセッション単位で責務を分離し、各自専用ブランチで作業
 
 **ブランチ命名規則**:
-- **SpecKit機能開発**: `feature/{3桁数字}-{機能名}` 例: `feature/001-event-creation`
-  - 数字はspecs/ディレクトリと対応（SpecKitワークフロー用）
-  - `/speckit.*` コマンド使用時は必須形式
-- **Phase開発**: `feature/phase{N}-{説明}` 例: `feature/phase2-foundation`
-  - 基盤構築など、SpecKit外の作業用
+- **機能開発（ユーザーストーリー単位）**: `feature/{3桁数字}-{機能名}`
+  - 例: `feature/001-event-creation`, `feature/000-phase2-foundation`
+  - 数字はspecs/ディレクトリと対応（SpecKit機能の場合）
+  - Phase/基盤構築も数字プレフィックスで管理（例: 000番台）
+  - **1ストーリー = 1ブランチ = UI + API + テスト全部含む**
 - 環境構築: `infra/<対象>` 例: `infra/setup-ci`
 - バグ修正: `fix/<内容>` 例: `fix/ui-modal-close`
 - リファクタ: `refactor/<範囲>` 例: `refactor/event-schema`
 - 実験／検証: `exp/<内容>` 例: `exp/claude-prompt-tuning`
 
 **運用ルール**:
-- 1つのブランチは「1ユーザーストーリー」または「1API／1UI機能」に対応
+- 1つのブランチは「1ユーザーストーリー完結」に対応
+- UI/API分割せず、1ストーリーを1ブランチで完結させる
 - 作業時間の目安: 1〜3時間〜半日で完了できる粒度
 - 作業終了後、PRを作成しCI通過後に`main`へマージ
 - マージ後はブランチ自動削除（GitHub設定推奨）
 
-**並行開発**:
-- 各セッションは独立ブランチで作業
-- main 更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
-- Claudeセッションごとに目的を固定して干渉を防ぐ
+**並行開発戦略**:
+- **依存のないストーリー同士は並列開発OK**
+  - 例: `feature/001-event-creation` と `feature/002-timeline-view` を同時着手
+- **依存のあるストーリーは前のストーリーのmainマージを待つ**
+  - 例: `003-event-edit` は `001-event-creation` のマージ後に着手
+- 各セッションは独立したストーリー番号で作業
+- main更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
+
+**アンチパターン（禁止）**:
+❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
+  → SpecKitスクリプトが競合し、spec.md編集が衝突する
 
 ### SpecKitワークフロー（必須）
 

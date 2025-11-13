@@ -72,12 +72,12 @@ check_feature_branch() {
         return 0
     fi
 
-    # Accept both formats:
-    # - feature/001-feature-name (Trunk-Based Development with feature/ prefix)
-    # - 001-feature-name (legacy format)
+    # Accept feature/{3桁数字}- format for user stories and phases
+    # Examples: feature/001-event-creation, feature/000-phase2-foundation
     if [[ ! "$branch" =~ ^(feature/)?[0-9]{3}- ]]; then
         echo "ERROR: Not on a feature branch. Current branch: $branch" >&2
-        echo "Feature branches should be named like: feature/001-feature-name or 001-feature-name" >&2
+        echo "Feature branches should be named like: feature/001-event-creation (推奨) or 001-event-creation (レガシー)" >&2
+        echo "Phase branches should use 000 prefix: feature/000-phase2-foundation" >&2
         return 1
     fi
 
