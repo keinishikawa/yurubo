@@ -144,14 +144,21 @@ export function PostEventModal({
     reset() // 送信成功後にフォームをリセット
   }
 
-  // 【ステップ4】キャンセル時のリセットハンドラー
+  // 【ステップ4】キャンセル・閉じる時のリセットハンドラー
+  const handleClose = (open: boolean) => {
+    if (!open) {
+      reset() // モーダルを閉じる時にフォーム状態をリセット
+    }
+    onOpenChange(open)
+  }
+
   const handleCancel = () => {
     reset() // フォーム状態をリセット
     onOpenChange(false) // モーダルを閉じる
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
           <DialogTitle>イベントを投稿</DialogTitle>

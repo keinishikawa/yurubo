@@ -88,6 +88,7 @@ export const createEventSchema = z
     // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
     date_start: z
       .string({ required_error: '開始日時を選択してください' })
+      .min(1, '開始日時を選択してください')
       .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '開始日時の形式が正しくありません')
       .refine(
         (date) => new Date(date) > new Date(),
@@ -99,6 +100,7 @@ export const createEventSchema = z
     // ※date_startとの比較は.refine()で実施
     date_end: z
       .string({ required_error: '終了日時を選択してください' })
+      .min(1, '終了日時を選択してください')
       .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '終了日時の形式が正しくありません'),
 
     // 最小参加人数（必須、1以上）
