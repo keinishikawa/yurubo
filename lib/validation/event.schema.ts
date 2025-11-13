@@ -175,6 +175,19 @@ export const createEventSchema = z
       path: ['price_max'], // エラーをprice_maxフィールドに関連付け
     }
   )
+  .refine(
+    // 募集締切 < 開催開始時刻（T071: Edge Case対応）
+    (data) => {
+      // deadlineが未設定の場合はバリデーションスキップ
+      if (data.deadline == null) return true
+      // 募集締切は開催開始時刻より前である必要がある
+      return new Date(data.deadline) < new Date(data.date_start)
+    },
+    {
+      message: '募集締切は開催開始時刻より前に設定してください',
+      path: ['deadline'],
+    }
+  )
 
 /**
  * イベント作成入力の型

@@ -147,22 +147,22 @@
 
 > **IMPORTANT: spec.mdの受入シナリオ7つすべてをテストケース化**
 
-- [ ] T061 [US1] E2E test: 投稿モーダル表示（シナリオ1） in tests/e2e/user-story-1.spec.ts
-- [ ] T062 [US1] E2E test: イベント投稿完了（シナリオ2） in tests/e2e/user-story-1.spec.ts
-- [ ] T063 [US1] E2E test: 匿名ID表示（シナリオ3） in tests/e2e/user-story-1.spec.ts
-- [ ] T064 [US1] E2E test: つながりリストOKユーザーに表示（シナリオ4） in tests/e2e/user-story-1.spec.ts
-- [ ] T065 [US1] E2E test: つながりリストNGユーザーに非表示（シナリオ5） in tests/e2e/user-story-1.spec.ts
-- [ ] T066 [US1] E2E test: 1日3件投稿上限エラー（シナリオ6） in tests/e2e/user-story-1.spec.ts
-- [ ] T067 [US1] E2E test: 必須項目未入力エラー（シナリオ7） in tests/e2e/user-story-1.spec.ts
+- [x] T061 [US1] E2E test: 投稿モーダル表示（シナリオ1） in tests/e2e/user-story-1.spec.ts
+- [x] T062 [US1] E2E test: イベント投稿完了（シナリオ2） in tests/e2e/user-story-1.spec.ts
+- [x] T063 [US1] E2E test: 匿名ID表示（シナリオ3） in tests/e2e/user-story-1.spec.ts
+- [x] T064 [US1] E2E test: つながりリストOKユーザーに表示（シナリオ4） in tests/e2e/user-story-1.spec.ts
+- [x] T065 [US1] E2E test: つながりリストNGユーザーに非表示（シナリオ5） in tests/e2e/user-story-1.spec.ts
+- [x] T066 [US1] E2E test: 1日3件投稿上限エラー（シナリオ6） in tests/e2e/user-story-1.spec.ts
+- [x] T067 [US1] E2E test: 必須項目未入力エラー（シナリオ7） in tests/e2e/user-story-1.spec.ts
 
 ### Edge Cases for User Story 1
 
-- [ ] T068 [US1] Add validation for past date_start in event.schema.ts
-- [ ] T069 [US1] Add validation for date_end before date_start in event.schema.ts
-- [ ] T070 [US1] Add validation for capacity_min > capacity_max in event.schema.ts
-- [ ] T071 [US1] Add validation for deadline after date_start in event.schema.ts
-- [ ] T072 [US1] Handle network error with retry logic and user-friendly message
-- [ ] T073 [US1] Add warning message for empty connections list
+- [x] T068 [US1] Add validation for past date_start in event.schema.ts
+- [x] T069 [US1] Add validation for date_end before date_start in event.schema.ts
+- [x] T070 [US1] Add validation for capacity_min > capacity_max in event.schema.ts
+- [x] T071 [US1] Add validation for deadline after date_start in event.schema.ts
+- [x] T072 [US1] Handle network error with retry logic and user-friendly message
+- [x] T073 [US1] Add warning message for empty connections list
 
 **Checkpoint**: User Story 1が完全に機能し、独立してテスト可能
 
