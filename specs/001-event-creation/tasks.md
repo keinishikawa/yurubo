@@ -106,17 +106,17 @@
 
 > **NOTE: 実装前にテストを作成し、REDになることを確認**
 
-- [ ] T039 [P] [US1] Write unit test for event creation validation in lib/services/event.service.test.ts
-- [ ] T040 [P] [US1] Write unit test for daily post limit check in lib/services/event.service.test.ts
-- [ ] T041 [P] [US1] Write unit test for anonymous ID assignment in lib/services/event.service.test.ts
+- [x] T039 [P] [US1] Write unit test for event creation validation in lib/services/event.service.test.ts
+- [x] T040 [P] [US1] Write unit test for daily post limit check in lib/services/event.service.test.ts
+- [x] T041 [P] [US1] Write unit test for anonymous ID assignment in lib/services/event.service.test.ts
 
 ### Implementation for User Story 1（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T042 [US1] Implement event creation service in lib/services/event.service.ts
-- [ ] T043 [US1] Implement daily post limit check logic in event service
-- [ ] T044 [US1] Implement anonymous ID assignment logic in event service
+- [x] T042 [US1] Implement event creation service in lib/services/event.service.ts
+- [x] T043 [US1] Implement daily post limit check logic in event service
+- [x] T044 [US1] Implement anonymous ID assignment logic in event service
 
 #### Server Actions
 
@@ -178,20 +178,20 @@
 
 ### Unit Tests for User Story 2（TDD Phase 2）
 
-- [ ] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
-- [ ] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
+- [X] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
+- [X] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
 
 ### Implementation for User Story 2（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
-- [ ] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
+- [X] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
+- [X] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
 
 #### Server Actions
 
-- [ ] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
-- [ ] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
+- [X] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
+- [X] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
 
 #### UIコンポーネント
 
