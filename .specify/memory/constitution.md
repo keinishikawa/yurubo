@@ -127,7 +127,11 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 - Claude / Cursor のセッション単位で責務を分離し、各自専用ブランチで作業
 
 **ブランチ命名規則**:
-- 新機能: `feature/<領域>-<機能>` 例: `feature/api-create-event`
+- **SpecKit機能開発**: `feature/{3桁数字}-{機能名}` 例: `feature/001-event-creation`
+  - 数字はspecs/ディレクトリと対応（SpecKitワークフロー用）
+  - `/speckit.*` コマンド使用時は必須形式
+- **Phase開発**: `feature/phase{N}-{説明}` 例: `feature/phase2-foundation`
+  - 基盤構築など、SpecKit外の作業用
 - 環境構築: `infra/<対象>` 例: `infra/setup-ci`
 - バグ修正: `fix/<内容>` 例: `fix/ui-modal-close`
 - リファクタ: `refactor/<範囲>` 例: `refactor/event-schema`

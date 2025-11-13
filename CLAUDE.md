@@ -101,13 +101,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### ブランチ命名規則
 
-| 種別    | 命名例                 | 内容                                                   |
-| ----- | ------------------- | ---------------------------------------------------- |
-| 新機能   | `feature/<領域>-<機能>` | 例：`feature/api-create-event`、`feature/ui-event-form` |
-| 環境構築  | `infra/<対象>`        | 例：`infra/setup-ci`、`infra/supabase-auth`             |
-| バグ修正  | `fix/<内容>`          | 例：`fix/ui-modal-close`                               |
-| リファクタ | `refactor/<範囲>`     | 例：`refactor/event-schema`                            |
-| 実験／検証 | `exp/<内容>`          | 例：`exp/claude-prompt-tuning`                         |
+| 種別              | 命名例                            | 内容                                             |
+| --------------- | ------------------------------ | ---------------------------------------------- |
+| **SpecKit機能開発** | `feature/{3桁数字}-{機能名}`         | 例：`feature/001-event-creation`（specs/と対応）     |
+| **Phase開発**     | `feature/phase{N}-{説明}`        | 例：`feature/phase2-foundation`（基盤構築など）        |
+| 環境構築            | `infra/<対象>`                   | 例：`infra/setup-ci`、`infra/supabase-auth`       |
+| バグ修正            | `fix/<内容>`                     | 例：`fix/ui-modal-close`                         |
+| リファクタ           | `refactor/<範囲>`                | 例：`refactor/event-schema`                      |
+| 実験／検証           | `exp/<内容>`                     | 例：`exp/claude-prompt-tuning`                   |
+
+**重要**: SpecKit機能開発時は必ず`feature/{3桁数字}-`形式を使用すること。この形式により、SpecKitスクリプトがspecs/ディレクトリと正しく連携できます。
 
 ### 運用ルール
 
@@ -118,12 +121,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### 並行開発（Claude複数セッション運用）
 
-| セッション     | ブランチ                       | 目的                    |
-| --------- | -------------------------- | --------------------- |
-| Claude #1 | `infra/setup`              | 開発環境構築（CI, Supabase等） |
-| Claude #2 | `feature/api-create-event` | API実装                 |
-| Claude #3 | `feature/ui-event-form`    | UI実装                  |
-| Claude #4 | `feature/ui-connect-event` | UIとAPIの統合確認           |
+| セッション     | ブランチ                          | 目的                    |
+| --------- | ----------------------------- | --------------------- |
+| Claude #1 | `infra/setup-ci`              | 開発環境構築（CI, Supabase等） |
+| Claude #2 | `feature/001-event-creation`  | イベント作成機能（SpecKit）    |
+| Claude #3 | `feature/phase2-foundation`   | Phase 2基盤構築          |
+| Claude #4 | `feature/002-timeline-view`   | タイムライン機能（SpecKit）    |
 
 - 各セッションは独立ブランチで作業
 - main 更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
