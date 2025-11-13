@@ -120,12 +120,12 @@
 
 #### Server Actions
 
-- [ ] T045 [US1] Create event creation Server Action in app/actions/createEvent.ts
-- [ ] T046 [US1] Write integration test for event creation API in app/actions/createEvent.test.ts
+- [x] T045 [US1] Create event creation Server Action in app/actions/createEvent.ts
+- [x] T046 [US1] Write integration test for event creation API in app/actions/createEvent.test.ts
 
 #### UIコンポーネント
 
-- [ ] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
+- [x] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
 - [ ] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
 - [ ] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
 - [ ] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
