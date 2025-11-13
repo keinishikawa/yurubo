@@ -49,10 +49,14 @@ const config: Config = {
     "^@/(.*)$": "<rootDir>/$1",
   },
 
-  // テストファイルのパターン
+  // テストファイルのパターン（E2Eテストを除外）
   testMatch: [
     "**/__tests__/**/*.[jt]s?(x)",
     "**/?(*.)+(spec|test).[jt]s?(x)",
+  ],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/tests/e2e/", // Playwright E2Eテストを除外
   ],
 
   // カバレッジ収集対象
