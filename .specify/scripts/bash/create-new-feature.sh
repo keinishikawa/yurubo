@@ -88,10 +88,10 @@ check_existing_branches() {
     git fetch --all --prune 2>/dev/null || true
     
     # Find all branches matching the pattern using git ls-remote (more reliable)
-    local remote_branches=$(git ls-remote --heads origin 2>/dev/null | grep -E "refs/heads/[0-9]+-${short_name}$" | sed 's/.*\/\([0-9]*\)-.*/\1/' | sort -n)
-    
+    local remote_branches=$(git ls-remote --heads origin 2>/dev/null | grep -E "refs/heads/feature/[0-9]+-${short_name}$" | sed 's/.*\/feature\/\([0-9]*\)-.*/\1/' | sort -n)
+
     # Also check local branches
-    local local_branches=$(git branch 2>/dev/null | grep -E "^[* ]*[0-9]+-${short_name}$" | sed 's/^[* ]*//' | sed 's/-.*//' | sort -n)
+    local local_branches=$(git branch 2>/dev/null | grep -E "^[* ]*feature/[0-9]+-${short_name}$" | sed 's/^[* ]*//' | sed 's/.*feature\///' | sed 's/-.*//' | sort -n)
     
     # Check specs directory as well
     local spec_dirs=""
@@ -211,7 +211,7 @@ if [ -z "$BRANCH_NUMBER" ]; then
 fi
 
 FEATURE_NUM=$(printf "%03d" "$BRANCH_NUMBER")
-BRANCH_NAME="${FEATURE_NUM}-${BRANCH_SUFFIX}"
+BRANCH_NAME="feature/${FEATURE_NUM}-${BRANCH_SUFFIX}"
 
 # GitHub enforces a 244-byte limit on branch names
 # Validate and truncate if necessary
@@ -240,7 +240,9 @@ else
     >&2 echo "[specify] Warning: Git repository not detected; skipped branch creation for $BRANCH_NAME"
 fi
 
-FEATURE_DIR="$SPECS_DIR/$BRANCH_NAME"
+# Remove 'feature/' prefix from directory name (directories can't contain /)
+FEATURE_DIR_NAME="${BRANCH_NAME#feature/}"
+FEATURE_DIR="$SPECS_DIR/$FEATURE_DIR_NAME"
 mkdir -p "$FEATURE_DIR"
 
 TEMPLATE="$REPO_ROOT/.specify/templates/spec-template.md"
