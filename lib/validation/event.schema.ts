@@ -85,25 +85,27 @@ export const createEventSchema = z
     category: categorySchema,
 
     // 開始日時（必須、未来の日時）
+    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
     date_start: z
       .string({ required_error: '開始日時を選択してください' })
-      .datetime({ message: '開始日時の形式が正しくありません' })
+      .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '開始日時の形式が正しくありません')
       .refine(
         (date) => new Date(date) > new Date(),
         '開始日時は現在時刻より未来を選択してください'
       ),
 
     // 終了日時（必須、開始日時より未来）
+    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
     // ※date_startとの比較は.refine()で実施
     date_end: z
       .string({ required_error: '終了日時を選択してください' })
-      .datetime({ message: '終了日時の形式が正しくありません' }),
+      .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '終了日時の形式が正しくありません'),
 
     // 最小参加人数（必須、1以上）
     capacity_min: z
       .number({ required_error: '最小参加人数を入力してください' })
       .int('最小参加人数は整数で入力してください')
-      .min(1, '最小参加人数は1人以上で入力してください'),
+      .min(2, '最小参加人数は2人以上で入力してください'),
 
     // 最大参加人数（必須、最小参加人数以上）
     // ※capacity_minとの比較は.refine()で実施

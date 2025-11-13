@@ -2,40 +2,48 @@
  * ファイル名: date-range-picker.tsx
  *
  * 【概要】
- * 開始日時〜終了日時を1つのコンポーネントで統合表示する日時範囲選択コンポーネント
- * イベントの開催期間を直感的に入力可能
+ * カレンダー + 30分間隔の時刻選択で日時範囲を選択するコンポーネント
+ * 添付画像のようなUI/UXを実現
  *
  * 【処理フロー】
- * 1. DateRange型 { start: string, end: string } を受け取る
- * 2. 2つのdatetime-local入力を横並びで配置
- * 3. 視覚的に1つの範囲選択コンポーネントとして表現
- * 4. 値変更時にonChangeコールバックを呼び出し
+ * 1. 開始日をカレンダーで選択
+ * 2. 開始時刻を30分間隔のセレクトで選択
+ * 3. 終了日をカレンダーで選択
+ * 4. 終了時刻を30分間隔のセレクトで選択
+ * 5. YYYY-MM-DDTHH:MM形式で親コンポーネントに返す
  *
  * 【主要機能】
- * - 開始・終了日時の統合表示
- * - 横並びレイアウトで範囲感を表現
- * - React Hook Formとの統合対応
- * - バリデーションエラー表示
+ * - shadcn-ui Calendarによる日付選択
+ * - 30分間隔の時刻セレクト（00:00〜23:30）
+ * - 同一モーダル内で開始・終了を選択
+ * - HTML5 datetime-local形式（YYYY-MM-DDTHH:MM）出力
  *
  * 【依存関係】
+ * - shadcn-ui Calendar: 日付選択
  * - React Hook Form: フォーム統合
- * - event.schema.ts: バリデーションルール
  */
 
 'use client'
 
 import * as React from 'react'
+import { Calendar } from '@/components/ui/calendar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { ja } from 'date-fns/locale'
 
 /**
  * DateRange型定義
  */
 export type DateRange = {
-  /** 開始日時（ISO 8601形式: YYYY-MM-DDTHH:MM） */
+  /** 開始日時（HTML5 datetime-local形式: YYYY-MM-DDTHH:MM） */
   start: string
-  /** 終了日時（ISO 8601形式: YYYY-MM-DDTHH:MM） */
+  /** 終了日時（HTML5 datetime-local形式: YYYY-MM-DDTHH:MM） */
   end: string
 }
 
@@ -58,42 +66,73 @@ type DateRangePickerProps = {
 }
 
 /**
+ * 30分間隔の時刻オプションを生成
+ *
+ * @returns ['00:00', '00:30', '01:00', ..., '23:30']
+ */
+function generateTimeOptions(): string[] {
+  const times: string[] = []
+  for (let hour = 0; hour < 24; hour++) {
+    for (let minute = 0; minute < 60; minute += 30) {
+      const h = hour.toString().padStart(2, '0')
+      const m = minute.toString().padStart(2, '0')
+      times.push(`${h}:${m}`)
+    }
+  }
+  return times
+}
+
+/**
+ * datetime-local形式の文字列から日付と時刻を分離
+ *
+ * @param datetime - YYYY-MM-DDTHH:MM
+ * @returns { date: Date | undefined, time: string }
+ */
+function parseDateTimeLocal(datetime: string): { date: Date | undefined; time: string } {
+  if (!datetime) {
+    return { date: undefined, time: '09:00' }
+  }
+  const [datePart, timePart] = datetime.split('T')
+  const date = datePart ? new Date(datePart) : undefined
+  return { date, time: timePart || '09:00' }
+}
+
+/**
+ * 日付と時刻をdatetime-local形式に結合
+ *
+ * @param date - Date object
+ * @param time - HH:MM
+ * @returns YYYY-MM-DDTHH:MM
+ */
+function formatDateTimeLocal(date: Date | undefined, time: string): string {
+  if (!date) return ''
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}T${time}`
+}
+
+/**
  * DateRangePickerコンポーネント
  *
  * @param props - DateRangePickerのProps
- * @returns 開始〜終了を統合表示する日時範囲選択コンポーネント
+ * @returns カレンダー + 時刻選択の日時範囲ピッカー
  *
  * 【処理内容】
- * 1. valueを { start, end } オブジェクトとして受け取る
- * 2. 2つのdatetime-local入力を横並びで配置
- * 3. 開始日時変更時にonChange({ ...value, start: newValue })を呼び出し
- * 4. 終了日時変更時にonChange({ ...value, end: newValue })を呼び出し
- * 5. エラーメッセージを各フィールドの下に表示
+ * 1. valueから開始日・時刻、終了日・時刻を分離
+ * 2. Calendarで日付を選択
+ * 3. Selectで時刻を選択（30分間隔）
+ * 4. 変更時にonChangeでdatetime-local形式で返す
  *
  * 【UI仕様】
- * - レイアウト: 横並び（grid-cols-2）
- * - 枠線: 統合感を出すためのborder
- * - ラベル: 「開始日時」「終了日時」
- *
- * 【使用例】
- * <DateRangePicker
- *   value={{ start: '2025-11-13T19:00', end: '2025-11-13T22:00' }}
- *   onChange={(range) => {
- *     setValue('date_start', range.start);
- *     setValue('date_end', range.end);
- *   }}
- *   startError={errors.date_start?.message}
- *   endError={errors.date_end?.message}
- * />
+ * - 横並び（開始 | 終了）
+ * - カレンダー: shadcn-ui Calendar
+ * - 時刻: 30分間隔のセレクト
  *
  * 【設計根拠】
- * - UI改善リクエスト: 開始・終了を1つのコンポーネントで表現
- * - UX: 範囲選択の視覚的な統合感を演出
- *
- * 【アクセシビリティ】
- * - ラベル: 各入力にLabel要素を関連付け
- * - エラーメッセージ: text-destructive色で明示
- * - フォーカス管理: Tab/Shift+Tabで移動
+ * - ユーザー要望: 添付画像のようなUI
+ * - 30分間隔での時刻指定
+ * - 同一モーダル内で開始・終了を選択
  */
 export function DateRangePicker({
   value,
@@ -103,20 +142,36 @@ export function DateRangePicker({
   disabled = false,
   className,
 }: DateRangePickerProps) {
-  // 【ステップ1】開始日時変更ハンドラー
-  const handleStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...value,
-      start: e.target.value,
-    })
+  const timeOptions = generateTimeOptions()
+
+  // 【ステップ1】開始日時を分離
+  const { date: startDate, time: startTime } = parseDateTimeLocal(value.start)
+
+  // 【ステップ2】終了日時を分離
+  const { date: endDate, time: endTime } = parseDateTimeLocal(value.end)
+
+  // 【ステップ3】開始日変更ハンドラー
+  const handleStartDateChange = (date: Date | undefined) => {
+    const newStart = formatDateTimeLocal(date, startTime)
+    onChange({ ...value, start: newStart })
   }
 
-  // 【ステップ2】終了日時変更ハンドラー
-  const handleEndChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({
-      ...value,
-      end: e.target.value,
-    })
+  // 【ステップ4】開始時刻変更ハンドラー
+  const handleStartTimeChange = (time: string) => {
+    const newStart = formatDateTimeLocal(startDate, time)
+    onChange({ ...value, start: newStart })
+  }
+
+  // 【ステップ5】終了日変更ハンドラー
+  const handleEndDateChange = (date: Date | undefined) => {
+    const newEnd = formatDateTimeLocal(date, endTime)
+    onChange({ ...value, end: newEnd })
+  }
+
+  // 【ステップ6】終了時刻変更ハンドラー
+  const handleEndTimeChange = (time: string) => {
+    const newEnd = formatDateTimeLocal(endDate, time)
+    onChange({ ...value, end: newEnd })
   }
 
   return (
@@ -129,60 +184,78 @@ export function DateRangePicker({
       {/* 統合枠線 */}
       <div className="rounded-lg border border-input bg-background p-4">
         {/* 横並びレイアウト */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* 開始日時 */}
-          <div className="space-y-2">
-            <Label htmlFor="date_start" className="text-sm font-medium">
-              開始日時<span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="date_start"
-              type="datetime-local"
-              value={value.start}
-              onChange={handleStartChange}
+          <div className="space-y-3">
+            <div className="text-sm font-medium">
+              開始<span className="text-destructive">*</span>
+            </div>
+
+            {/* カレンダー */}
+            <Calendar
+              mode="single"
+              selected={startDate}
+              onSelect={handleStartDateChange}
               disabled={disabled}
-              className={cn(
-                'w-full',
-                startError && 'border-destructive focus-visible:ring-destructive'
-              )}
-              aria-invalid={!!startError}
-              aria-describedby={startError ? 'date_start-error' : undefined}
+              locale={ja}
+              className="rounded-md border"
             />
+
+            {/* 時刻セレクト */}
+            <Select value={startTime} onValueChange={handleStartTimeChange} disabled={disabled}>
+              <SelectTrigger className={cn(startError && 'border-destructive')}>
+                <SelectValue placeholder="時刻を選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* エラーメッセージ */}
             {startError && (
-              <p
-                id="date_start-error"
-                className="text-sm text-destructive"
-                role="alert"
-              >
+              <p className="text-sm text-destructive" role="alert">
                 {startError}
               </p>
             )}
           </div>
 
           {/* 終了日時 */}
-          <div className="space-y-2">
-            <Label htmlFor="date_end" className="text-sm font-medium">
-              終了日時<span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="date_end"
-              type="datetime-local"
-              value={value.end}
-              onChange={handleEndChange}
+          <div className="space-y-3">
+            <div className="text-sm font-medium">
+              終了<span className="text-destructive">*</span>
+            </div>
+
+            {/* カレンダー */}
+            <Calendar
+              mode="single"
+              selected={endDate}
+              onSelect={handleEndDateChange}
               disabled={disabled}
-              className={cn(
-                'w-full',
-                endError && 'border-destructive focus-visible:ring-destructive'
-              )}
-              aria-invalid={!!endError}
-              aria-describedby={endError ? 'date_end-error' : undefined}
+              locale={ja}
+              className="rounded-md border"
             />
+
+            {/* 時刻セレクト */}
+            <Select value={endTime} onValueChange={handleEndTimeChange} disabled={disabled}>
+              <SelectTrigger className={cn(endError && 'border-destructive')}>
+                <SelectValue placeholder="時刻を選択" />
+              </SelectTrigger>
+              <SelectContent>
+                {timeOptions.map((time) => (
+                  <SelectItem key={time} value={time}>
+                    {time}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* エラーメッセージ */}
             {endError && (
-              <p
-                id="date_end-error"
-                className="text-sm text-destructive"
-                role="alert"
-              >
+              <p className="text-sm text-destructive" role="alert">
                 {endError}
               </p>
             )}
