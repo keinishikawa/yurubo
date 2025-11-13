@@ -101,33 +101,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### ブランチ命名規則
 
-| 種別    | 命名例                 | 内容                                                   |
-| ----- | ------------------- | ---------------------------------------------------- |
-| 新機能   | `feature/<領域>-<機能>` | 例：`feature/api-create-event`、`feature/ui-event-form` |
-| 環境構築  | `infra/<対象>`        | 例：`infra/setup-ci`、`infra/supabase-auth`             |
-| バグ修正  | `fix/<内容>`          | 例：`fix/ui-modal-close`                               |
-| リファクタ | `refactor/<範囲>`     | 例：`refactor/event-schema`                            |
-| 実験／検証 | `exp/<内容>`          | 例：`exp/claude-prompt-tuning`                         |
+| 種別                         | 命名例                       | 内容                                        |
+| -------------------------- | ------------------------- | ----------------------------------------- |
+| **機能開発（ユーザーストーリー単位）**     | `feature/{3桁数字}-{機能名}`    | 例：`feature/001-event-creation`（UI+API+テスト） |
+| **Phase/基盤構築**            | `feature/000-{説明}`        | 例：`feature/000-phase2-foundation`         |
+| 環境構築                       | `infra/<対象>`              | 例：`infra/setup-ci`                        |
+| バグ修正                       | `fix/<内容>`                | 例：`fix/ui-modal-close`                    |
+| リファクタ                      | `refactor/<範囲>`           | 例：`refactor/event-schema`                 |
+| 実験／検証                      | `exp/<内容>`                | 例：`exp/claude-prompt-tuning`              |
+
+**重要原則**:
+- **1ストーリー = 1ブランチ = UI + API + テスト全部含む**
+- SpecKit機能は必ず`feature/{3桁数字}-`形式を使用
+- Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
+
+**アンチパターン（禁止）**:
+❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
+  → SpecKitスクリプトが競合し、spec.md編集が衝突する
 
 ### 運用ルール
 
-- 1つのブランチは「1ユーザーストーリー」または「1API／1UI機能」に対応
+- 1つのブランチは「1ユーザーストーリー完結」に対応
+- UI/API分割せず、1ストーリーを1ブランチで完結させる
 - 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
 - 作業終了後、PRを作成しCI通過後に`main`へマージ
 - マージ後はブランチ自動削除（GitHub設定推奨）
 
-### 並行開発（Claude複数セッション運用）
+### 並行開発戦略（Claude複数セッション運用）
 
-| セッション     | ブランチ                       | 目的                    |
-| --------- | -------------------------- | --------------------- |
-| Claude #1 | `infra/setup`              | 開発環境構築（CI, Supabase等） |
-| Claude #2 | `feature/api-create-event` | API実装                 |
-| Claude #3 | `feature/ui-event-form`    | UI実装                  |
-| Claude #4 | `feature/ui-connect-event` | UIとAPIの統合確認           |
+**依存関係に基づく並列開発:**
 
-- 各セッションは独立ブランチで作業
-- main 更新後は各ブランチで `git pull origin main` を行い、差分を早期吸収
-- Claudeセッションごとに目的を固定して干渉を防ぐ
+```
+# 基盤構築（依存: なし）
+feature/000-phase2-foundation ← 最優先でマージ
+
+# 並列開発可能（依存: Phase 2のみ）
+feature/001-event-creation    ← UI + API + E2E
+feature/002-timeline-view     ← UI + API + E2E
+
+# 依存あり（001マージ後に着手）
+feature/003-event-edit        ← 依存: 001
+```
+
+**実運用例:**
+
+| セッション     | ブランチ                            | 依存関係          | 状態   |
+| --------- | ------------------------------- | ------------- | ---- |
+| Claude #1 | `feature/000-phase2-foundation` | なし            | マージ済 |
+| Claude #2 | `feature/001-event-creation`    | Phase 2マージ済み  | 並列開発 |
+| Claude #3 | `feature/002-timeline-view`     | Phase 2マージ済み  | 並列開発 |
+| Claude #4 | `feature/003-event-edit`        | 001マージ待ち     | 待機中  |
+
+**原則:**
+- 依存のないストーリー同士は並列開発OK
+- 依存のあるストーリーは前のストーリーのmainマージを待つ
+- 各セッションは独立したストーリー番号で作業
+- main更新後は `git pull origin main` で差分を早期吸収
 
 ### CI / Branch Protection
 
