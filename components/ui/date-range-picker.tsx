@@ -83,25 +83,6 @@ function generateTimeOptions(): string[] {
 }
 
 /**
- * 現在時刻の2時間後の時刻を取得（30分単位に切り上げ）
- *
- * @returns HH:MM形式の時刻
- */
-function getDefaultStartTime(): string {
-  const now = new Date()
-  now.setHours(now.getHours() + 2) // 2時間後
-
-  const hour = now.getHours()
-  const minute = now.getMinutes()
-
-  // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour
-
-  return `${roundedHour.toString().padStart(2, '0')}:${roundedMinute.toString().padStart(2, '0')}`
-}
-
-/**
  * datetime-local形式の文字列から日付と時刻を分離
  *
  * @param datetime - YYYY-MM-DDTHH:MM
@@ -109,11 +90,11 @@ function getDefaultStartTime(): string {
  */
 function parseDateTimeLocal(datetime: string): { date: Date | undefined; time: string } {
   if (!datetime) {
-    return { date: undefined, time: getDefaultStartTime() }
+    return { date: undefined, time: '09:00' }
   }
   const [datePart, timePart] = datetime.split('T')
   const date = datePart ? new Date(datePart) : undefined
-  return { date, time: timePart || getDefaultStartTime() }
+  return { date, time: timePart || '09:00' }
 }
 
 /**
@@ -195,6 +176,11 @@ export function DateRangePicker({
 
   // 【ステップ4】開始日変更ハンドラー
   const handleStartDateChange = (date: Date | undefined) => {
+    // undefinedの場合は選択解除されたので、元の状態を維持（選択解除を防ぐ）
+    if (!date) {
+      return
+    }
+
     const newStart = formatDateTimeLocal(date, startTime)
 
     // 初回のみ終了日時を自動設定（+4時間）
@@ -233,6 +219,11 @@ export function DateRangePicker({
 
   // 【ステップ6】終了日変更ハンドラー
   const handleEndDateChange = (date: Date | undefined) => {
+    // undefinedの場合は選択解除されたので、元の状態を維持（選択解除を防ぐ）
+    if (!date) {
+      return
+    }
+
     const newEnd = formatDateTimeLocal(date, endTime)
     onChange({ ...value, end: newEnd })
   }

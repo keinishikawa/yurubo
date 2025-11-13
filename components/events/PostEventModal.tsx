@@ -75,6 +75,70 @@ const CATEGORY_OPTIONS = [
 ] as const
 
 /**
+ * デフォルトの開始日時を取得（現在時刻+2時間、30分単位に切り上げ）
+ *
+ * @returns YYYY-MM-DDTHH:MM形式の日時文字列
+ */
+function getDefaultStartDateTime(): string {
+  const now = new Date()
+  now.setHours(now.getHours() + 2) // 2時間後
+
+  const year = now.getFullYear()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const day = now.getDate().toString().padStart(2, '0')
+  const hour = now.getHours()
+  const minute = now.getMinutes()
+
+  // 30分単位に切り上げ
+  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0
+  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour
+
+  // 時刻が24時を超えた場合は翌日に
+  if (roundedMinute === 0 && minute > 30 && hour === 23) {
+    now.setDate(now.getDate() + 1)
+    const nextYear = now.getFullYear()
+    const nextMonth = (now.getMonth() + 1).toString().padStart(2, '0')
+    const nextDay = now.getDate().toString().padStart(2, '0')
+    return `${nextYear}-${nextMonth}-${nextDay}T00:00`
+  }
+
+  const timeStr = `${roundedHour.toString().padStart(2, '0')}:${roundedMinute.toString().padStart(2, '0')}`
+  return `${year}-${month}-${day}T${timeStr}`
+}
+
+/**
+ * デフォルトの終了日時を取得（開始日時+4時間）
+ *
+ * @returns YYYY-MM-DDTHH:MM形式の日時文字列
+ */
+function getDefaultEndDateTime(): string {
+  const now = new Date()
+  now.setHours(now.getHours() + 6) // 2時間後 + 4時間 = 6時間後
+
+  const year = now.getFullYear()
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const day = now.getDate().toString().padStart(2, '0')
+  const hour = now.getHours()
+  const minute = now.getMinutes()
+
+  // 30分単位に切り上げ
+  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0
+  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour
+
+  // 時刻が24時を超えた場合は翌日に
+  if (roundedMinute === 0 && minute > 30 && hour === 23) {
+    now.setDate(now.getDate() + 1)
+    const nextYear = now.getFullYear()
+    const nextMonth = (now.getMonth() + 1).toString().padStart(2, '0')
+    const nextDay = now.getDate().toString().padStart(2, '0')
+    return `${nextYear}-${nextMonth}-${nextDay}T00:00`
+  }
+
+  const timeStr = `${roundedHour.toString().padStart(2, '0')}:${roundedMinute.toString().padStart(2, '0')}`
+  return `${year}-${month}-${day}T${timeStr}`
+}
+
+/**
  * PostEventModalコンポーネント
  *
  * @param props - モーダル制御とsubmitハンドラーを含むProps
@@ -119,8 +183,8 @@ export function PostEventModal({
     defaultValues: {
       title: '',
       category: 'drinking',
-      date_start: '',
-      date_end: '',
+      date_start: getDefaultStartDateTime(),
+      date_end: getDefaultEndDateTime(),
       capacity_min: 2,
       capacity_max: 6,
       price_min: 3000,
