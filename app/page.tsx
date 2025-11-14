@@ -27,11 +27,12 @@
 
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { toast } from 'sonner'
 import { createEvent } from '@/app/actions/createEvent'
 import { PostEventModal } from '@/components/events/PostEventModal'
 import { FloatingPostButton } from '@/components/layout/FloatingPostButton'
+import { EventTimeline } from '@/components/events/EventTimeline'
 import type { CreateEventInput } from '@/lib/validation/event.schema'
 
 /**
@@ -57,8 +58,7 @@ import type { CreateEventInput } from '@/lib/validation/event.schema'
  * spec.md NFR-003: 統一されたエラーハンドリング
  *
  * 【注意】
- * - タイムライン表示機能はUser Story 2で実装予定
- * - 現在はイベント投稿機能のみ実装
+ * - タイムライン自動更新はkeyを変更することで実現
  */
 export default function HomePage() {
   // 【ステップ1】モーダルの開閉状態管理
@@ -66,6 +66,9 @@ export default function HomePage() {
 
   // 【ステップ2】ローディング状態管理
   const [isCreating, setIsCreating] = useState(false)
+
+  // 【ステップ2.5】タイムライン再読み込み用のキー
+  const [timelineKey, setTimelineKey] = useState(0)
 
   // 【ステップ3】イベント作成ハンドラー
   const handleCreateEvent = async (data: CreateEventInput) => {
@@ -85,7 +88,8 @@ export default function HomePage() {
         // モーダルを閉じる
         setIsModalOpen(false)
 
-        // TODO: タイムラインを再読み込み（User Story 2で実装）
+        // タイムラインを再読み込み
+        setTimelineKey((prev) => prev + 1)
       } else {
         // エラー時の処理 (T059)
         toast.error(result.message, {
@@ -112,16 +116,9 @@ export default function HomePage() {
         </p>
       </header>
 
-      {/* TODO: タイムライン表示（User Story 2で実装） */}
-      <div className="mb-24 space-y-4">
-        <div className="rounded-lg border border-dashed p-8 text-center">
-          <p className="text-muted-foreground">
-            タイムライン機能はUser Story 2で実装予定です
-          </p>
-          <p className="mt-2 text-sm text-muted-foreground">
-            現在はイベント投稿機能のみ利用可能です
-          </p>
-        </div>
+      {/* タイムライン表示 (User Story 2) */}
+      <div className="mb-24">
+        <EventTimeline key={timelineKey} />
       </div>
 
       {/* 投稿ボタン（右下固定） */}
