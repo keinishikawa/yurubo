@@ -70,8 +70,8 @@ export function createClient() {
          * 【処理】
          * cookieStore.get()でクッキーを取得し、値を返す
          */
-        getAll() {
-          return cookieStore.getAll()
+        async getAll() {
+          return (await cookieStore).getAll()
         },
         /**
          * クッキーに値を設定
@@ -84,10 +84,11 @@ export function createClient() {
          * cookieStore.set()でクッキーを設定
          * Supabase認証トークンの永続化に使用
          */
-        setAll(cookiesToSet) {
+        async setAll(cookiesToSet) {
           try {
+            const store = await cookieStore
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
+              store.set(name, value, options)
             )
           } catch {
             // set()はServer Component内で呼ばれることがあるが、

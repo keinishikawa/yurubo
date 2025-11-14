@@ -76,8 +76,8 @@ export const categoryFlagsSchema = z.object({
 export const addConnectionSchema = z.object({
   // 追加対象ユーザーのID（UUID形式）
   target_id: z
-    .string({ required_error: 'ユーザーIDを指定してください' })
-    .uuid({ message: 'ユーザーIDの形式が正しくありません' }),
+    .string({ message: 'ユーザーIDを指定してください' })
+    .uuid('ユーザーIDの形式が正しくありません'),
 
   // カテゴリフラグ（オプション、デフォルト全てfalse）
   category_flags: categoryFlagsSchema.optional().default({
@@ -119,8 +119,8 @@ export type AddConnectionInput = z.infer<typeof addConnectionSchema>
 export const updateCategoryFlagsSchema = z.object({
   // 更新対象ユーザーのID（UUID形式）
   target_id: z
-    .string({ required_error: 'ユーザーIDを指定してください' })
-    .uuid({ message: 'ユーザーIDの形式が正しくありません' }),
+    .string({ message: 'ユーザーIDを指定してください' })
+    .uuid('ユーザーIDの形式が正しくありません'),
 
   // カテゴリフラグ（必須）
   category_flags: categoryFlagsSchema,
@@ -149,8 +149,8 @@ export type UpdateCategoryFlagsInput = z.infer<typeof updateCategoryFlagsSchema>
 export const deleteConnectionSchema = z.object({
   // 削除対象ユーザーのID（UUID形式）
   target_id: z
-    .string({ required_error: 'ユーザーIDを指定してください' })
-    .uuid({ message: 'ユーザーIDの形式が正しくありません' }),
+    .string({ message: 'ユーザーIDを指定してください' })
+    .uuid('ユーザーIDの形式が正しくありません'),
 })
 
 /**

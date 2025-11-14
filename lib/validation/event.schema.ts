@@ -77,7 +77,7 @@ export const createEventSchema = z
   .object({
     // タイトル（必須、1〜50文字）
     title: z
-      .string({ required_error: 'タイトルを入力してください' })
+      .string({ message: 'タイトルを入力してください' })
       .min(1, 'タイトルを入力してください')
       .max(50, 'タイトルは50文字以内で入力してください'),
 
@@ -87,7 +87,7 @@ export const createEventSchema = z
     // 開始日時（必須、未来の日時）
     // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
     date_start: z
-      .string({ required_error: '開始日時を選択してください' })
+      .string({ message: '開始日時を選択してください' })
       .min(1, '開始日時を選択してください')
       .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '開始日時の形式が正しくありません')
       .refine(
@@ -99,20 +99,20 @@ export const createEventSchema = z
     // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
     // ※date_startとの比較は.refine()で実施
     date_end: z
-      .string({ required_error: '終了日時を選択してください' })
+      .string({ message: '終了日時を選択してください' })
       .min(1, '終了日時を選択してください')
       .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '終了日時の形式が正しくありません'),
 
     // 最小参加人数（必須、1以上）
     capacity_min: z
-      .number({ required_error: '最小参加人数を入力してください' })
+      .number({ message: '最小参加人数を入力してください' })
       .int('最小参加人数は整数で入力してください')
       .min(2, '最小参加人数は2人以上で入力してください'),
 
     // 最大参加人数（必須、最小参加人数以上）
     // ※capacity_minとの比較は.refine()で実施
     capacity_max: z
-      .number({ required_error: '最大参加人数を入力してください' })
+      .number({ message: '最大参加人数を入力してください' })
       .int('最大参加人数は整数で入力してください')
       .max(100, '最大参加人数は100人以下で入力してください'),
 

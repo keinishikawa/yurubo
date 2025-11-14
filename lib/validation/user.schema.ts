@@ -78,7 +78,7 @@ export const notificationPreferencesSchema = z.object({
 export const createUserProfileSchema = z.object({
   // 表示名（必須、1〜50文字）
   display_name: z
-    .string({ required_error: '表示名を入力してください' })
+    .string({ message: '表示名を入力してください' })
     .min(1, '表示名を入力してください')
     .max(50, '表示名は50文字以内で入力してください'),
 
