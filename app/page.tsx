@@ -27,7 +27,7 @@
 
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { createEvent } from '@/app/actions/createEvent'
 import { PostEventModal } from '@/components/events/PostEventModal'
