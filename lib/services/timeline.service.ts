@@ -57,19 +57,21 @@ export async function fetchTimeline(
 ): Promise<FetchTimelineResult> {
   const { page = 0, limit = 20 } = params
 
+  // ⚠️ TEMPORARY: 認証スキップ（開発専用）
+  // TODO: User Story 4実装後に削除 - specs/001-event-creation/refactor-tasks.md参照
   // 【ステップ1】現在ユーザーを取得
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  // const {
+  //   data: { user },
+  //   error: authError,
+  // } = await supabase.auth.getUser()
 
-  if (authError || !user) {
-    return {
-      data: [],
-      error: 'UNAUTHORIZED',
-      hasMore: false,
-    }
-  }
+  // if (authError || !user) {
+  //   return {
+  //     data: [],
+  //     error: 'UNAUTHORIZED',
+  //     hasMore: false,
+  //   }
+  // }
 
   // 【ステップ2】ページネーション範囲を計算
   const from = page * limit

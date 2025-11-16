@@ -68,25 +68,29 @@ import type { ApiResponse, CreateEventResult } from '@/lib/services/event.servic
 export async function createEvent(
   input: CreateEventInput
 ): Promise<ApiResponse<CreateEventResult>> {
-  // 【ステップ1】Supabase認証から現在のユーザーを取得
-  const supabase = createClient()
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
+  // ⚠️ TEMPORARY: 認証スキップ（開発専用）
+  // TODO: User Story 4実装後に削除 - specs/001-event-creation/refactor-tasks.md参照
+  const TEMP_DEV_USER_ID = '00000000-0000-0000-0000-000000000001'
 
-  // 【エラーハンドリング】未ログインの場合
-  if (authError || !user) {
-    return {
-      success: false,
-      message: 'ログインが必要です。ログインしてから再度お試しください。',
-      code: 'UNAUTHORIZED',
-    }
-  }
+  // 【ステップ1】Supabase認証から現在のユーザーを取得
+  // const supabase = createClient()
+  // const {
+  //   data: { user },
+  //   error: authError,
+  // } = await supabase.auth.getUser()
+
+  // // 【エラーハンドリング】未ログインの場合
+  // if (authError || !user) {
+  //   return {
+  //     success: false,
+  //     message: 'ログインが必要です。ログインしてから再度お試しください。',
+  //     code: 'UNAUTHORIZED',
+  //   }
+  // }
 
   // 【ステップ2】イベント作成サービスを呼び出し
   // バリデーション、投稿上限チェック、匿名ID割り当て、DB保存を実行
-  const result = await createEventService(input, user.id)
+  const result = await createEventService(input, TEMP_DEV_USER_ID)
 
   // 【ステップ3】結果をクライアントに返却
   return result
