@@ -26,12 +26,12 @@
  * - spec.md FR-002: 投稿フォーム要件
  */
 
-'use client'
+"use client";
 
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { createEventSchema, type CreateEventInput } from '@/lib/validation/event.schema'
-import { Button } from '@/components/ui/button'
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createEventSchema, type CreateEventInput } from "@/lib/validation/event.schema";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -39,28 +39,28 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { DualRangeSlider } from '@/components/ui/dual-range-slider'
-import { DateRangePicker } from '@/components/ui/date-range-picker'
+} from "@/components/ui/select";
+import { DualRangeSlider } from "@/components/ui/dual-range-slider";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 /**
  * PostEventModalのProps型
  */
 type PostEventModalProps = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: CreateEventInput) => Promise<void>
-  isLoading?: boolean
-}
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit: (data: CreateEventInput) => Promise<void>;
+  isLoading?: boolean;
+};
 
 /**
  * カテゴリ選択肢
@@ -68,11 +68,11 @@ type PostEventModalProps = {
  * 【設計根拠】spec.md FR-003: カテゴリ定義
  */
 const CATEGORY_OPTIONS = [
-  { value: 'drinking', label: '🍶 飲み', emoji: '🍶' },
-  { value: 'travel', label: '✈️ 旅行', emoji: '✈️' },
-  { value: 'tennis', label: '🎾 テニス', emoji: '🎾' },
-  { value: 'other', label: '📌 その他', emoji: '📌' },
-] as const
+  { value: "drinking", label: "🍶 飲み", emoji: "🍶" },
+  { value: "travel", label: "✈️ 旅行", emoji: "✈️" },
+  { value: "tennis", label: "🎾 テニス", emoji: "🎾" },
+  { value: "other", label: "📌 その他", emoji: "📌" },
+] as const;
 
 /**
  * デフォルトの開始日時を取得（現在時刻+2時間、30分単位に切り上げ）
@@ -80,30 +80,30 @@ const CATEGORY_OPTIONS = [
  * @returns YYYY-MM-DDTHH:MM形式の日時文字列
  */
 function getDefaultStartDateTime(): string {
-  const now = new Date()
-  now.setHours(now.getHours() + 2) // 2時間後
+  const now = new Date();
+  now.setHours(now.getHours() + 2); // 2時間後
 
-  const year = now.getFullYear()
-  const month = (now.getMonth() + 1).toString().padStart(2, '0')
-  const day = now.getDate().toString().padStart(2, '0')
-  const hour = now.getHours()
-  const minute = now.getMinutes()
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  const hour = now.getHours();
+  const minute = now.getMinutes();
 
   // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour
+  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
+  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
 
   // 時刻が24時を超えた場合は翌日に
   if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1)
-    const nextYear = now.getFullYear()
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, '0')
-    const nextDay = now.getDate().toString().padStart(2, '0')
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`
+    now.setDate(now.getDate() + 1);
+    const nextYear = now.getFullYear();
+    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
+    const nextDay = now.getDate().toString().padStart(2, "0");
+    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
   }
 
-  const timeStr = `${roundedHour.toString().padStart(2, '0')}:${roundedMinute.toString().padStart(2, '0')}`
-  return `${year}-${month}-${day}T${timeStr}`
+  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
+  return `${year}-${month}-${day}T${timeStr}`;
 }
 
 /**
@@ -112,30 +112,30 @@ function getDefaultStartDateTime(): string {
  * @returns YYYY-MM-DDTHH:MM形式の日時文字列
  */
 function getDefaultEndDateTime(): string {
-  const now = new Date()
-  now.setHours(now.getHours() + 6) // 2時間後 + 4時間 = 6時間後
+  const now = new Date();
+  now.setHours(now.getHours() + 6); // 2時間後 + 4時間 = 6時間後
 
-  const year = now.getFullYear()
-  const month = (now.getMonth() + 1).toString().padStart(2, '0')
-  const day = now.getDate().toString().padStart(2, '0')
-  const hour = now.getHours()
-  const minute = now.getMinutes()
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  const hour = now.getHours();
+  const minute = now.getMinutes();
 
   // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour
+  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
+  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
 
   // 時刻が24時を超えた場合は翌日に
   if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1)
-    const nextYear = now.getFullYear()
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, '0')
-    const nextDay = now.getDate().toString().padStart(2, '0')
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`
+    now.setDate(now.getDate() + 1);
+    const nextYear = now.getFullYear();
+    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
+    const nextDay = now.getDate().toString().padStart(2, "0");
+    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
   }
 
-  const timeStr = `${roundedHour.toString().padStart(2, '0')}:${roundedMinute.toString().padStart(2, '0')}`
-  return `${year}-${month}-${day}T${timeStr}`
+  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
+  return `${year}-${month}-${day}T${timeStr}`;
 }
 
 /**
@@ -181,45 +181,45 @@ export function PostEventModal({
   } = useForm<CreateEventInput>({
     resolver: zodResolver(createEventSchema),
     defaultValues: {
-      title: '',
-      category: 'drinking',
+      title: "",
+      category: "drinking",
       date_start: getDefaultStartDateTime(),
       date_end: getDefaultEndDateTime(),
       capacity_min: 2,
       capacity_max: 6,
       price_min: 3000,
       price_max: 5000,
-      comment: '',
+      comment: "",
       deadline: null,
     },
-  })
+  });
 
   // 【ステップ2】フォーム値を監視
-  const priceMin = watch('price_min')
-  const priceMax = watch('price_max')
-  const capacityMin = watch('capacity_min')
-  const capacityMax = watch('capacity_max')
-  const dateStart = watch('date_start')
-  const dateEnd = watch('date_end')
+  const priceMin = watch("price_min");
+  const priceMax = watch("price_max");
+  const capacityMin = watch("capacity_min");
+  const capacityMax = watch("capacity_max");
+  const dateStart = watch("date_start");
+  const dateEnd = watch("date_end");
 
   // 【ステップ3】フォーム送信ハンドラー
   const onFormSubmit = async (data: CreateEventInput) => {
-    await onSubmit(data)
-    reset() // 送信成功後にフォームをリセット
-  }
+    await onSubmit(data);
+    reset(); // 送信成功後にフォームをリセット
+  };
 
   // 【ステップ4】キャンセル・閉じる時のリセットハンドラー
   const handleClose = (open: boolean) => {
     if (!open) {
-      reset() // モーダルを閉じる時にフォーム状態をリセット
+      reset(); // モーダルを閉じる時にフォーム状態をリセット
     }
-    onOpenChange(open)
-  }
+    onOpenChange(open);
+  };
 
   const handleCancel = () => {
-    reset() // フォーム状態をリセット
-    onOpenChange(false) // モーダルを閉じる
-  }
+    reset(); // フォーム状態をリセット
+    onOpenChange(false); // モーダルを閉じる
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -238,7 +238,7 @@ export function PostEventModal({
               カテゴリ <span className="text-destructive">*</span>
             </label>
             <Select
-              onValueChange={(value) => setValue('category', value as any)}
+              onValueChange={(value) => setValue("category", value as any)}
               defaultValue="drinking"
             >
               <SelectTrigger>
@@ -262,25 +262,19 @@ export function PostEventModal({
             <label className="text-sm font-medium">
               タイトル <span className="text-destructive">*</span>
             </label>
-            <Input
-              {...register('title')}
-              placeholder="例: 軽く飲みませんか？"
-              maxLength={50}
-            />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title.message}</p>
-            )}
+            <Input {...register("title")} placeholder="例: 軽く飲みませんか？" maxLength={50} />
+            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
           {/* 日時ピッカー (T050) - DateRangePicker使用 */}
           <DateRangePicker
             value={{
-              start: dateStart || '',
-              end: dateEnd || '',
+              start: dateStart || "",
+              end: dateEnd || "",
             }}
             onChange={(range) => {
-              setValue('date_start', range.start)
-              setValue('date_end', range.end)
+              setValue("date_start", range.start);
+              setValue("date_end", range.end);
             }}
             startError={errors.date_start?.message}
             endError={errors.date_end?.message}
@@ -292,8 +286,8 @@ export function PostEventModal({
             <DualRangeSlider
               value={[capacityMin ?? 2, capacityMax ?? 6]}
               onValueChange={(values) => {
-                setValue('capacity_min', values[0])
-                setValue('capacity_max', values[1])
+                setValue("capacity_min", values[0]);
+                setValue("capacity_max", values[1]);
               }}
               min={1}
               max={20}
@@ -313,13 +307,15 @@ export function PostEventModal({
             <DualRangeSlider
               value={[priceMin ?? 3000, priceMax ?? 5000]}
               onValueChange={(values) => {
-                setValue('price_min', values[0])
-                setValue('price_max', values[1])
+                setValue("price_min", values[0]);
+                setValue("price_max", values[1]);
               }}
               min={0}
               max={20000}
               step={500}
-              label={(values) => `価格帯（任意）: ${values[0].toLocaleString()}〜${values[1].toLocaleString()}円`}
+              label={(values) =>
+                `価格帯（任意）: ${values[0].toLocaleString()}〜${values[1].toLocaleString()}円`
+              }
               disabled={isLoading}
             />
             {(errors.price_min || errors.price_max) && (
@@ -333,14 +329,12 @@ export function PostEventModal({
           <div className="space-y-2">
             <label className="text-sm font-medium">コメント（任意）</label>
             <Textarea
-              {...register('comment')}
-              placeholder="例: 仕事終わりに軽く一杯どうですか？"
+              {...register("comment")}
+              placeholder="例: 遅れて参加も歓迎です！"
               rows={4}
               maxLength={500}
             />
-            {errors.comment && (
-              <p className="text-sm text-destructive">{errors.comment.message}</p>
-            )}
+            {errors.comment && <p className="text-sm text-destructive">{errors.comment.message}</p>}
           </div>
 
           {/* エラーメッセージ表示エリア (T055) */}
@@ -353,20 +347,15 @@ export function PostEventModal({
           )}
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
               キャンセル
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? '投稿中...' : '投稿する'}
+              {isLoading ? "投稿中..." : "投稿する"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
