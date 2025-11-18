@@ -25,7 +25,6 @@
 
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createEvent as createEventService } from '@/lib/services/event.service'
 import type { CreateEventInput } from '@/lib/validation/event.schema'
 import type { ApiResponse, CreateEventResult } from '@/lib/services/event.service'
