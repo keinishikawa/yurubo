@@ -30,23 +30,34 @@ import { createEventSchema, type CreateEventInput } from '@/lib/validation/event
 import { generateAnonId } from '@/lib/utils/generateAnonId'
 
 /**
- * API統一レスポンス型
+ * API統一レスポンス型（Discriminated Union）
  *
  * 【用途】すべてのAPI関数の戻り値型
  * 【設計根拠】spec.md NFR-003: 統一されたエラーハンドリング
  *
  * 【成功時】
- * { success: true, message: '成功メッセージ', code: 'SUCCESS', data?: ... }
+ * { success: true, message: '成功メッセージ', code: 'SUCCESS', data: ... }
  *
  * 【エラー時】
  * { success: false, message: 'エラーメッセージ', code: 'ERROR_CODE' }
+ *
+ * 【Discriminated Unionの利点】
+ * - success === true の場合、dataは必ず存在する（型安全性）
+ * - success === false の場合、dataは存在しない（型安全性）
+ * - TypeScriptコンパイラが自動的に型を絞り込む
  */
-export type ApiResponse<T = unknown> = {
-  success: boolean
-  message: string
-  code: string
-  data?: T
-}
+export type ApiResponse<T = unknown> =
+  | {
+      success: true
+      message: string
+      code: string
+      data: T
+    }
+  | {
+      success: false
+      message: string
+      code: string
+    }
 
 /**
  * イベント作成結果型
