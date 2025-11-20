@@ -26,16 +26,30 @@ export type FetchTimelineParams = {
 }
 
 /**
- * タイムライン取得結果
+ * タイムライン取得結果（Discriminated Union）
+ *
+ * 【Discriminated Unionの利点】
+ * - error === null の場合、dataとhasMoreは必ず存在する（型安全性）
+ * - error !== null の場合、エラー状態を明確に表現
+ * - TypeScriptコンパイラが自動的に型を絞り込む
  */
-export type FetchTimelineResult = {
-  /** イベント一覧 */
-  data: Event[]
-  /** エラーコード */
-  error: string | null
-  /** 次のページが存在するか */
-  hasMore: boolean
-}
+export type FetchTimelineResult =
+  | {
+      /** イベント一覧 */
+      data: Event[]
+      /** エラーなし */
+      error: null
+      /** 次のページが存在するか */
+      hasMore: boolean
+    }
+  | {
+      /** 空配列 */
+      data: []
+      /** エラーコード */
+      error: 'UNAUTHORIZED' | 'FETCH_ERROR'
+      /** ページング情報なし */
+      hasMore: false
+    }
 
 /**
  * タイムラインイベントを取得
