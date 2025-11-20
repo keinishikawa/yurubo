@@ -33,6 +33,43 @@ jest.mock('@/components/ui/date-range-picker', () => ({
   DateRangePicker: () => <div data-testid="date-range-picker">Date Range Picker</div>,
 }))
 
+// Dialogコンポーネントのモック
+jest.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ children, open }: { children: React.ReactNode; open: boolean }) => (
+    open ? <div data-testid="dialog">{children}</div> : null
+  ),
+  DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+  DialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+}))
+
+// Select/Input/Textareaコンポーネントのモック
+jest.mock('@/components/ui/select', () => ({
+  Select: ({ children, defaultValue, onValueChange }: any) => (
+    <select onChange={(e) => onValueChange?.(e.target.value)} defaultValue={defaultValue}>
+      {children}
+    </select>
+  ),
+  SelectTrigger: ({ children }: any) => <div>{children}</div>,
+  SelectValue: ({ placeholder }: any) => <span>{placeholder}</span>,
+  SelectContent: ({ children }: any) => <div>{children}</div>,
+  SelectItem: ({ children, value }: any) => <option value={value}>{children}</option>,
+}))
+
+jest.mock('@/components/ui/input', () => ({
+  Input: (props: any) => <input {...props} />,
+}))
+
+jest.mock('@/components/ui/textarea', () => ({
+  Textarea: (props: any) => <textarea {...props} />,
+}))
+
+jest.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
+}))
+
 describe('PostEventModal Component', () => {
   describe('T056: PostEventModal表示・操作テスト', () => {
     const mockOnSubmit = jest.fn<(data: CreateEventInput) => Promise<void>>()
