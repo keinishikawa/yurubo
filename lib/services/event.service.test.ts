@@ -15,11 +15,12 @@
  * - event.service.ts: テスト対象のサービス（これから実装）
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 /**
  * テストデータ: 有効なイベント作成データ
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const validEventData = {
   category: 'drinking',
   date_start: new Date('2025-12-01T19:00:00+09:00'),

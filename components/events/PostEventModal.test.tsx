@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect, jest } from '@jest/globals'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PostEventModal } from './PostEventModal'
 import type { CreateEventInput } from '@/lib/validation/event.schema'

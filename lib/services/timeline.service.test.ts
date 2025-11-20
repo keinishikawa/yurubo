@@ -10,7 +10,6 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals'
-import type { SupabaseClient } from '@supabase/supabase-js'
 
 // モック用の型定義
 type MockSupabaseClient = {
