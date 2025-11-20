@@ -152,6 +152,7 @@ describe('EventTimeline', () => {
     render(<EventTimeline initialEvents={mockEvents} />)
 
     // Mock fetchTimeline to return hasMore=false
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { fetchTimeline } = require('@/app/actions/fetchTimeline')
     ;(fetchTimeline as jest.Mock).mockResolvedValue({
       success: true,

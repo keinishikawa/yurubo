@@ -238,7 +238,9 @@ export function PostEventModal({
               カテゴリ <span className="text-destructive">*</span>
             </label>
             <Select
-              onValueChange={(value) => setValue("category", value as any)}
+              onValueChange={(value) =>
+                setValue("category", value as "drinking" | "travel" | "tennis" | "other")
+              }
               defaultValue="drinking"
             >
               <SelectTrigger>
