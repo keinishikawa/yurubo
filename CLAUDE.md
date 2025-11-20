@@ -103,29 +103,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 | 種別                         | 命名例                       | 内容                                        |
 | -------------------------- | ------------------------- | ----------------------------------------- |
-| **機能開発（ユーザーストーリー単位）**     | `feature/{3桁数字}-{機能名}`    | 例：`feature/001-event-creation`（UI+API+テスト） |
+| **機能開発（User Story単位）** ⭐CRITICAL | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting`（UI+API+テスト） |
 | **Phase/基盤構築**            | `feature/000-{説明}`        | 例：`feature/000-phase2-foundation`         |
 | 環境構築                       | `infra/<対象>`              | 例：`infra/setup-ci`                        |
 | バグ修正                       | `fix/<内容>`                | 例：`fix/ui-modal-close`                    |
 | リファクタ                      | `refactor/<範囲>`           | 例：`refactor/event-schema`                 |
 | 実験／検証                      | `exp/<内容>`                | 例：`exp/claude-prompt-tuning`              |
 
+**⭐ CRITICAL: Epic vs User Story の重要な違い**:
+- **Epic**: 複数のUser Storyを含む大きな機能単位（例: Epic 001 = イベント作成機能全体）
+- **User Story**: 独立して完結できる小さな機能単位（例: US1 = イベント投稿、US2 = タイムライン閲覧）
+- **必須**: 1つのEpicに複数User Storyがある場合、**必ずUser Story単位でブランチを分ける**
+- **命名**: `feature/{Epic番号}-us{US番号}-{機能名}` 形式を厳守
+
 **重要原則**:
-- **1ストーリー = 1ブランチ = UI + API + テスト全部含む**
+- **1 User Story = 1ブランチ = 1 PR = UI + API + テスト全部含む**
 - SpecKit機能は必ず`feature/{3桁数字}-`形式を使用
 - Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
 
 **アンチパターン（禁止）**:
+❌ Epic単位のブランチ（例: `feature/001-event-creation`に複数User Storyを混在）
+  → 複数セッションでの作業衝突、tasks.md競合、PRが巨大化
 ❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
   → SpecKitスクリプトが競合し、spec.md編集が衝突する
 
 ### 運用ルール
 
-- 1つのブランチは「1ユーザーストーリー完結」に対応
+- 1つのブランチは「**1 User Story完結**」に対応（Epicではない）
 - UI/API分割せず、1ストーリーを1ブランチで完結させる
 - 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
-- 作業終了後、PRを作成しCI通過後に`main`へマージ
+- 作業終了後、PRを作成しCI通過後に`main`へマージ（1 PR = 1 User Story）
 - マージ後はブランチ自動削除（GitHub設定推奨）
+- 複数User Storyを含むEpicの場合、各User Storyごとに独立したブランチを作成
 
 ### 並行開発戦略（Claude複数セッション運用）
 
@@ -135,12 +144,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 基盤構築（依存: なし）
 feature/000-phase2-foundation ← 最優先でマージ
 
-# 並列開発可能（依存: Phase 2のみ）
-feature/001-event-creation    ← UI + API + E2E
-feature/002-timeline-view     ← UI + API + E2E
+# Epic 001の並列開発（依存: Phase 2のみ）
+feature/001-us1-event-posting  ← User Story 1（イベント投稿）
+feature/001-us2-timeline-view  ← User Story 2（タイムライン閲覧）
+feature/001-us3-event-edit     ← User Story 3（イベント編集）
 
-# 依存あり（001マージ後に着手）
-feature/003-event-edit        ← 依存: 001
+# 各User Storyは独立してマージ可能
+# US1とUS2は並行開発可能（ファイル衝突なし）
+# US3はUS1に依存（イベント作成後に編集機能）
 ```
 
 **実運用例:**
@@ -148,13 +159,15 @@ feature/003-event-edit        ← 依存: 001
 | セッション     | ブランチ                            | 依存関係          | 状態   |
 | --------- | ------------------------------- | ------------- | ---- |
 | Claude #1 | `feature/000-phase2-foundation` | なし            | マージ済 |
-| Claude #2 | `feature/001-event-creation`    | Phase 2マージ済み  | 並列開発 |
-| Claude #3 | `feature/002-timeline-view`     | Phase 2マージ済み  | 並列開発 |
-| Claude #4 | `feature/003-event-edit`        | 001マージ待ち     | 待機中  |
+| Claude #2 | `feature/001-us1-event-posting` | Phase 2マージ済み  | 並列開発 |
+| Claude #3 | `feature/001-us2-timeline-view` | Phase 2マージ済み  | 並列開発 |
+| Claude #4 | `feature/001-us3-event-edit`    | US1マージ待ち     | 待機中  |
 
 **原則:**
-- 依存のないストーリー同士は並列開発OK
-- 依存のあるストーリーは前のストーリーのmainマージを待つ
+- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
+- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
+- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
+- Epic全体を1つのPRにまとめない（レビューが困難になるため）
 - 各セッションは独立したストーリー番号で作業
 - main更新後は `git pull origin main` で差分を早期吸収
 
@@ -344,15 +357,15 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 
 ---
 
-## 学習補助モード
+## 学習補助システム
 
-すべての実装コードには**学習補助を目的とした詳細な日本語コメント**を必ず含めること。
+プロジェクトは**ハイブリッド学習方式**を採用し、コード内コメント（基本）+ `.learning/`ディレクトリ（詳細解説）の2層構造で学習を支援する。
 
-### コメント記述の必須要件
+### コメント記述ルール（コード内）
+
+**目的**: コードの可読性を保ちながら、基本的な理解を支援
 
 #### 1. ファイル全体のコメント（ファイル冒頭に記述）
-
-各ファイルの冒頭に以下を含むコメントブロックを追加:
 
 ```typescript
 /**
@@ -361,54 +374,80 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
  * 【概要】
  * このファイルの役割を1-2文で説明
  *
- * 【処理フロー】
- * 1. どのような順序で処理が実行されるか
- * 2. 主要な関数・コンポーネントの呼び出し順
- * 3. データの流れ（入力 → 処理 → 出力）
- *
- * 【主要機能】
- * - 機能1: 説明
- * - 機能2: 説明
- *
  * 【依存関係】
  * - 使用している外部ライブラリとその目的
- * - 他のモジュールとの関係
+ *
+ * @see .learning/tasks/{epic}/{task_id}.md - 詳細な実装ガイド
  */
 ```
 
-#### 2. 処理単位のコメント（関数・コンポーネント単位）
+**変更点**:
+- 【処理フロー】【主要機能】は削除 → `.learning/` へ移動
+- `@see` タグで学習ガイドへのリンクを追加
 
-各関数・コンポーネントに以下を含むコメントを追加:
+#### 2. 関数・コンポーネント単位のコメント
 
 ```typescript
 /**
- * 関数名の説明
+ * 関数名の簡潔な説明（1行）
  *
- * @param paramName - パラメータの説明と型の意味
- * @returns 戻り値の説明と型の意味
- *
- * 【処理内容】
- * 1. どのような処理を行うか（ステップバイステップ）
- * 2. 使用している文法の説明（map, filter, async/awaitなど）
- * 3. エッジケースへの対応
- *
- * 【使用例】
- * const result = await functionName(param);
+ * @param paramName - パラメータの説明
+ * @returns 戻り値の説明
  */
 ```
 
-#### 3. ロジック内のインラインコメント
+**変更点**:
+- 【処理内容】【使用例】は削除 → `.learning/` へ移動
+- JSDoc形式を維持（IDE補完のため）
 
-複雑なロジックには行ごとまたはブロックごとにコメントを追加:
+#### 3. インラインコメント
 
 ```typescript
-// 【文法】Array.filter() - 条件に一致する要素のみを抽出
-// 【処理】つながりリスト内で該当カテゴリがOKのユーザーのみを取得
+// 複雑なロジックのみコメント（簡潔に）
 const filteredUsers = users.filter(user =>
-  // category_flagsはJSONB型で、各カテゴリの許可状態を保持
   user.category_flags[categoryId] === true
 );
 ```
+
+**変更点**:
+- 【文法】【処理】タグは削除
+- 自明でないロジックのみコメント
+
+---
+
+### .learning/ ディレクトリ構造
+
+**目的**: 詳細な実装ガイド、文法解説、トラブルシューティングを提供
+
+```
+.learning/
+├── tasks/                    # タスク単位の実装ガイド
+│   └── {epic-id}/
+│       └── T{task-id}-{task-name}.md
+├── guides/                   # 横断的な学習ガイド
+│   ├── typescript-basics.md
+│   ├── next-app-router.md
+│   └── ...
+└── references/              # アーキテクチャ参照
+    ├── architecture-overview.md
+    └── testing-strategy.md
+```
+
+#### タスク実装ガイドのテンプレート
+
+`.specify/templates/learning-task-template.md` を参照
+
+**記載内容**:
+- 実装概要（spec.mdからの抜粋）
+- 技術解説（使用技術、文法・パターン解説）
+- 実装手順（ステップバイステップ）
+- コード例（Bad/Good比較）
+- テストケース
+- トラブルシューティング
+
+**作成タイミング**:
+- Phase 3以降: タスク実装時に手動作成
+- Phase 4以降: `/speckit.implement` による自動生成
 
 ### エラー発生時の対応
 

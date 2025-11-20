@@ -106,42 +106,42 @@
 
 > **NOTE: 実装前にテストを作成し、REDになることを確認**
 
-- [ ] T039 [P] [US1] Write unit test for event creation validation in lib/services/event.service.test.ts
-- [ ] T040 [P] [US1] Write unit test for daily post limit check in lib/services/event.service.test.ts
-- [ ] T041 [P] [US1] Write unit test for anonymous ID assignment in lib/services/event.service.test.ts
+- [x] T039 [P] [US1] Write unit test for event creation validation in lib/services/event.service.test.ts
+- [x] T040 [P] [US1] Write unit test for daily post limit check in lib/services/event.service.test.ts
+- [x] T041 [P] [US1] Write unit test for anonymous ID assignment in lib/services/event.service.test.ts
 
 ### Implementation for User Story 1（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T042 [US1] Implement event creation service in lib/services/event.service.ts
-- [ ] T043 [US1] Implement daily post limit check logic in event service
-- [ ] T044 [US1] Implement anonymous ID assignment logic in event service
+- [x] T042 [US1] Implement event creation service in lib/services/event.service.ts
+- [x] T043 [US1] Implement daily post limit check logic in event service
+- [x] T044 [US1] Implement anonymous ID assignment logic in event service
 
 #### Server Actions
 
-- [ ] T045 [US1] Create event creation Server Action in app/actions/createEvent.ts
-- [ ] T046 [US1] Write integration test for event creation API in app/actions/createEvent.test.ts
+- [x] T045 [US1] Create event creation Server Action in app/actions/createEvent.ts
+- [x] T046 [US1] Write integration test for event creation API in app/actions/createEvent.test.ts
 
 #### UIコンポーネント
 
-- [ ] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
-- [ ] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
-- [ ] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
-- [ ] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
-- [ ] T051 [US1] Add capacity range input to PostEventModal (想定人数: 最小・最大)
-- [ ] T052 [US1] Add price range slider to PostEventModal (価格帯: 3000~5000円デフォルト)
-- [ ] T053 [US1] Add comment textarea to PostEventModal
-- [ ] T054 [US1] Integrate React Hook Form with Zod validation in PostEventModal
-- [ ] T055 [US1] Add error message display to PostEventModal
-- [ ] T056 [US1] Write unit test for PostEventModal in components/events/PostEventModal.test.tsx
-- [ ] T057 [P] [US1] Create FloatingPostButton component (右下「＋投稿」ボタン) in components/layout/FloatingPostButton.tsx
+- [x] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
+- [x] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
+- [x] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
+- [x] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
+- [x] T051 [US1] Add capacity range input to PostEventModal (想定人数: 最小・最大)
+- [x] T052 [US1] Add price range slider to PostEventModal (価格帯: 3000~5000円デフォルト)
+- [x] T053 [US1] Add comment textarea to PostEventModal
+- [x] T054 [US1] Integrate React Hook Form with Zod validation in PostEventModal
+- [x] T055 [US1] Add error message display to PostEventModal
+- [x] T056 [US1] Write unit test for PostEventModal in components/events/PostEventModal.test.tsx
+- [x] T057 [P] [US1] Create FloatingPostButton component (右下「＋投稿」ボタン) in components/layout/FloatingPostButton.tsx
 
 #### 統合
 
-- [ ] T058 [US1] Integrate PostEventModal with createEvent Server Action
-- [ ] T059 [US1] Add toast notification on successful event creation
-- [ ] T060 [US1] Add loading state during event creation
+- [x] T058 [US1] Integrate PostEventModal with createEvent Server Action
+- [x] T059 [US1] Add toast notification on successful event creation
+- [x] T060 [US1] Add loading state during event creation
 
 ### E2E Tests for User Story 1（TDD Phase 4）
 
@@ -157,12 +157,12 @@
 
 ### Edge Cases for User Story 1
 
-- [ ] T068 [US1] Add validation for past date_start in event.schema.ts
-- [ ] T069 [US1] Add validation for date_end before date_start in event.schema.ts
-- [ ] T070 [US1] Add validation for capacity_min > capacity_max in event.schema.ts
-- [ ] T071 [US1] Add validation for deadline after date_start in event.schema.ts
-- [ ] T072 [US1] Handle network error with retry logic and user-friendly message
-- [ ] T073 [US1] Add warning message for empty connections list
+- [x] T068 [US1] Add validation for past date_start in event.schema.ts
+- [x] T069 [US1] Add validation for date_end before date_start in event.schema.ts
+- [x] T070 [US1] Add validation for capacity_min > capacity_max in event.schema.ts
+- [x] T071 [US1] Add validation for deadline after date_start in event.schema.ts
+- [x] T072 [US1] Handle network error with retry logic and user-friendly message
+- [x] T073 [US1] Add warning message for empty connections list
 
 **Checkpoint**: User Story 1が完全に機能し、独立してテスト可能
 
@@ -178,33 +178,33 @@
 
 ### Unit Tests for User Story 2（TDD Phase 2）
 
-- [ ] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
-- [ ] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
+- [X] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
+- [X] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
 
 ### Implementation for User Story 2（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
-- [ ] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
+- [X] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
+- [X] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
 
 #### Server Actions
 
-- [ ] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
-- [ ] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
+- [X] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
+- [X] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
 
 #### UIコンポーネント
 
-- [ ] T080 [P] [US2] Create EventTimeline component in components/events/EventTimeline.tsx
-- [ ] T081 [US2] Implement infinite scroll with React Query in EventTimeline
-- [ ] T082 [US2] Add loading skeleton for timeline in EventTimeline
-- [ ] T083 [US2] Add empty state message in EventTimeline
-- [ ] T084 [US2] Write unit test for EventTimeline in components/events/EventTimeline.test.tsx
+- [X] T080 [P] [US2] Create EventTimeline component in components/events/EventTimeline.tsx
+- [X] T081 [US2] Implement infinite scroll with React Query in EventTimeline
+- [X] T082 [US2] Add loading skeleton for timeline in EventTimeline
+- [X] T083 [US2] Add empty state message in EventTimeline
+- [X] T084 [US2] Write unit test for EventTimeline in components/events/EventTimeline.test.tsx
 
 #### ページ実装
 
-- [ ] T085 [US2] Create timeline page (ホーム画面) in app/page.tsx
-- [ ] T086 [US2] Integrate EventTimeline component with fetchTimeline Server Action
+- [X] T085 [US2] Update timeline page (ホーム画面) in app/page.tsx
+- [X] T086 [US2] Integrate EventTimeline component with fetchTimeline Server Action
 
 ### E2E Tests for User Story 2（TDD Phase 4）
 

@@ -1,65 +1,136 @@
-import Image from "next/image";
+/**
+ * ファイル名: page.tsx
+ *
+ * 【概要】
+ * ホーム画面（タイムライン）のメインページ
+ * イベント一覧表示と投稿機能を統合
+ *
+ * 【処理フロー】
+ * 1. FloatingPostButtonをクリックするとPostEventModalが開く
+ * 2. モーダルからイベント作成Server Actionを呼び出し
+ * 3. 成功時はToast通知を表示
+ * 4. エラー時はエラーメッセージをToastで表示
+ *
+ * 【主要機能】
+ * - イベント投稿モーダル表示
+ * - イベント作成処理
+ * - Toast通知（成功・エラー）
+ * - ローディング状態管理
+ *
+ * 【依存関係】
+ * - @/app/actions/createEvent: Server Action
+ * - @/components/events/PostEventModal: 投稿モーダル
+ * - @/components/layout/FloatingPostButton: 投稿ボタン
+ * - sonner: Toast通知
+ * - spec.md FR-001: 投稿機能統合要件
+ */
 
-export default function Home() {
+'use client'
+
+import { useState } from 'react'
+import { toast } from 'sonner'
+import { createEvent } from '@/app/actions/createEvent'
+import { PostEventModal } from '@/components/events/PostEventModal'
+import { FloatingPostButton } from '@/components/layout/FloatingPostButton'
+import { EventTimeline } from '@/components/events/EventTimeline'
+import type { CreateEventInput } from '@/lib/validation/event.schema'
+
+/**
+ * ホームページコンポーネント
+ *
+ * @returns タイムライン画面（投稿機能統合）
+ *
+ * 【処理内容】
+ * 1. モーダルの開閉状態を管理
+ * 2. 投稿処理中のローディング状態を管理
+ * 3. フォーム送信時にcreateEvent Server Actionを呼び出し
+ * 4. 成功時はToast通知を表示してモーダルを閉じる
+ * 5. エラー時はToast通知でエラーメッセージを表示
+ *
+ * 【UI構成】
+ * - FloatingPostButton: 画面右下の「＋投稿」ボタン
+ * - PostEventModal: イベント投稿モーダル
+ * - Toast: 成功・エラー通知
+ *
+ * 【設計根拠】
+ * spec.md FR-001: 匿名イベント投稿機能
+ * spec.md FR-006: 投稿完了後、即座にタイムライン反映
+ * spec.md NFR-003: 統一されたエラーハンドリング
+ *
+ * 【注意】
+ * - タイムライン自動更新はkeyを変更することで実現
+ */
+export default function HomePage() {
+  // 【ステップ1】モーダルの開閉状態管理
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  // 【ステップ2】ローディング状態管理
+  const [isCreating, setIsCreating] = useState(false)
+
+  // 【ステップ2.5】タイムライン再読み込み用のキー
+  const [timelineKey, setTimelineKey] = useState(0)
+
+  // 【ステップ3】イベント作成ハンドラー
+  const handleCreateEvent = async (data: CreateEventInput) => {
+    try {
+      // ローディング開始 (T060)
+      setIsCreating(true)
+
+      // Server Action呼び出し (T058)
+      const result = await createEvent(data)
+
+      if (result.success) {
+        // 成功時の処理 (T059)
+        toast.success(result.message, {
+          description: `匿名ID: ${result.data?.anon_id}`,
+        })
+
+        // モーダルを閉じる
+        setIsModalOpen(false)
+
+        // タイムラインを再読み込み
+        setTimelineKey((prev) => prev + 1)
+      } else {
+        // エラー時の処理 (T059)
+        toast.error(result.message, {
+          description: `エラーコード: ${result.code}`,
+        })
+      }
+    } catch (error) {
+      // 予期しないエラー
+      console.error('イベント作成エラー:', error)
+      toast.error('予期しないエラーが発生しました。もう一度お試しください。')
+    } finally {
+      // ローディング終了 (T060)
+      setIsCreating(false)
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    <main className="container mx-auto min-h-screen p-4">
+      {/* ヘッダー */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold">タイムライン</h1>
+        <p className="text-muted-foreground">
+          つながりリストのイベントが表示されます
+        </p>
+      </header>
+
+      {/* タイムライン表示 (User Story 2) */}
+      <div className="mb-24">
+        <EventTimeline key={timelineKey} />
+      </div>
+
+      {/* 投稿ボタン（右下固定） */}
+      <FloatingPostButton onClick={() => setIsModalOpen(true)} />
+
+      {/* 投稿モーダル (T058) */}
+      <PostEventModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleCreateEvent}
+        isLoading={isCreating}
+      />
+    </main>
+  )
 }

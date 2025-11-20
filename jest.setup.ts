@@ -17,3 +17,17 @@
  */
 
 import "@testing-library/jest-dom";
+
+/**
+ * IntersectionObserverのモック
+ * EventTimelineコンポーネントで使用されるIntersectionObserverをJest環境でモック
+ */
+global.IntersectionObserver = class IntersectionObserver {
+  constructor() {}
+  disconnect() {}
+  observe() {}
+  takeRecords() {
+    return [];
+  }
+  unobserve() {}
+} as unknown as typeof IntersectionObserver;
