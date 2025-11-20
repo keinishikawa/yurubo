@@ -15,11 +15,23 @@
  * - PostEventModal.tsx: テスト対象コンポーネント
  */
 
-import { describe, it, expect, jest } from '@jest/globals'
+import { describe, it, expect, jest, beforeEach } from '@jest/globals'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { PostEventModal } from './PostEventModal'
 import type { CreateEventInput } from '@/lib/validation/event.schema'
+
+// DualRangeSliderのモック
+jest.mock('@/components/ui/dual-range-slider', () => ({
+  DualRangeSlider: ({ label, value }: { label: (values: number[]) => string; value: number[] }) => (
+    <div data-testid="dual-range-slider">{label(value)}</div>
+  ),
+}))
+
+// DateRangePickerのモック
+jest.mock('@/components/ui/date-range-picker', () => ({
+  DateRangePicker: () => <div data-testid="date-range-picker">Date Range Picker</div>,
+}))
 
 describe('PostEventModal Component', () => {
   describe('T056: PostEventModal表示・操作テスト', () => {
