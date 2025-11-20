@@ -183,6 +183,35 @@ feature/001-us3-event-edit     ← User Story 3（イベント編集）
 - Block force pushes ✅
 - Delete branch after merge ✅
 
+### PRレビュー確認のベストプラクティス
+
+**重要**: GitHub APIには2種類のコメントエンドポイントが存在します。
+
+| エンドポイント | 取得できるコメント | 用途 |
+|--------------|-----------------|------|
+| `/repos/{owner}/{repo}/issues/{number}/comments` | **Issue comments**（PR全体への総合コメント） | ClaudeレビューなどのPR全体へのコメント |
+| `/repos/{owner}/{repo}/pulls/{number}/comments` | **Review comments**（コード行への指摘） | 特定コード行への指摘コメント |
+
+**推奨コマンド**:
+```bash
+# ✅ 推奨: gh CLIの高レベルコマンドを使用
+gh pr view {PR番号}                    # PR全体の情報を表示
+gh pr view {PR番号} --comments         # すべてのコメントを表示
+gh pr checks {PR番号}                  # CI/CDステータスを確認
+
+# ⚠️ 低レベルAPI使用時の注意
+# Claudeレビューなどの総合コメントを取得する場合
+gh api repos/{owner}/{repo}/issues/{PR番号}/comments
+
+# コード行への指摘コメントを取得する場合
+gh api repos/{owner}/{repo}/pulls/{PR番号}/comments
+```
+
+**注意事項**:
+- ClaudeレビューはGitHub Actionsで動作し、**Issue comment**として投稿される
+- `/pulls/{number}/comments`ではClaudeレビューが取得できない
+- 完全なレビュー情報を得るには両方のエンドポイントを使用するか、`gh pr view --comments`を使用
+
 ---
 
 ## 開発ワークフロー: SpecKit
