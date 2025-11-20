@@ -67,29 +67,42 @@ import type { ApiResponse, CreateEventResult } from '@/lib/services/event.servic
 export async function createEvent(
   input: CreateEventInput
 ): Promise<ApiResponse<CreateEventResult>> {
-  // ⚠️ TEMPORARY: 認証スキップ（開発専用）
-  // TODO: User Story 4実装後に削除 - specs/001-event-creation/refactor-tasks.md参照
+  // 【環境変数による認証スキップ制御】
+  // NEXT_PUBLIC_SKIP_AUTH=true の場合のみ認証をスキップ（開発専用）
+  // 本番環境では必ず認証チェックを実行
+  const SKIP_AUTH = process.env.NEXT_PUBLIC_SKIP_AUTH === 'true'
   const TEMP_DEV_USER_ID = '00000000-0000-0000-0000-000000000001'
 
-  // 【ステップ1】Supabase認証から現在のユーザーを取得
-  // const supabase = createClient()
-  // const {
-  //   data: { user },
-  //   error: authError,
-  // } = await supabase.auth.getUser()
+  let userId: string
 
-  // // 【エラーハンドリング】未ログインの場合
-  // if (authError || !user) {
-  //   return {
-  //     success: false,
-  //     message: 'ログインが必要です。ログインしてから再度お試しください。',
-  //     code: 'UNAUTHORIZED',
-  //   }
-  // }
+  if (SKIP_AUTH) {
+    // ⚠️ 開発専用: 認証スキップ
+    // TODO: User Story 4実装後にNEXT_PUBLIC_SKIP_AUTHを削除 - specs/001-event-creation/refactor-tasks.md参照
+    userId = TEMP_DEV_USER_ID
+  } else {
+    // 【ステップ1】Supabase認証から現在のユーザーを取得
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = createClient()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
+
+    // 【エラーハンドリング】未ログインの場合
+    if (authError || !user) {
+      return {
+        success: false,
+        message: 'ログインが必要です。ログインしてから再度お試しください。',
+        code: 'UNAUTHORIZED',
+      }
+    }
+
+    userId = user.id
+  }
 
   // 【ステップ2】イベント作成サービスを呼び出し
   // バリデーション、投稿上限チェック、匿名ID割り当て、DB保存を実行
-  const result = await createEventService(input, TEMP_DEV_USER_ID)
+  const result = await createEventService(input, userId)
 
   // 【ステップ3】結果をクライアントに返却
   return result
