@@ -178,33 +178,33 @@
 
 ### Unit Tests for User Story 2（TDD Phase 2）
 
-- [ ] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
-- [ ] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
+- [X] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
+- [X] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
 
 ### Implementation for User Story 2（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
-- [ ] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
+- [X] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
+- [X] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
 
 #### Server Actions
 
-- [ ] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
-- [ ] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
+- [X] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
+- [X] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
 
 #### UIコンポーネント
 
-- [ ] T080 [P] [US2] Create EventTimeline component in components/events/EventTimeline.tsx
-- [ ] T081 [US2] Implement infinite scroll with React Query in EventTimeline
-- [ ] T082 [US2] Add loading skeleton for timeline in EventTimeline
-- [ ] T083 [US2] Add empty state message in EventTimeline
-- [ ] T084 [US2] Write unit test for EventTimeline in components/events/EventTimeline.test.tsx
+- [X] T080 [P] [US2] Create EventTimeline component in components/events/EventTimeline.tsx
+- [X] T081 [US2] Implement infinite scroll with React Query in EventTimeline
+- [X] T082 [US2] Add loading skeleton for timeline in EventTimeline
+- [X] T083 [US2] Add empty state message in EventTimeline
+- [X] T084 [US2] Write unit test for EventTimeline in components/events/EventTimeline.test.tsx
 
 #### ページ実装
 
-- [ ] T085 [US2] Create timeline page (ホーム画面) in app/page.tsx
-- [ ] T086 [US2] Integrate EventTimeline component with fetchTimeline Server Action
+- [X] T085 [US2] Update timeline page (ホーム画面) in app/page.tsx
+- [X] T086 [US2] Integrate EventTimeline component with fetchTimeline Server Action
 
 ### E2E Tests for User Story 2（TDD Phase 4）
 

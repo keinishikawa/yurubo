@@ -214,7 +214,7 @@ export async function createEvent(
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.errors[0]?.message ?? 'バリデーションエラー',
+      message: validation.error.issues[0]?.message ?? 'バリデーションエラー',
       code: 'VALIDATION_ERROR',
     }
   }
