@@ -15,12 +15,13 @@
  * - createEvent.ts: テスト対象のServer Action
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals'
+import { describe, it, expect } from '@jest/globals'
 import type { CreateEventInput } from '@/lib/validation/event.schema'
 
 /**
  * テストデータ: 有効なイベント作成データ
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const validEventData: CreateEventInput = {
   title: '軽く飲みませんか？',
   category: 'drinking',
