@@ -23,6 +23,21 @@ import { describe, it, expect } from '@jest/globals'
 import { createEventSchema, categorySchema } from './event.schema'
 
 /**
+ * 日付をdatetime-local形式（YYYY-MM-DDTHH:MM）に変換
+ *
+ * @param date - Date オブジェクト
+ * @returns YYYY-MM-DDTHH:MM形式の文字列
+ */
+function toDateTimeLocal(date: Date): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  return `${year}-${month}-${day}T${hours}:${minutes}`
+}
+
+/**
  * カテゴリスキーマのテスト
  */
 describe('categorySchema', () => {
@@ -75,8 +90,8 @@ describe('createEventSchema', () => {
       const validData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(), // 明日
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(), // 明後日
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)), // 明日
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)), // 明後日
         capacity_min: 2,
         capacity_max: 5,
       }
@@ -96,8 +111,8 @@ describe('createEventSchema', () => {
       const validData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
         price_min: 3000,
@@ -126,8 +141,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: '',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
       }
@@ -150,8 +165,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'あ'.repeat(51), // 51文字
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
       }
@@ -179,8 +194,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() - 86400000).toISOString(), // 昨日
-        date_end: new Date(Date.now() + 86400000).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() - 86400000)), // 昨日
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000)),
         capacity_min: 2,
         capacity_max: 5,
       }
@@ -205,8 +220,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000 * 2).toISOString(), // 明後日
-        date_end: new Date(Date.now() + 86400000).toISOString(), // 明日
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)), // 明後日
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000)), // 明日
         capacity_min: 2,
         capacity_max: 5,
       }
@@ -236,8 +251,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 0,
         capacity_max: 5,
       }
@@ -248,7 +263,7 @@ describe('createEventSchema', () => {
       // Assert: バリデーションエラー
       expect(result.success).toBe(false)
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('最小参加人数は1人以上で入力してください')
+        expect(result.error.issues[0].message).toBe('最小参加人数は2人以上で入力してください')
       }
     })
 
@@ -260,8 +275,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 5,
         capacity_max: 2,
       }
@@ -291,8 +306,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
         price_min: -100,
@@ -316,8 +331,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
         price_min: 5000,
@@ -347,8 +362,8 @@ describe('createEventSchema', () => {
       const invalidData = {
         title: 'テストイベント',
         category: 'drinking' as const,
-        date_start: new Date(Date.now() + 86400000).toISOString(),
-        date_end: new Date(Date.now() + 86400000 * 2).toISOString(),
+        date_start: toDateTimeLocal(new Date(Date.now() + 86400000)),
+        date_end: toDateTimeLocal(new Date(Date.now() + 86400000 * 2)),
         capacity_min: 2,
         capacity_max: 5,
         comment: 'あ'.repeat(501), // 501文字
