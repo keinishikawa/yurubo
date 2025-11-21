@@ -25,9 +25,9 @@
  * - spec.md FR-001, FR-009: 匿名投稿機能
  */
 
-import { createClient } from '@/lib/supabase/server'
-import { createEventSchema, type CreateEventInput } from '@/lib/validation/event.schema'
-import { generateAnonId } from '@/lib/utils/generateAnonId'
+import { createClient } from "@/lib/supabase/server";
+import { createEventSchema, type CreateEventInput } from "@/lib/validation/event.schema";
+import { generateAnonId } from "@/lib/utils/generateAnonId";
 
 /**
  * API統一レスポンス型（Discriminated Union）
@@ -48,28 +48,28 @@ import { generateAnonId } from '@/lib/utils/generateAnonId'
  */
 export type ApiResponse<T = unknown> =
   | {
-      success: true
-      message: string
-      code: string
-      data: T
+      success: true;
+      message: string;
+      code: string;
+      data: T;
     }
   | {
-      success: false
-      message: string
-      code: string
-    }
+      success: false;
+      message: string;
+      code: string;
+    };
 
 /**
  * イベント作成結果型
  */
 export type CreateEventResult = {
-  id: string
-  anon_id: string
-  category: string
-  title: string
-  date_start: string
-  date_end: string
-}
+  id: string;
+  anon_id: string;
+  category: string;
+  title: string;
+  date_start: string;
+  date_end: string;
+};
 
 /**
  * 1日の投稿上限チェック
@@ -95,34 +95,31 @@ export type CreateEventResult = {
  * - 投稿上限はカテゴリ別（飲みで3件、旅行で3件はOK）
  * - 日付は UTC ではなく JST (Asia/Tokyo) で判定
  */
-export async function checkDailyPostLimit(
-  userId: string,
-  category: string
-): Promise<boolean> {
-  const supabase = createClient()
+export async function checkDailyPostLimit(userId: string, category: string): Promise<boolean> {
+  const supabase = createClient();
 
   // 【データ取得】今日の0時〜23:59:59のイベント数をカウント
-  const today = new Date()
-  today.setHours(0, 0, 0, 0) // 今日の0時
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1) // 明日の0時
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // 今日の0時
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1); // 明日の0時
 
   const { count, error } = await supabase
-    .from('events')
-    .select('id', { count: 'exact', head: true }) // headオプションでデータ取得せずカウントのみ
-    .eq('host_id', userId)
-    .eq('category', category)
-    .gte('created_at', today.toISOString())
-    .lt('created_at', tomorrow.toISOString())
+    .from("events")
+    .select("id", { count: "exact", head: true }) // headオプションでデータ取得せずカウントのみ
+    .eq("host_id", userId)
+    .eq("category", category)
+    .gte("created_at", today.toISOString())
+    .lt("created_at", tomorrow.toISOString());
 
   // 【エラーハンドリング】データベースエラー時は念のため投稿不可とする
   if (error) {
-    console.error('投稿上限チェックエラー:', error)
-    return false
+    console.error("投稿上限チェックエラー:", error);
+    return false;
   }
 
   // 【上限チェック】3件未満の場合は投稿可能
-  return (count ?? 0) < 3
+  return (count ?? 0) < 3;
 }
 
 /**
@@ -147,31 +144,28 @@ export async function checkDailyPostLimit(
  * - 削除されたイベントは連番に影響しない（歯抜けになる可能性あり）
  * - カテゴリ別に連番管理（飲みAと旅行Aは別カウント）
  */
-export async function assignAnonymousId(
-  userId: string,
-  category: string
-): Promise<string> {
-  const supabase = createClient()
+export async function assignAnonymousId(userId: string, category: string): Promise<string> {
+  const supabase = createClient();
 
   // 【データ取得】今日の0時〜23:59:59のイベント数をカウント
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   const { count, error } = await supabase
-    .from('events')
-    .select('id', { count: 'exact', head: true })
-    .eq('host_id', userId)
-    .eq('category', category)
-    .gte('created_at', today.toISOString())
-    .lt('created_at', tomorrow.toISOString())
+    .from("events")
+    .select("id", { count: "exact", head: true })
+    .eq("host_id", userId)
+    .eq("category", category)
+    .gte("created_at", today.toISOString())
+    .lt("created_at", tomorrow.toISOString());
 
   // 【エラーハンドリング】エラー時は0件として扱う（フェイルセーフ）
-  const dailyPostCount = error ? 0 : (count ?? 0)
+  const dailyPostCount = error ? 0 : (count ?? 0);
 
   // 【匿名ID生成】generateAnonId関数を使用
-  return generateAnonId(category, dailyPostCount)
+  return generateAnonId(category, dailyPostCount);
 }
 
 /**
@@ -221,34 +215,34 @@ export async function createEvent(
   userId: string
 ): Promise<ApiResponse<CreateEventResult>> {
   // 【ステップ1】バリデーション（Zodスキーマ）
-  const validation = createEventSchema.safeParse(input)
+  const validation = createEventSchema.safeParse(input);
   if (!validation.success) {
     return {
       success: false,
-      message: validation.error.issues[0]?.message ?? 'バリデーションエラー',
-      code: 'VALIDATION_ERROR',
-    }
+      message: validation.error.issues[0]?.message ?? "バリデーションエラー",
+      code: "VALIDATION_ERROR",
+    };
   }
 
-  const validData = validation.data
+  const validData = validation.data;
 
   // 【ステップ2】1日3件投稿上限チェック
-  const canPost = await checkDailyPostLimit(userId, validData.category)
+  const canPost = await checkDailyPostLimit(userId, validData.category);
   if (!canPost) {
     return {
       success: false,
-      message: '1日の投稿上限（3件）に達しました。明日以降に再度お試しください。',
-      code: 'DAILY_LIMIT_EXCEEDED',
-    }
+      message: "1日の投稿上限（3件）に達しました。明日以降に再度お試しください。",
+      code: "DAILY_LIMIT_EXCEEDED",
+    };
   }
 
   // 【ステップ3】匿名ID自動割り当て
-  const anonId = await assignAnonymousId(userId, validData.category)
+  const anonId = await assignAnonymousId(userId, validData.category);
 
   // 【ステップ4】データベースに保存
-  const supabase = createClient()
+  const supabase = createClient();
   const { data, error } = await supabase
-    .from('events')
+    .from("events")
     .insert({
       title: validData.title,
       category: validData.category,
@@ -262,26 +256,26 @@ export async function createEvent(
       comment: validData.comment ?? null,
       deadline: validData.deadline ?? null,
       host_id: userId,
-      status: 'recruiting', // デフォルトは募集中
+      status: "recruiting", // デフォルトは募集中
     })
-    .select('id, anon_id, category, title, date_start, date_end')
-    .single()
+    .select("id, anon_id, category, title, date_start, date_end")
+    .single();
 
   // 【エラーハンドリング】データベースエラー
   if (error) {
-    console.error('イベント作成エラー:', error)
+    console.error("イベント作成エラー:", error);
     return {
       success: false,
-      message: 'イベントの作成に失敗しました。もう一度お試しください。',
-      code: 'DATABASE_ERROR',
-    }
+      message: "イベントの作成に失敗しました。もう一度お試しください。",
+      code: "DATABASE_ERROR",
+    };
   }
 
   // 【ステップ5】成功レスポンスを返す
   return {
     success: true,
-    message: 'イベントを作成しました',
-    code: 'EVENT_CREATED',
+    message: "イベントを作成しました",
+    code: "EVENT_CREATED",
     data,
-  }
+  };
 }

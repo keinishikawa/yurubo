@@ -14,7 +14,7 @@
  * - @supabase/supabase-js: Supabaseクライアント（モック）
  */
 
-import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 // TODO: auth.service.ts実装後にインポートを有効化
 // import {
