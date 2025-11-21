@@ -10,7 +10,7 @@
 
 > SNS が「見る関係」を作ったのであれば、ゆるぼは「動く関係」を作る。
 
-**現在の状態**: 初期企画・仕様策定フェーズ（実装前）
+**現在の状態**: 初期企画・仕様策定フェーズ（実装中）
 
 ### アーキテクチャ概要
 
@@ -24,7 +24,6 @@
 | Infra           | Vercel / Supabase Cloud                        |
 
 **主要データモデル**: users, events, participants, stores, messages, settlements, tasks
-
 詳細は [docs/techplan.md](docs/techplan.md) を参照。
 
 ### 設計哲学
@@ -36,45 +35,24 @@
 
 ---
 
-## 応答言語
+## 応答・実装ガイドライン
+
+### 言語と命名
 
 - **応答言語**: 日本語
 - **コードコメント**: すべて日本語で記述
 - **技術用語**: 英語のまま使用可（例: Server Components, Props）
 - **変数名・関数名**: 英語（言語規約に従う）
 
----
+### 開発方針
 
-## 開発方針
-
-### 未リリース段階の実装原則
-
-アプリは未リリース段階のため、以下を厳守：
-
-- **機能フラグ・後方互換レイヤー・バージョン分岐は作成しない**
-- すべてのコードは「現在の仕様に対する単一の実装パス」を前提
-- 不要な抽象化・汎用化・将来の拡張を見越した設計は行わない
-  - 明示的に依頼された場合のみ実装
-
-**目的**: 冗長な実装や複雑な条件分岐を避け、開発初期の効率を最大化
-
-### 応答ポリシー
-
-- 不明点は推測せず、必要な情報を明確に質問
-- 問題解決に関係のない文言（雑談・感謝など）は含めない
-- 回答は質問内容に直接関連したものに限定、冗長な文章を避ける
-
-### 禁止事項
-
-- ❌ 不要な抽象化・過剰設計
-- ❌ 後方互換コード・将来拡張のための分岐
-- ❌ 推測による仕様追加
-
-### 期待されるアウトプット
-
-- ✅ 明確でシンプルな実装方針
-- ✅ 過度な抽象化や技術的複雑性のないコード
-- ✅ 必要な場合のみ追加ヒアリング
+- **未リリース段階の実装原則**:
+  - 機能フラグ・後方互換レイヤー・バージョン分岐は作成しない
+  - 「現在の仕様に対する単一の実装パス」のみを記述
+  - 不要な抽象化・汎用化は行わない（YAGNI）
+- **禁止事項**:
+  - ❌ 不要な抽象化・過剰設計
+  - ❌ 推測による仕様追加
 
 ---
 
@@ -84,375 +62,137 @@
 
 - **Trunk-Based Development** を採用
 - `main` ブランチは常に動作保証された状態を維持
-- すべての変更は PR 経由で `main` に統合（直接 push 禁止）
+- すべての変更は PR 経由で `main` に統合
 
 ### ブランチ命名規則
 
-| 種別                                      | 命名例                                      | 内容                                                 |
-| ----------------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
-| **機能開発（User Story単位）** ⭐CRITICAL | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting`（UI+API+テスト） |
-| **Phase/基盤構築**                        | `feature/000-{説明}`                        | 例：`feature/000-phase2-foundation`                  |
-| 環境構築                                  | `infra/<対象>`                              | 例：`infra/setup-ci`                                 |
-| バグ修正                                  | `fix/<内容>`                                | 例：`fix/ui-modal-close`                             |
-| リファクタ                                | `refactor/<範囲>`                           | 例：`refactor/event-schema`                          |
-| ドキュメント                              | `docs/<内容>`                               | 例：`docs/add-gemini-context`                        |
-| 実験／検証                                | `exp/<内容>`                                | 例：`exp/ai-prompt-tuning`                           |
+| 種別         | 命名例                                      | 備考                                |
+| ------------ | ------------------------------------------- | ----------------------------------- |
+| **機能開発** | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting` |
+| **基盤構築** | `feature/000-{説明}`                        | 例：`feature/000-phase2-foundation` |
+| **修正/他**  | `fix/...`, `refactor/...`, `docs/...`       |                                     |
 
-**⭐ CRITICAL: Epic vs User Story の重要な違い**:
+**重要**: 1つのブランチは「**1 User Story完結**」に対応させる（Epic単位ではない）。
 
-- **Epic**: 複数のUser Storyを含む大きな機能単位（例: Epic 001 = イベント作成機能全体）
-- **User Story**: 独立して完結できる小さな機能単位（例: US1 = イベント投稿、US2 = タイムライン閲覧）
-- **必須**: 1つのEpicに複数User Storyがある場合、**必ずUser Story単位でブランチを分ける**
-- **命名**: `feature/{Epic番号}-us{US番号}-{機能名}` 形式を厳守
+### コミットメッセージ規約
 
-**重要原則**:
+[Conventional Commits](https://www.conventionalcommits.org/)に従います。
 
-- **1 User Story = 1ブランチ = 1 PR = UI + API + テスト全部含む**
-- 機能開発は必ず`feature/{3桁数字}-`形式を使用
-- Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
-
-**アンチパターン（禁止）**:
-❌ Epic単位のブランチ（例: `feature/001-event-creation`に複数User Storyを混在）
-→ 複数セッションでの作業衝突、PRが巨大化
-❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
-→ 仕様編集が衝突する
-
-### 運用ルール
-
-- 1つのブランチは「**1 User Story完結**」に対応（Epicではない）
-- UI/API分割せず、1ストーリーを1ブランチで完結させる
-- 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
-- 作業終了後、PRを作成しCI通過後に`main`へマージ（1 PR = 1 User Story）
-- マージ後はブランチ自動削除（GitHub設定推奨）
-- 複数User Storyを含むEpicの場合、各User Storyごとに独立したブランチを作成
-
-### 並行開発戦略
-
-**依存関係に基づく並列開発:**
+**フォーマット**:
 
 ```
-# 基盤構築（依存: なし）
-feature/000-phase2-foundation ← 最優先でマージ
-
-# Epic 001の並列開発（依存: Phase 2のみ）
-feature/001-us1-event-posting  ← User Story 1（イベント投稿）
-feature/001-us2-timeline-view  ← User Story 2（タイムライン閲覧）
-feature/001-us3-event-edit     ← User Story 3（イベント編集）
-
-# 各User Storyは独立してマージ可能
-# US1とUS2は並行開発可能（ファイル衝突なし）
-# US3はUS1に依存（イベント作成後に編集機能）
+<type>(<scope>): <subject>
 ```
 
-**原則:**
+**Type一覧**:
 
-- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
-- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
-- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
-- Epic全体を1つのPRにまとめない（レビューが困難になるため）
-- main更新後は `git pull origin main` で差分を早期吸収
+- **feat**: 新機能
+- **fix**: バグ修正
+- **docs**: ドキュメントのみの変更
+- **style**: コードの動作に影響しない変更（フォーマット等）
+- **refactor**: バグ修正や機能追加ではないコード変更
+- **test**: テストの追加・修正
+- **chore**: ビルドプロセスやツールの変更
 
-### CI / Branch Protection
+### Pull Request ガイドライン
 
-- `.github/workflows/ci.yml` に lint + test を自動化
-- PR時にCIが緑でない場合はマージ不可（保護ルール）
-- mainブランチは常にテスト通過済み状態を保証
+**PRタイトル**: `[機能番号] 簡潔な説明`
+例: `[001-US1] イベント投稿機能の実装`
 
-**GitHub設定例**:
+**PR説明テンプレート**:
 
-- Require PR before merge ✅
-- Require status checks ✅
-- Block force pushes ✅
-- Delete branch after merge ✅
+```markdown
+## 概要
 
-### PRレビュー確認のベストプラクティス
+[何を実装したか]
 
-**重要**: GitHub APIには2種類のコメントエンドポイントが存在します。
+## User Story
 
-| エンドポイント                                   | 取得できるコメント                           | 用途                               |
-| ------------------------------------------------ | -------------------------------------------- | ---------------------------------- |
-| `/repos/{owner}/{repo}/issues/{number}/comments` | **Issue comments**（PR全体への総合コメント） | AIレビューなどのPR全体へのコメント |
-| `/repos/{owner}/{repo}/pulls/{number}/comments`  | **Review comments**（コード行への指摘）      | 特定コード行への指摘コメント       |
+[関連するUser Story]
 
-**推奨コマンド**:
+## 変更内容
 
-```bash
-# ✅ 推奨: gh CLIの高レベルコマンドを使用
-gh pr view {PR番号}                    # PR全体の情報を表示
-gh pr view {PR番号} --comments         # すべてのコメントを表示
-gh pr checks {PR番号}                  # CI/CDステータスを確認
+- [変更点1]
 
-# ⚠️ 低レベルAPI使用時の注意
-# AIレビューなどの総合コメントを取得する場合
-gh api repos/{owner}/{repo}/issues/{PR番号}/comments
+## テスト
 
-# コード行への指摘コメントを取得する場合
-gh api repos/{owner}/{repo}/pulls/{PR番号}/comments
+- [ ] 単体テスト: すべてパス
+- [ ] E2Eテスト: 該当シナリオパス
+
+## チェックリスト
+
+- [ ] 型エラーなし
+- [ ] リントエラーなし
 ```
 
-**注意事項**:
+**ベストプラクティス**:
 
-- AIレビューはGitHub Actionsで動作し、**Issue comment**として投稿される
-- `/pulls/{number}/comments`ではAIレビューが取得できない
-- 完全なレビュー情報を得るには両方のエンドポイントを使用するか、`gh pr view --comments`を使用
-
----
-
-## 主要な設計原則
-
-### 1. ストーリー駆動開発
-
-- 実装は**ユーザーストーリー**を中心に組織化
-- 各ストーリーには受入基準、バリデーションルール、エラーハンドリングを含む
-
-### 2. シンプルさ優先（YAGNI）
-
-- 最小構成で動く実装を構築
-- 複雑なオーケストレーションは延期
-- 「小さな関数を積み重ねる」哲学
-
-### 3. 型安全性とバリデーション
-
-- TypeScript strict mode使用
-- Zodなどでバリデーションスキーマを定義
-- フロントエンドとバックエンドでスキーマ再利用
+- **User Story単位のPR**: 1PR = 1 User Story
+- **self-review**: PRを出す前に自分でコードを見直す
+- **tasks.mdの更新**: タスク完了時は必ず`[X]`でマーク
 
 ---
 
 ## テスト戦略と要件
 
+### テスト駆動開発（TDD）の適用方針
+
+- **ロジック・重要機能**: 原則として **テストファースト** で進める。
+  1. テストコードを作成（Red）
+  2. 実装を作成してテストをパスさせる（Green）
+  3. コードを整理する（Refactor）
+- **UI/コンポーネント**: 実装とセット、または実装直後の作成を許容する（試行錯誤が多いため）。
+
 ### テスト構成
 
-```
-tests/
-  unit/       ← Jest + React Testing Library
-  e2e/        ← Playwright
-```
-
-### テスト層の方針
-
-| 層                  | 対象                       | 主目的               | 推奨ツール | 備考                         |
-| ------------------- | -------------------------- | -------------------- | ---------- | ---------------------------- |
-| 単体（Unit）        | ロジック・小コンポーネント | ロジック・描画テスト | Jest + RTL | 状態変化やバリデーションなど |
-| 統合（Integration） | コンポーネント間連携       | storeやhooks動作確認 | RTL        | 状況に応じて                 |
-| E2E（End-to-End）   | 画面操作〜API応答          | UXと主要フロー保証   | Playwright | 初期段階はE2EメインでOK      |
+- **Unit**: `tests/unit/` (Jest) - ロジック、バリデーション
+- **E2E**: `tests/e2e/` (Playwright) - ユーザーフロー、受入シナリオ
 
 ### 実行ポリシー
 
-- **PR作成時**: Lint + Unit Test（GitHub Actions自動実行）
-- **mainマージ前 or 定期実行**: E2E（Playwright）を nightly で実行
-- **初期フェーズ**: E2E優先で体験保証、Unit Testは段階的に追加
-
-### テストカバレッジ要件
-
-#### 1. 単体テスト（Jest）
-
-- **対象**: ユーティリティ関数、バリデーションロジック、ビジネスロジック
-- **配置**: 実装ファイルと同じディレクトリに `*.test.ts`
-- **実行**: `npm test`
-
-#### 2. 統合テスト（Jest）
-
-- **対象**: APIルート、データベース相互作用、コンポーネント間連携
-- **配置**: 実装ファイルと同じディレクトリに `route.test.ts` または `integration.test.ts`
-- **実行**: `npm test`
-
-#### 3. E2Eテスト（Playwright）
-
-- **対象**: 重要なユーザーフロー、受入シナリオ
-- **配置**: `tests/e2e/` にUser Story単位
-- **重要**: 仕様の受入シナリオを**すべて**テストケースに含める
-- **実行**: `npm run test:e2e`
+- **PR作成時**: Lint + Unit Test（必須）
+- **mainマージ前**: E2E Test（推奨）
 
 ### テスト作成のガイドライン
 
-1. **受入基準をテスト仕様として使用**
-   - 受入シナリオ → テストケース
-   - Given-When-Then形式を活用
-
-2. **AAA パターン**
-
-   ```typescript
-   test("タイトルが有効な場合イベントを保存", async () => {
-     // Arrange: 準備
-     const eventData = { title: "テストイベント" };
-
-     // Act: 実行
-     const result = await saveEvent(eventData);
-
-     // Assert: 検証
-     expect(result.success).toBe(true);
-   });
-   ```
-
-3. **テストは独立させる**
-   - 他のテストに依存しない
-   - 実行順序に依存しない
-
-4. **エラーケースを含める**
-   - 正常系・異常系の両方をテスト
-
-### タスク完了の定義（Definition of Done）
-
-- ✅ 単体テスト作成済み、すべてパス
-- ✅ 統合テスト作成済み、すべてパス
-- ✅ E2Eテスト作成済み、受入シナリオ全カバー
-- ✅ 型エラーなし
-- ✅ リントエラーなし
-
-### CI/CD実行フロー
-
-**.github/workflows/ci.yml**:
-
-- Lint実行（ESLint）
-- 単体・統合テスト実行（Jest）
-- E2Eテスト実行（Playwright）
-- すべて通過で緑チェック → PRマージ可能
+1. **受入基準をテスト仕様として使用**（Given-When-Then形式）
+2. **AAAパターン**（Arrange, Act, Assert）を遵守
+3. **エラーケース**（異常系）を必ず含める
 
 ---
 
 ## エラーハンドリング
 
-### 統一されたエラーレスポンス形式
+### 統一レスポンス形式
 
 ```typescript
-// 成功時
 {
-  success: true,
-  message: '成功メッセージ',
-  code: 'SUCCESS_CODE'
-}
-
-// エラー時
-{
-  success: false,
-  message: 'エラーメッセージ',
-  code: 'ERROR_CODE'
+  success: boolean;
+  message: string; // 日本語
+  code?: string;
+  data?: T;
 }
 ```
 
 ### 原則
 
-- すべてのユーザー入力をバリデーション
+- すべてのユーザー入力をバリデーション（Zod使用）
 - エラーメッセージは日本語で明確に
-- 一時的な障害はリトライロジック実装
-- エラーをログに記録
+- エラーはログに記録する
 
 ---
 
 ## 学習補助システム
 
-プロジェクトは**ハイブリッド学習方式**を採用し、コード内コメント（基本）+ `.learning/`ディレクトリ（詳細解説）の2層構造で学習を支援する。
+### コードコメント記述ルール
 
-### コメント記述ルール（コード内）
+- **ファイル冒頭**: 概要と依存関係、`@see .learning/tasks/...` へのリンク
+- **関数/メソッド**: JSDoc形式で説明、引数、戻り値を記述
+- **インライン**: 複雑なロジックのみ簡潔に
 
-**目的**: コードの可読性を保ちながら、基本的な理解を支援
+### .learning/ ディレクトリ
 
-#### 1. ファイル全体のコメント（ファイル冒頭に記述）
-
-```typescript
-/**
- * ファイル名: example.ts
- *
- * 【概要】
- * このファイルの役割を1-2文で説明
- *
- * 【依存関係】
- * - 使用している外部ライブラリとその目的
- *
- * @see .learning/tasks/{epic}/{task_id}.md - 詳細な実装ガイド
- */
-```
-
-**変更点**:
-
-- 【処理フロー】【主要機能】は削除 → `.learning/` へ移動
-- `@see` タグで学習ガイドへのリンクを追加
-
-#### 2. 関数・コンポーネント単位のコメント
-
-```typescript
-/**
- * 関数名の簡潔な説明（1行）
- *
- * @param paramName - パラメータの説明
- * @returns 戻り値の説明
- */
-```
-
-**変更点**:
-
-- 【処理内容】【使用例】は削除 → `.learning/` へ移動
-- JSDoc形式を維持（IDE補完のため）
-
-#### 3. インラインコメント
-
-```typescript
-// 複雑なロジックのみコメント（簡潔に）
-const filteredUsers = users.filter((user) => user.category_flags[categoryId] === true);
-```
-
-**変更点**:
-
-- 【文法】【処理】タグは削除
-- 自明でないロジックのみコメント
-
----
-
-### .learning/ ディレクトリ構造
-
-**目的**: 詳細な実装ガイド、文法解説、トラブルシューティングを提供
-
-```
-.learning/
-├── tasks/                    # タスク単位の実装ガイド
-│   └── {epic-id}/
-│       └── T{task-id}-{task-name}.md
-├── guides/                   # 横断的な学習ガイド
-│   ├── typescript-basics.md
-│   ├── next-app-router.md
-│   └── ...
-└── references/              # アーキテクチャ参照
-    ├── architecture-overview.md
-    └── testing-strategy.md
-```
-
-### エラー発生時の対応
-
-#### エラー連続時の対応手順
-
-実装中に**同じエラーが2回以上連続して発生した場合**、以下の手順を実行:
-
-1. **エラー分析を実施**
-   - エラーメッセージの詳細を確認
-   - スタックトレースから原因箇所を特定
-   - 関連するファイル・設定を確認
-
-2. **ユーザーに修正方針を提示**
-
-   ```
-   【エラー分析結果】
-   - エラー内容: [エラーメッセージ]
-   - 原因: [推定される原因]
-   - 影響範囲: [影響を受けるファイル・機能]
-
-   【提案する修正方針】
-   A案: [方針1の説明とメリット・デメリット]
-   B案: [方針2の説明とメリット・デメリット]
-
-   どの方針で進めますか？または別のアプローチをご希望ですか？
-   ```
-
-3. **ユーザーの判断を待つ**
-   - 自動的に修正を試みない
-   - 複数の選択肢を提示し、ユーザーに選択させる
-
-#### エラー発生を防ぐための原則
-
-- 型定義を厳密に行う（TypeScript strict mode）
-- バリデーションを必ず実装する
-- テストファーストで実装する
-- 小さい単位でコミット・検証する
+詳細な実装ガイドや学習資料は `.learning/` 配下に配置し、コードコメントから参照させる。
 
 ---
 
@@ -460,110 +200,21 @@ const filteredUsers = users.filter((user) => user.category_flags[categoryId] ===
 
 ### 読み込むべきファイル優先順位
 
-1. **必須**: CLAUDE.md / GEMINI.md (AI向けガイダンス)
-2. **仕様**: specs/{epic-id}/spec.md (実装中の機能仕様)
-3. **設計**: specs/{epic-id}/plan.md (技術設計)
-4. **タスク**: specs/{epic-id}/tasks.md (実装タスク)
-5. **参照**: docs/techplan.md (全体アーキテクチャ)
+1. **必須**: CLAUDE.md / GEMINI.md
+2. **仕様**: specs/{epic-id}/spec.md
+3. **設計**: specs/{epic-id}/plan.md
+4. **タスク**: specs/{epic-id}/tasks.md
 
 ### Active Context（現在の実装対象）
 
 - **Epic**: 001-event-creation
-- **User Story**: US3 - イベント編集機能
+- **User Story**: US4 - イベント参加機能（予定）
 - **主要ファイル**:
-  - components/events/EventEditModal.tsx
-  - app/actions/updateEvent.ts
-  - app/actions/cancelEvent.ts
-  - lib/services/event.service.ts
-  - tests/e2e/event-edit.spec.ts
+  - `lib/services/event.service.ts`
+  - `components/events/*`
+  - `app/actions/*`
 
-### 技術スタック（Epic 001）
+### 重要な参照ドキュメント
 
-- Frontend: Next.js 15 / React 19 / TypeScript
-- Backend: Supabase (PostgreSQL + RLS)
-- UI: shadcn-ui / TailwindCSS
-- Validation: Zod
-- Testing: Jest (Unit/Integration) / Playwright (E2E)
-
-### プロジェクト構造
-
-```
-yurubo/
-├── app/                    # Next.js App Router
-│   ├── actions/           # Server Actions
-│   └── page.tsx           # ページコンポーネント
-├── components/            # Reactコンポーネント
-│   └── events/           # イベント関連コンポーネント
-├── lib/                   # ユーティリティ・サービス
-│   ├── services/         # ビジネスロジック
-│   └── supabase/         # Supabase関連
-├── specs/                 # 機能仕様（Epic単位）
-│   └── 001-event-creation/
-├── tests/                 # テスト
-│   ├── e2e/              # Playwright E2Eテスト
-│   └── unit/             # Jestテスト
-└── docs/                  # ドキュメント
-```
-
----
-
-## ベストプラクティス
-
-1. **ユーザーストーリーに対してバリデーション** - 各機能をストーリーにマッピング
-2. **テストファーストで記述** - 受入基準をテスト仕様として使用
-3. **シンプルに保つ** - 早すぎる最適化や複雑な抽象化を避ける
-4. **エラーメッセージ** - 明確で実行可能な日本語メッセージ
-5. **一貫したAPI形式** - 常に `{ success, message, code }` 構造
-
----
-
-## 開発コマンド（実装後に使用）
-
-### プロジェクト初期化
-
-```bash
-# Next.js 15プロジェクト作成
-npx create-next-app@latest . --typescript --tailwind --app
-
-# 必要なパッケージインストール
-npm install @supabase/supabase-js zod react-hook-form @hookform/resolvers
-npm install -D @testing-library/react @testing-library/jest-dom jest @playwright/test
-
-# Supabaseプロジェクト初期化
-npx supabase init
-```
-
-### 開発・テスト・ビルド
-
-```bash
-# 開発サーバー起動
-npm run dev
-
-# テスト実行
-npm test              # Jest単体テスト
-npm run test:e2e      # Playwright E2Eテスト
-
-# ビルド・型チェック
-npm run build
-npm run type-check
-
-# リント
-npm run lint
-```
-
----
-
-## 重要な参照ドキュメント
-
-- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様（6フェーズ設計、UI構成）
-- [docs/techplan.md](docs/techplan.md) - 技術仕様（データモデル、AIモジュール、通知ロジック）
-- [docs/figma.md](docs/figma.md) - UI/UXフロー、画面遷移、Prototypeガイド
-
-## Active Technologies
-
-- TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS (001-event-creation)
-- Supabase (PostgreSQL 15) with Row-Level Security (001-event-creation)
-
-## Recent Changes
-
-- 001-event-creation: Added TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS
+- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様
+- [docs/techplan.md](docs/techplan.md) - 技術仕様
