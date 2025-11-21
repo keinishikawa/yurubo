@@ -25,15 +25,27 @@
  * - spec.md FR-001: 投稿機能統合要件
  */
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { toast } from 'sonner'
-import { createEvent } from '@/app/actions/createEvent'
-import { PostEventModal } from '@/components/events/PostEventModal'
-import { FloatingPostButton } from '@/components/layout/FloatingPostButton'
-import { EventTimeline } from '@/components/events/EventTimeline'
-import type { CreateEventInput } from '@/lib/validation/event.schema'
+import { useState } from "react";
+import { toast } from "sonner";
+import { createEvent } from "@/app/actions/createEvent";
+import { signOut } from "@/app/actions/signOut";
+import { PostEventModal } from "@/components/events/PostEventModal";
+import { FloatingPostButton } from "@/components/layout/FloatingPostButton";
+import { EventTimeline } from "@/components/events/EventTimeline";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import type { CreateEventInput } from "@/lib/validation/event.schema";
 
 /**
  * ホームページコンポーネント
@@ -62,59 +74,122 @@ import type { CreateEventInput } from '@/lib/validation/event.schema'
  */
 export default function HomePage() {
   // 【ステップ1】モーダルの開閉状態管理
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // 【ステップ2】ローディング状態管理
-  const [isCreating, setIsCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(false);
 
   // 【ステップ2.5】タイムライン再読み込み用のキー
-  const [timelineKey, setTimelineKey] = useState(0)
+  const [timelineKey, setTimelineKey] = useState(0);
+
+  // 【ステップ2.6】ログアウト処理中の状態管理 (T161)
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // 【ステップ2.7】ログアウト確認ダイアログの状態管理 (T174)
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // 【ステップ3】イベント作成ハンドラー
   const handleCreateEvent = async (data: CreateEventInput) => {
     try {
       // ローディング開始 (T060)
-      setIsCreating(true)
+      setIsCreating(true);
 
       // Server Action呼び出し (T058)
-      const result = await createEvent(data)
+      const result = await createEvent(data);
 
       if (result.success) {
         // 成功時の処理 (T059)
         toast.success(result.message, {
           description: `匿名ID: ${result.data?.anon_id}`,
-        })
+        });
 
         // モーダルを閉じる
-        setIsModalOpen(false)
+        setIsModalOpen(false);
 
         // タイムラインを再読み込み
-        setTimelineKey((prev) => prev + 1)
+        setTimelineKey((prev) => prev + 1);
       } else {
         // エラー時の処理 (T059)
         toast.error(result.message, {
           description: `エラーコード: ${result.code}`,
-        })
+        });
       }
     } catch (error) {
       // 予期しないエラー
-      console.error('イベント作成エラー:', error)
-      toast.error('予期しないエラーが発生しました。もう一度お試しください。')
+      console.error("イベント作成エラー:", error);
+      toast.error(
+        `予期しないエラー: ${error instanceof Error ? error.message : JSON.stringify(error)}`
+      );
     } finally {
       // ローディング終了 (T060)
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
+
+  // 【ステップ4】ログアウトハンドラー (T161, T174)
+  const handleSignOut = async () => {
+    try {
+      setIsLoggingOut(true);
+      setShowLogoutDialog(false); // ダイアログを閉じる
+
+      const result = await signOut();
+
+      // エラー時のみ処理（成功時は自動的に/welcomeにリダイレクト）
+      if (!result.success) {
+        toast.error(result.message, {
+          description: `エラーコード: ${result.error}`,
+        });
+      }
+    } catch (error) {
+      console.error("ログアウトエラー:", error);
+      toast.error("ログアウトに失敗しました。再度お試しください。");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <main className="container mx-auto min-h-screen p-4">
-      {/* ヘッダー */}
-      <header className="mb-8">
-        <h1 className="text-3xl font-bold">タイムライン</h1>
-        <p className="text-muted-foreground">
-          つながりリストのイベントが表示されます
-        </p>
+      {/* ヘッダー (T161: ログアウトボタン追加) */}
+      <header className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">タイムライン</h1>
+          <p className="text-muted-foreground">つながりリストのイベントが表示されます</p>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => setShowLogoutDialog(true)}
+          disabled={isLoggingOut}
+        >
+          {isLoggingOut ? "ログアウト中..." : "ログアウト"}
+        </Button>
       </header>
+
+      {/* ログアウト確認ダイアログ (T174) */}
+      <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>ログアウトしますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              ログアウトすると、次回アクセス時に新しい匿名ユーザーとして登録されます。
+              <br />
+              <span className="font-semibold text-destructive">
+                現在のイベント投稿・つながりリストは引き継がれません。
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isLoggingOut}>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleSignOut}
+              disabled={isLoggingOut}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isLoggingOut ? "ログアウト中..." : "ログアウト"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* タイムライン表示 (User Story 2) */}
       <div className="mb-24">
@@ -132,5 +207,5 @@ export default function HomePage() {
         isLoading={isCreating}
       />
     </main>
-  )
+  );
 }

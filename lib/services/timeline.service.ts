@@ -71,24 +71,17 @@ export async function fetchTimeline(
 ): Promise<FetchTimelineResult> {
   const { page = 0, limit = 20 } = params
 
-  // 【環境変数による認証スキップ制御】
-  // NEXT_PUBLIC_SKIP_AUTH=true の場合のみ認証をスキップ（開発専用）
-  // TODO: User Story 4実装後にNEXT_PUBLIC_SKIP_AUTHを削除 - specs/001-event-creation/refactor-tasks.md参照
-  const SKIP_AUTH = process.env.NEXT_PUBLIC_SKIP_AUTH === 'true'
+  // 【ステップ1】現在ユーザーを取得 (T165)
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
 
-  if (!SKIP_AUTH) {
-    // 【ステップ1】現在ユーザーを取得（本番環境）
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return {
-        data: [],
-        error: 'UNAUTHORIZED',
-        hasMore: false,
-      }
+  if (authError || !user) {
+    return {
+      data: [],
+      error: 'UNAUTHORIZED',
+      hasMore: false,
     }
   }
 
