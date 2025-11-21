@@ -69,9 +69,9 @@ import { Database } from './types'
 export function createClient() {
   // Client Components用Supabaseクライアント作成
   return createBrowserClient<Database>(
-    // 環境変数からSupabase URLを取得（NEXT_PUBLIC_プレフィックス必須）
+    // Next.jsがビルド時に置換する環境変数
+    // Turbopackでは process.env.NEXT_PUBLIC_* は自動的に置換される
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    // 環境変数からSupabase Anon Keyを取得（NEXT_PUBLIC_プレフィックス必須）
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )
 }

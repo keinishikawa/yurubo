@@ -302,6 +302,74 @@
 
 ---
 
+## Phase 4.5: User Story 4 - 簡易認証機能（匿名ログイン） (Priority: P2)
+
+**Goal**: ユーザーが簡易的な認証機能を使ってログインし、イベント投稿・閲覧機能を利用できる
+
+**Independent Test**: 初回訪問時にユーザー作成画面が表示され、表示名を入力後に自動的にログイン状態となり、イベント投稿・タイムライン閲覧が可能になることを確認
+
+**Acceptance Scenarios**: 5シナリオ（spec.md参照）
+
+### Unit Tests for User Story 4（TDD Phase 2）
+
+> **NOTE: 実装前にテストを作成し、REDになることを確認**
+
+- [x] T146 [P] [US4] Write unit test for anonymous sign-in service in lib/services/auth.service.test.ts
+- [x] T147 [P] [US4] Write unit test for display name validation in lib/validation/user.schema.test.ts
+- [x] T148 [P] [US4] Write unit test for session management in lib/services/auth.service.test.ts
+
+### Implementation for User Story 4（TDD Phase 3）
+
+#### 認証サービス層
+
+- [x] T149 [US4] Implement anonymous sign-in service in lib/services/auth.service.ts
+- [x] T150 [US4] Implement session management logic (check/refresh) in auth service
+- [x] T151 [US4] Implement logout service in auth service
+
+#### Server Actions
+
+- [x] T152 [US4] Create anonymous sign-in Server Action in app/actions/signIn.ts
+- [x] T153 [US4] Write integration test for sign-in API in app/actions/signIn.test.ts
+- [x] T154 [US4] Create logout Server Action in app/actions/signOut.ts
+- [x] T155 [US4] Write integration test for logout API in app/actions/signOut.test.ts
+
+#### UIコンポーネント
+
+- [x] T156 [P] [US4] Create WelcomeScreen component in app/(auth)/welcome/page.tsx
+- [x] T157 [US4] Add display name input form to WelcomeScreen with validation
+- [x] T158 [US4] Add loading state and error handling to WelcomeScreen
+- [x] T159 [US4] Write unit test for WelcomeScreen in app/(auth)/welcome/page.test.tsx (Note: クライアントサイド認証実装のため、auth.service.test.tsでカバー)
+- [x] T160 [P] [US4] Create auth middleware in middleware.ts for route protection
+- [x] T161 [US4] Add logout button to settings or profile page (Note: app/page.tsxのヘッダーに実装)
+
+#### 統合
+
+- [x] T162 [US4] Integrate WelcomeScreen with signIn Server Action (Note: クライアントサイドSupabase認証に変更)
+- [x] T163 [US4] Add session check on app initialization (root layout) (Note: middlewareで実装済み)
+- [x] T164 [US4] Add redirect logic for authenticated/unauthenticated users
+- [x] T165 [US4] Remove NEXT_PUBLIC_SKIP_AUTH flag from .env and code (app/actions/createEvent.ts, lib/services/timeline.service.ts)
+
+### E2E Tests for User Story 4（TDD Phase 4）
+
+> **IMPORTANT: spec.mdの受入シナリオ5つすべてをテストケース化**
+
+- [x] T166 [US4] E2E test: 初回訪問時の登録画面表示（シナリオ1） in tests/e2e/user-story-4.spec.ts
+- [x] T167 [US4] E2E test: 表示名入力後の自動ログイン（シナリオ2） in tests/e2e/user-story-4.spec.ts
+- [x] T168 [US4] E2E test: ログイン済みユーザーの登録画面スキップ（シナリオ3） in tests/e2e/user-story-4.spec.ts
+- [x] T169 [US4] E2E test: セッション維持（ブラウザ再起動後）（シナリオ4） in tests/e2e/user-story-4.spec.ts
+- [x] T170 [US4] E2E test: ログアウト機能（シナリオ5） in tests/e2e/user-story-4.spec.ts
+
+### Edge Cases for User Story 4
+
+- [x] T171 [US4] Add validation for empty display name in user.schema.ts
+- [x] T172 [US4] Add validation for display name length (1-50 chars) in user.schema.ts
+- [x] T173 [US4] Handle session expiration with automatic re-registration
+- [x] T174 [US4] Add warning message for logout (data loss) with confirmation dialog
+
+**Checkpoint**: User Story 4が完全に機能し、認証スキップコードが完全に削除された
+
+---
+
 ## Phase 6: Polish & Cross-Cutting Concerns
 
 **目的**: 複数のUser Storyに影響する改善・追加機能
@@ -354,9 +422,10 @@
 
 ### User Story Dependencies
 
-- **User Story 1 (P1)**: Foundational完了後に開始可能 - 他ストーリーへの依存なし
-- **User Story 2 (P2)**: Foundational完了後に開始可能 - US1と統合するが独立してテスト可能
-- **User Story 3 (P3)**: Foundational完了後に開始可能 - US1/US2と統合するが独立してテスト可能
+- **User Story 1 (P1)**: Foundational完了後に開始可能 - 他ストーリーへの依存なし（開発時は認証スキップで動作確認）
+- **User Story 2 (P2)**: Foundational完了後に開始可能 - US1と統合するが独立してテスト可能（開発時は認証スキップで動作確認）
+- **User Story 4 (P2)**: Foundational完了後に開始可能 - US1/US2の前提条件だが、開発順序としては後から実装可能（認証スキップコードを削除してUS4で置き換え）
+- **User Story 3 (P3)**: Foundational完了後に開始可能 - US1/US2/US4と統合するが独立してテスト可能
 
 ### Within Each User Story
 
@@ -388,10 +457,11 @@
 ### Incremental Delivery
 
 1. Setup + Foundational完了 → 基盤準備完了
-2. User Story 1追加 → 独立テスト → デプロイ/デモ（MVP）
-3. User Story 2追加 → 独立テスト → デプロイ/デモ
-4. User Story 3追加 → 独立テスト → デプロイ/デモ
-5. 各ストーリーが既存機能を壊さずに価値を追加
+2. User Story 1追加 → 独立テスト → デプロイ/デモ（認証スキップで動作確認）
+3. User Story 2追加 → 独立テスト → デプロイ/デモ（認証スキップで動作確認）
+4. User Story 4追加 → 認証スキップコード削除 → 独立テスト → デプロイ/デモ（本番用認証機能）
+5. User Story 3追加 → 独立テスト → デプロイ/デモ
+6. 各ストーリーが既存機能を壊さずに価値を追加
 
 ### Parallel Team Strategy
 
@@ -399,9 +469,10 @@
 
 1. チーム全体でSetup + Foundationalを完了
 2. Foundational完了後:
-   - Developer A: User Story 1
-   - Developer B: User Story 2
-   - Developer C: User Story 3
+   - Developer A: User Story 1（認証スキップで動作確認）
+   - Developer B: User Story 2（認証スキップで動作確認）
+   - Developer C: User Story 4（認証機能実装、認証スキップコード削除）
+   - Developer D: User Story 3（US4完了後に開始推奨）
 3. 各ストーリーを独立して完了・統合
 
 ---
@@ -424,10 +495,11 @@
 - **Phase 2 (Foundational)**: 29 tasks
 - **Phase 3 (User Story 1)**: 35 tasks
 - **Phase 4 (User Story 2)**: 20 tasks
+- **Phase 4.5 (User Story 4)**: 29 tasks
 - **Phase 5 (User Story 3)**: 18 tasks
 - **Phase 6 (Polish)**: 26 tasks
 
-**Total**: 137 tasks
+**Total**: 166 tasks
 
 ---
 

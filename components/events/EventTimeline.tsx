@@ -107,7 +107,12 @@ export function EventTimeline({ initialEvents = [], className }: EventTimelinePr
       const result = await fetchTimeline({ page, limit: 20 })
 
       if (result.success && result.data) {
-        setEvents((prev) => [...prev, ...result.data!])
+        // 重複を防ぐため、既存のIDセットを作成
+        setEvents((prev) => {
+          const existingIds = new Set(prev.map((e) => e.id))
+          const newEvents = result.data!.filter((e) => !existingIds.has(e.id))
+          return [...prev, ...newEvents]
+        })
         setHasMore(result.hasMore ?? false)
         setPage((prev) => prev + 1)
       } else {
@@ -149,8 +154,15 @@ export function EventTimeline({ initialEvents = [], className }: EventTimelinePr
   }, [loadMore, hasMore, isLoading])
 
   // 【ステップ4】初回ロード（initialEventsが空の場合）
+  // React 19 Strict Modeでの二重実行を防ぐため、refで制御
+  const isInitialLoadRef = useRef(false)
+
   useEffect(() => {
+    // 既に初回ロード済みの場合はスキップ
+    if (isInitialLoadRef.current) return
+
     if (events.length === 0 && !isLoading && hasMore) {
+      isInitialLoadRef.current = true
       loadMore()
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
