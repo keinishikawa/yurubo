@@ -87,7 +87,12 @@ export default function WelcomePage() {
       });
 
       if (profileError) {
-        setError('ユーザー情報の保存に失敗しました。');
+        // プロフィール作成失敗時は認証もロールバック
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+          console.error('Failed to rollback authentication:', signOutError);
+        }
+        setError('ユーザー情報の保存に失敗しました。再度お試しください。');
         setIsLoading(false);
         return;
       }

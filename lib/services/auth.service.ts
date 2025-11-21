@@ -115,7 +115,10 @@ export async function signInAnonymously(displayName: string): Promise<AuthResult
 
   if (profileError) {
     // プロフィール作成失敗時は認証もロールバック
-    await supabase.auth.signOut();
+    const { error: signOutError } = await supabase.auth.signOut();
+    if (signOutError) {
+      console.error('Failed to rollback authentication:', signOutError);
+    }
     return {
       success: false,
       error: 'SIGN_IN_FAILED',
