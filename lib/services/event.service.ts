@@ -272,10 +272,173 @@ export async function createEvent(
   }
 
   // 【ステップ5】成功レスポンスを返す
+
   return {
     success: true,
     message: "イベントを作成しました",
     code: "EVENT_CREATED",
     data,
+  };
+}
+
+/**
+ * イベント更新
+ *
+ * @param eventId - 更新対象のイベントID
+ * @param input - 更新データ
+ * @param userId - 実行ユーザーID
+ * @returns API統一レスポンス
+ *
+ * 【処理内容】
+ * 1. バリデーション
+ * 2. 権限チェック（幹事のみ）
+ * 3. ステータスチェック（募集中のみ編集可など）
+ * 4. 更新実行
+ */
+export async function updateEvent(
+  eventId: string,
+  input: CreateEventInput, // UpdateEventInputと同じ
+  userId: string
+): Promise<ApiResponse<null>> {
+  // 【ステップ1】バリデーション
+  const validation = createEventSchema.safeParse(input);
+  if (!validation.success) {
+    return {
+      success: false,
+      message: validation.error.issues[0]?.message ?? "バリデーションエラー",
+      code: "VALIDATION_ERROR",
+    };
+  }
+  const validData = validation.data;
+
+  const supabase = createClient();
+
+  // 【ステップ2・3】イベント取得と権限・ステータスチェック
+  const { data: event, error: fetchError } = await supabase
+    .from("events")
+    .select("host_id, status")
+    .eq("id", eventId)
+    .single();
+
+  if (fetchError || !event) {
+    return {
+      success: false,
+      message: "イベントが見つかりません",
+      code: "EVENT_NOT_FOUND",
+    };
+  }
+
+  if (event.host_id !== userId) {
+    return {
+      success: false,
+      message: "編集権限がありません",
+      code: "FORBIDDEN",
+    };
+  }
+
+  // キャンセル済みのイベントは編集不可にするなどのルールがあればここに追加
+  if (event.status === "cancelled") {
+    return {
+      success: false,
+      message: "中止されたイベントは編集できません",
+      code: "EVENT_CANCELLED",
+    };
+  }
+
+  // 【ステップ4】更新実行
+  const { error: updateError } = await supabase
+    .from("events")
+    .update({
+      title: validData.title,
+      category: validData.category,
+      date_start: validData.date_start,
+      date_end: validData.date_end,
+      capacity_min: validData.capacity_min,
+      capacity_max: validData.capacity_max,
+      price_min: validData.price_min ?? null,
+      price_max: validData.price_max ?? null,
+      comment: validData.comment ?? null,
+      deadline: validData.deadline ?? null,
+    })
+    .eq("id", eventId);
+
+  if (updateError) {
+    console.error("イベント更新エラー:", updateError);
+    return {
+      success: false,
+      message: "イベントの更新に失敗しました",
+      code: "DATABASE_ERROR",
+    };
+  }
+
+  return {
+    success: true,
+    message: "イベントを更新しました",
+    code: "EVENT_UPDATED",
+    data: null,
+  };
+}
+
+/**
+ * イベント中止（キャンセル）
+ *
+ * @param eventId - 対象イベントID
+ * @param userId - 実行ユーザーID
+ * @returns API統一レスポンス
+ */
+export async function cancelEvent(eventId: string, userId: string): Promise<ApiResponse<null>> {
+  const supabase = createClient();
+
+  // 権限チェック
+  const { data: event, error: fetchError } = await supabase
+    .from("events")
+    .select("host_id, status")
+    .eq("id", eventId)
+    .single();
+
+  if (fetchError || !event) {
+    return {
+      success: false,
+      message: "イベントが見つかりません",
+      code: "EVENT_NOT_FOUND",
+    };
+  }
+
+  if (event.host_id !== userId) {
+    return {
+      success: false,
+      message: "権限がありません",
+      code: "FORBIDDEN",
+    };
+  }
+
+  if (event.status === "cancelled") {
+    return {
+      success: false,
+      message: "すでに中止されています",
+      code: "ALREADY_CANCELLED",
+    };
+  }
+
+  // ステータス更新
+  const { error: updateError } = await supabase
+    .from("events")
+    .update({ status: "cancelled" })
+    .eq("id", eventId);
+
+  if (updateError) {
+    console.error("イベント中止エラー:", updateError);
+    return {
+      success: false,
+      message: "イベントの中止に失敗しました",
+      code: "DATABASE_ERROR",
+    };
+  }
+
+  return {
+    success: true,
+    message: "イベントを中止しました",
+    code: "EVENT_CANCELLED",
+    data: null,
   };
 }

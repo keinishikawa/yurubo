@@ -11,24 +11,26 @@
  * - fetchTimeline: Server Action
  */
 
-'use client'
+"use client";
 
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { EventCard } from '@/components/events/EventCard'
-import { fetchTimeline } from '@/app/actions/fetchTimeline'
-import type { Database } from '@/lib/supabase/types'
+import { useState, useEffect, useCallback, useRef } from "react";
+import { EventCard } from "@/components/events/EventCard";
+import { fetchTimeline } from "@/app/actions/fetchTimeline";
+import type { Database } from "@/lib/supabase/types";
 
-type Event = Database['public']['Tables']['events']['Row']
+type Event = Database["public"]["Tables"]["events"]["Row"];
 
 /**
  * EventTimelineのProps型
  */
 type EventTimelineProps = {
   /** 初期イベント一覧（SSR用） */
-  initialEvents?: Event[]
+  initialEvents?: Event[];
   /** 追加のCSSクラス */
-  className?: string
-}
+  className?: string;
+  /** 現在のユーザーID（編集・中止権限判定用） */
+  currentUserId?: string;
+};
 
 /**
  * ローディングスケルトンコンポーネント
@@ -45,7 +47,7 @@ function EventSkeleton() {
         <div className="h-4 w-2/3 rounded bg-muted"></div>
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -56,14 +58,12 @@ function EventSkeleton() {
 function EmptyState() {
   return (
     <div className="rounded-lg border border-dashed p-12 text-center">
-      <p className="text-lg text-muted-foreground">
-        まだイベントがありません
-      </p>
+      <p className="text-lg text-muted-foreground">まだイベントがありません</p>
       <p className="mt-2 text-sm text-muted-foreground">
         右下の「＋投稿」ボタンからイベントを作成してみましょう
       </p>
     </div>
-  )
+  );
 }
 
 /**
@@ -84,88 +84,92 @@ function EmptyState() {
  * - 読み込み中はスケルトン表示
  * - 空の場合は案内メッセージ表示
  */
-export function EventTimeline({ initialEvents = [], className }: EventTimelineProps) {
+export function EventTimeline({
+  initialEvents = [],
+  className,
+  currentUserId,
+}: EventTimelineProps) {
   // 【ステップ1】状態管理
-  const [events, setEvents] = useState<Event[]>(initialEvents)
-  const [page, setPage] = useState(initialEvents.length > 0 ? 1 : 0)
-  const [hasMore, setHasMore] = useState(true)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [events, setEvents] = useState<Event[]>(initialEvents);
+  const [page, setPage] = useState(initialEvents.length > 0 ? 1 : 0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // スクロール監視用の参照
-  const observerRef = useRef<IntersectionObserver | null>(null)
-  const loadMoreRef = useRef<HTMLDivElement>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // 【ステップ2】次のページを読み込む関数
   const loadMore = useCallback(async () => {
-    if (isLoading || !hasMore) return
+    if (isLoading || !hasMore) return;
 
-    setIsLoading(true)
-    setError(null)
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const result = await fetchTimeline({ page, limit: 20 })
+      const result = await fetchTimeline({ page, limit: 20 });
 
       if (result.success && result.data) {
         // 重複を防ぐため、既存のIDセットを作成
         setEvents((prev) => {
-          const existingIds = new Set(prev.map((e) => e.id))
-          const newEvents = result.data!.filter((e) => !existingIds.has(e.id))
-          return [...prev, ...newEvents]
-        })
-        setHasMore(result.hasMore ?? false)
-        setPage((prev) => prev + 1)
+          const existingIds = new Set(prev.map((e) => e.id));
+          const newEvents = result.data!.filter((e) => !existingIds.has(e.id));
+          return [...prev, ...newEvents];
+        });
+        setHasMore(result.hasMore ?? false);
+        setPage((prev) => prev + 1);
       } else {
-        setError(result.message)
-        setHasMore(false)
+        setError(result.message);
+        setHasMore(false);
       }
     } catch (err) {
-      console.error('タイムライン読み込みエラー:', err)
-      setError('イベントの読み込みに失敗しました')
-      setHasMore(false)
+      console.error("タイムライン読み込みエラー:", err);
+      setError("イベントの読み込みに失敗しました");
+      setHasMore(false);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }, [page, isLoading, hasMore])
+  }, [page, isLoading, hasMore]);
 
   // 【ステップ3】Intersection Observerで無限スクロール実装
   useEffect(() => {
-    if (!loadMoreRef.current) return
+    if (!loadMoreRef.current) return;
 
     // Observerを作成
     observerRef.current = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !isLoading) {
-          loadMore()
+          loadMore();
         }
       },
       { threshold: 0.1 }
-    )
+    );
 
     // 監視開始
-    observerRef.current.observe(loadMoreRef.current)
+    observerRef.current.observe(loadMoreRef.current);
 
     // クリーンアップ
     return () => {
       if (observerRef.current) {
-        observerRef.current.disconnect()
+        observerRef.current.disconnect();
       }
-    }
-  }, [loadMore, hasMore, isLoading])
+    };
+  }, [loadMore, hasMore, isLoading]);
 
   // 【ステップ4】初回ロード（initialEventsが空の場合）
   // React 19 Strict Modeでの二重実行を防ぐため、refで制御
-  const isInitialLoadRef = useRef(false)
+  const isInitialLoadRef = useRef(false);
 
   useEffect(() => {
     // 既に初回ロード済みの場合はスキップ
-    if (isInitialLoadRef.current) return
+    if (isInitialLoadRef.current) return;
 
     if (events.length === 0 && !isLoading && hasMore) {
-      isInitialLoadRef.current = true
-      loadMore()
+      isInitialLoadRef.current = true;
+      loadMore();
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={className}>
@@ -173,7 +177,7 @@ export function EventTimeline({ initialEvents = [], className }: EventTimelinePr
       {events.length > 0 && (
         <div className="space-y-4">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} />
+            <EventCard key={event.id} event={event} currentUserId={currentUserId} />
           ))}
         </div>
       )}
@@ -207,5 +211,5 @@ export function EventTimeline({ initialEvents = [], className }: EventTimelinePr
         </p>
       )}
     </div>
-  )
+  );
 }

@@ -27,7 +27,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createEvent } from "@/app/actions/createEvent";
 import { signOut } from "@/app/actions/signOut";
@@ -87,6 +88,22 @@ export default function HomePage() {
 
   // 【ステップ2.7】ログアウト確認ダイアログの状態管理 (T174)
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+
+  // 【ステップ2.8】現在のユーザーID取得 (US3)
+  const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const supabase = createClient();
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        setCurrentUserId(user.id);
+      }
+    };
+    getUser();
+  }, []);
 
   // 【ステップ3】イベント作成ハンドラー
   const handleCreateEvent = async (data: CreateEventInput) => {
@@ -156,11 +173,7 @@ export default function HomePage() {
           <h1 className="text-3xl font-bold">タイムライン</h1>
           <p className="text-muted-foreground">つながりリストのイベントが表示されます</p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowLogoutDialog(true)}
-          disabled={isLoggingOut}
-        >
+        <Button variant="outline" onClick={() => setShowLogoutDialog(true)} disabled={isLoggingOut}>
           {isLoggingOut ? "ログアウト中..." : "ログアウト"}
         </Button>
       </header>
@@ -193,7 +206,7 @@ export default function HomePage() {
 
       {/* タイムライン表示 (User Story 2) */}
       <div className="mb-24">
-        <EventTimeline key={timelineKey} />
+        <EventTimeline key={timelineKey} currentUserId={currentUserId} />
       </div>
 
       {/* 投稿ボタン（右下固定） */}
