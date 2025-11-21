@@ -456,6 +456,57 @@ const filteredUsers = users.filter((user) => user.category_flags[categoryId] ===
 
 ---
 
+## コンテキスト効率化ガイド
+
+### 読み込むべきファイル優先順位
+
+1. **必須**: CLAUDE.md / GEMINI.md (AI向けガイダンス)
+2. **仕様**: specs/{epic-id}/spec.md (実装中の機能仕様)
+3. **設計**: specs/{epic-id}/plan.md (技術設計)
+4. **タスク**: specs/{epic-id}/tasks.md (実装タスク)
+5. **参照**: docs/techplan.md (全体アーキテクチャ)
+
+### Active Context（現在の実装対象）
+
+- **Epic**: 001-event-creation
+- **User Story**: US3 - イベント編集機能
+- **主要ファイル**:
+  - components/events/EventEditModal.tsx
+  - app/actions/updateEvent.ts
+  - app/actions/cancelEvent.ts
+  - lib/services/event.service.ts
+  - tests/e2e/event-edit.spec.ts
+
+### 技術スタック（Epic 001）
+
+- Frontend: Next.js 15 / React 19 / TypeScript
+- Backend: Supabase (PostgreSQL + RLS)
+- UI: shadcn-ui / TailwindCSS
+- Validation: Zod
+- Testing: Jest (Unit/Integration) / Playwright (E2E)
+
+### プロジェクト構造
+
+```
+yurubo/
+├── app/                    # Next.js App Router
+│   ├── actions/           # Server Actions
+│   └── page.tsx           # ページコンポーネント
+├── components/            # Reactコンポーネント
+│   └── events/           # イベント関連コンポーネント
+├── lib/                   # ユーティリティ・サービス
+│   ├── services/         # ビジネスロジック
+│   └── supabase/         # Supabase関連
+├── specs/                 # 機能仕様（Epic単位）
+│   └── 001-event-creation/
+├── tests/                 # テスト
+│   ├── e2e/              # Playwright E2Eテスト
+│   └── unit/             # Jestテスト
+└── docs/                  # ドキュメント
+```
+
+---
+
 ## ベストプラクティス
 
 1. **ユーザーストーリーに対してバリデーション** - 各機能をストーリーにマッピング
