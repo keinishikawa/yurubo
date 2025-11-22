@@ -99,7 +99,14 @@ function parseDateTimeLocal(datetime: string): { date: Date | undefined; time: s
     date = new Date(year, month - 1, day);
   }
 
-  return { date, time: timePart || "09:00" };
+  // Extract HH:MM from timePart (which might be HH:MM:SS or HH:MM:SS+09:00)
+  let time = "09:00";
+  if (timePart) {
+    // Take first 5 characters (HH:MM)
+    time = timePart.substring(0, 5);
+  }
+
+  return { date, time };
 }
 
 /**

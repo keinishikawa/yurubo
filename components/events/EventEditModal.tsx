@@ -96,7 +96,23 @@ export function EventEditModal({
   const dateEnd = watch("date_end");
 
   const onFormSubmit = async (data: CreateEventInput) => {
-    await onSubmit(event.id, data);
+    // JSTとして解釈してUTCに変換
+    const toISO = (dateStr: string) => {
+      if (!dateStr) return dateStr;
+      // 既にタイムゾーン情報が含まれている場合はそのまま
+      if (dateStr.includes("+") || dateStr.endsWith("Z")) return dateStr;
+      // JST (+09:00) として解釈
+      const date = new Date(`${dateStr}:00+09:00`);
+      return date.toISOString();
+    };
+
+    const submitData = {
+      ...data,
+      date_start: toISO(data.date_start),
+      date_end: toISO(data.date_end),
+    };
+
+    await onSubmit(event.id, submitData);
     onOpenChange(false);
   };
 

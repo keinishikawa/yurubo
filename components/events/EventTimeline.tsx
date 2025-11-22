@@ -171,13 +171,23 @@ export function EventTimeline({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // 【ステップ5】イベント中止時のハンドラー
+  const handleEventCancelled = useCallback((eventId: string) => {
+    setEvents((prev) => prev.filter((event) => event.id !== eventId));
+  }, []);
+
   return (
     <div className={className}>
       {/* イベント一覧 */}
       {events.length > 0 && (
         <div className="space-y-4">
           {events.map((event) => (
-            <EventCard key={event.id} event={event} currentUserId={currentUserId} />
+            <EventCard
+              key={event.id}
+              event={event}
+              currentUserId={currentUserId}
+              onEventCancelled={handleEventCancelled}
+            />
           ))}
         </div>
       )}

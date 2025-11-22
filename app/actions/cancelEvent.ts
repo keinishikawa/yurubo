@@ -36,5 +36,12 @@ export async function cancelEvent(eventId: string): Promise<ApiResponse<null>> {
     };
   }
 
-  return await cancelEventService(eventId, user.id);
+  const result = await cancelEventService(eventId, user.id);
+
+  if (result.success) {
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/");
+  }
+
+  return result;
 }

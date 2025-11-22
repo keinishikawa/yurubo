@@ -424,7 +424,8 @@ export async function cancelEvent(eventId: string, userId: string): Promise<ApiR
   const { error: updateError } = await supabase
     .from("events")
     .update({ status: "cancelled" })
-    .eq("id", eventId);
+    .eq("id", eventId)
+    .eq("host_id", userId);
 
   if (updateError) {
     console.error("イベント中止エラー:", updateError);

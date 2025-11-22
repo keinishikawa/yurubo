@@ -76,6 +76,7 @@ export type EventCardData = {
 type EventCardProps = {
   event: EventCardData;
   currentUserId?: string;
+  onEventCancelled?: (eventId: string) => void;
 };
 
 /**
@@ -84,15 +85,22 @@ type EventCardProps = {
  * @param dateString - ISO 8601形式の日時文字列
  * @returns 日本語表記の日時（例: 12/01（日）19:00）
  */
+/**
+ * 日時フォーマット関数
+ *
+ * @param dateString - ISO 8601形式の日時文字列
+ * @returns 日本語表記の日時（例: 12/01（日）19:00）
+ */
 function formatDateTime(dateString: string): string {
   const date = new Date(dateString);
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const weekday = ["日", "月", "火", "水", "木", "金", "土"][date.getDay()];
-  const hours = String(date.getHours()).padStart(2, "0");
-  const minutes = String(date.getMinutes()).padStart(2, "0");
-
-  return `${month}/${day}（${weekday}）${hours}:${minutes}`;
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 /**
@@ -115,15 +123,24 @@ function formatPriceRange(priceMin: number | null, priceMax: number | null): str
   return `${priceMin.toLocaleString()}〜${priceMax.toLocaleString()}円`;
 }
 
+// カテゴリラベルのマッピング
+const CATEGORY_LABELS: Record<string, string> = {
+  drinking: "飲み",
+  travel: "旅行",
+  tennis: "テニス",
+  other: "その他",
+};
+
 /**
  * EventCardコンポーネント
  */
-export function EventCard({ event, currentUserId }: EventCardProps) {
+export function EventCard({ event, currentUserId, onEventCancelled }: EventCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // 【データ準備】カテゴリ絵文字を取得
   const categoryEmoji = getCategoryEmoji(event.category);
+  const categoryLabel = CATEGORY_LABELS[event.category] || "その他";
 
   // 【データ準備】日時フォーマット
   const startDateTime = formatDateTime(event.date_start);
@@ -162,7 +179,9 @@ export function EventCard({ event, currentUserId }: EventCardProps) {
       const result = await cancelEvent(event.id);
       if (result.success) {
         alert("イベントを中止しました");
-        // TODO: 画面更新
+        if (onEventCancelled) {
+          onEventCancelled(event.id);
+        }
       } else {
         alert(result.message);
       }
@@ -176,20 +195,31 @@ export function EventCard({ event, currentUserId }: EventCardProps) {
     <div
       className={`rounded-lg border bg-card p-4 shadow-sm ${isCancelled ? "opacity-60 bg-gray-100" : ""}`}
     >
-      {/* ヘッダー: カテゴリ絵文字 + 匿名ID + アクション */}
-      <div className="mb-2 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{categoryEmoji}</span>
-          <span className="text-sm font-medium text-muted-foreground">{event.anon_id}</span>
-          {isCancelled && (
-            <span className="text-xs font-bold text-red-500 border border-red-500 px-1 rounded">
-              中止
+      {/* 上段: タイトル・属性・アクション */}
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          {/* タイトル + カテゴリ + 作成者 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-semibold leading-none">{event.title}</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+              <span>{categoryEmoji}</span>
+              <span>{categoryLabel}</span>
             </span>
-          )}
+            <span className="flex items-center gap-1 text-sm text-muted-foreground">
+              {/* 作成者アイコンは不要との指示のため削除し、IDのみ表示 */}
+              <span>{event.anon_id}</span>
+            </span>
+            {isCancelled && (
+              <span className="rounded border border-red-500 px-1 text-xs font-bold text-red-500">
+                中止
+              </span>
+            )}
+          </div>
         </div>
 
+        {/* アクションボタン（幹事のみ） */}
         {isHost && !isCancelled && (
-          <div className="flex gap-2">
+          <div className="flex shrink-0 gap-2">
             <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
               編集
             </Button>
@@ -200,43 +230,35 @@ export function EventCard({ event, currentUserId }: EventCardProps) {
         )}
       </div>
 
-      {/* タイトル */}
-      <h3 className="mb-3 text-lg font-semibold">{event.title}</h3>
-
-      {/* イベント詳細 */}
-      <div className="space-y-2 text-sm">
+      {/* 中段: イベント詳細（横並び） */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
         {/* 開催日時 */}
-        <div className="flex items-start gap-2">
-          <span className="text-muted-foreground">📅</span>
-          <div>
-            <div>{startDateTime}</div>
-            <div className="text-muted-foreground">〜 {endDateTime}</div>
-          </div>
+        <div className="flex items-center gap-1">
+          <span>📅</span>
+          <span>
+            {startDateTime} 〜 {endDateTime.split("（")[1] || endDateTime}
+          </span>
         </div>
 
         {/* 想定人数 */}
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">👥</span>
+        <div className="flex items-center gap-1">
+          <span>👥</span>
           <span>
             {event.capacity_min}〜{event.capacity_max}人
           </span>
         </div>
 
-        {/* 価格帯（オプション） */}
+        {/* 価格帯 */}
         {(event.price_min != null || event.price_max != null) && (
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">💰</span>
+          <div className="flex items-center gap-1">
+            <span>💰</span>
             <span>{priceRange}</span>
           </div>
         )}
-
-        {/* コメント（オプション） */}
-        {event.comment && (
-          <div className="mt-3 rounded bg-muted p-2">
-            <p className="text-sm">{event.comment}</p>
-          </div>
-        )}
       </div>
+
+      {/* 下段: コメント */}
+      {event.comment && <div className="rounded bg-muted p-2 text-sm">{event.comment}</div>}
 
       <EventEditModal
         event={event}

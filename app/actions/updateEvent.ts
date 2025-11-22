@@ -41,5 +41,12 @@ export async function updateEvent(
     };
   }
 
-  return await updateEventService(eventId, input, user.id);
+  const result = await updateEventService(eventId, input, user.id);
+
+  if (result.success) {
+    const { revalidatePath } = await import("next/cache");
+    revalidatePath("/");
+  }
+
+  return result;
 }
