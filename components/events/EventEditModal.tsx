@@ -64,6 +64,15 @@ export function EventEditModal({
   onSubmit,
   isLoading = false,
 }: EventEditModalProps) {
+  // UTC文字列をJSTローカル文字列（YYYY-MM-DDTHH:MM）に変換
+  const toJSTLocalISO = (utcStr: string) => {
+    if (!utcStr) return "";
+    const date = new Date(utcStr);
+    // JSTはUTC+9
+    const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+    return jstDate.toISOString().slice(0, 16);
+  };
+
   const {
     register,
     handleSubmit,
@@ -76,14 +85,14 @@ export function EventEditModal({
     defaultValues: {
       title: event.title,
       category: event.category as any,
-      date_start: event.date_start,
-      date_end: event.date_end,
+      date_start: toJSTLocalISO(event.date_start),
+      date_end: toJSTLocalISO(event.date_end),
       capacity_min: event.capacity_min,
       capacity_max: event.capacity_max,
       price_min: event.price_min ?? undefined,
       price_max: event.price_max ?? undefined,
       comment: event.comment ?? "",
-      deadline: null, // deadline is not in EventCardData yet, assume null or fetch if needed
+      deadline: null,
     },
   });
 
