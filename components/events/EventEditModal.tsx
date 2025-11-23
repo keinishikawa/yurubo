@@ -99,7 +99,7 @@ export function EventEditModal({
     resolver: zodResolver(createEventSchema),
     defaultValues: {
       title: event.title,
-      category: event.category as any,
+      category: event.category as CreateEventInput["category"],
       date_start: toJSTLocalISO(event.date_start),
       date_end: toJSTLocalISO(event.date_end),
       capacity_min: event.capacity_min,

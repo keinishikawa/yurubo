@@ -15,7 +15,6 @@
  * - event.service.ts: テスト対象のサービス（これから実装）
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, jest, beforeEach } from "@jest/globals";
 
@@ -62,7 +61,9 @@ describe("EventService", () => {
     jest.resetAllMocks();
 
     // モックとサービスをrequire
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     createClient = require("@/lib/supabase/server").createClient;
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const service = require("./event.service");
     updateEvent = service.updateEvent;
     cancelEvent = service.cancelEvent;
