@@ -7,7 +7,6 @@ DROP POLICY "events_update_policy" ON events;
 CREATE POLICY "events_update_policy" ON events
 FOR UPDATE USING (
   auth.uid() = host_id
-  AND status = 'recruiting'
 ) WITH CHECK (
   auth.uid() = host_id
 );

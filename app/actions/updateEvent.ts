@@ -45,7 +45,7 @@ export async function updateEvent(
 
   if (result.success) {
     const { revalidatePath } = await import("next/cache");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
   }
 
   return result;

@@ -40,7 +40,7 @@ export async function cancelEvent(eventId: string): Promise<ApiResponse<null>> {
 
   if (result.success) {
     const { revalidatePath } = await import("next/cache");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
   }
 
   return result;

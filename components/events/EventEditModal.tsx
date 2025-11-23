@@ -67,10 +67,25 @@ export function EventEditModal({
   // UTC文字列をJSTローカル文字列（YYYY-MM-DDTHH:MM）に変換
   const toJSTLocalISO = (utcStr: string) => {
     if (!utcStr) return "";
-    const date = new Date(utcStr);
-    // JSTはUTC+9
-    const jstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
-    return jstDate.toISOString().slice(0, 16);
+    try {
+      const date = new Date(utcStr);
+      // Intlを使ってJSTの日時部分を取得
+      const jstParts = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(date);
+
+      const part = (type: string) => jstParts.find((p) => p.type === type)?.value;
+      return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+    } catch (e) {
+      console.error("Date parse error:", e);
+      return "";
+    }
   };
 
   const {
@@ -110,9 +125,15 @@ export function EventEditModal({
       if (!dateStr) return dateStr;
       // 既にタイムゾーン情報が含まれている場合はそのまま
       if (dateStr.includes("+") || dateStr.endsWith("Z")) return dateStr;
-      // JST (+09:00) として解釈
-      const date = new Date(`${dateStr}:00+09:00`);
-      return date.toISOString();
+
+      try {
+        // JST (+09:00) として解釈してDateオブジェクトを作成
+        const date = new Date(`${dateStr}:00+09:00`);
+        return date.toISOString();
+      } catch (e) {
+        console.error("Date conversion error:", e);
+        return dateStr;
+      }
     };
 
     const submitData = {
