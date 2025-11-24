@@ -1,29 +1,18 @@
 /**
- * ファイル名: PostEventModal.tsx
+ * ファイル名: EventEditModal.tsx
  *
  * 【概要】
- * イベント投稿モーダルコンポーネント
- * カテゴリ選択、日時、人数、価格帯、コメント入力を提供
+ * イベント編集モーダルコンポーネント
+ * 既存のイベント情報を編集するフォームを提供
  *
  * 【処理フロー】
- * 1. React Hook Formでフォーム状態管理
- * 2. Zodスキーマでバリデーション
- * 3. 入力エラーを日本語で表示
- * 4. 送信時にonSubmitコールバックを呼び出し
- *
- * 【主要機能】
- * - カテゴリ選択（飲み・旅行・テニス・その他）
- * - 日時ピッカー（開始・終了）
- * - 想定人数入力（最小・最大）
- * - 価格帯スライダー（デフォルト3000-5000円）
- * - コメント入力
- * - バリデーションエラー表示
+ * 1. Propsで受け取ったイベント情報をフォーム初期値に設定
+ * 2. 変更内容をバリデーション
+ * 3. updateEventアクションを呼び出し
  *
  * 【依存関係】
- * - React Hook Form: フォーム管理
- * - Zod: バリデーション
- * - shadcn-ui: UIコンポーネント
- * - spec.md FR-002: 投稿フォーム要件
+ * - PostEventModalと類似のUI
+ * - updateEvent Server Action
  */
 
 "use client";
@@ -51,22 +40,16 @@ import {
 } from "@/components/ui/select";
 import { DualRangeSlider } from "@/components/ui/dual-range-slider";
 import { DateRangePicker } from "@/components/ui/date-range-picker";
+import type { EventCardData } from "./EventCard";
 
-/**
- * PostEventModalのProps型
- */
-type PostEventModalProps = {
+type EventEditModalProps = {
+  event: EventCardData;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (data: CreateEventInput) => Promise<void>;
+  onSubmit: (eventId: string, data: CreateEventInput) => Promise<void>;
   isLoading?: boolean;
 };
 
-/**
- * カテゴリ選択肢
- *
- * 【設計根拠】spec.md FR-003: カテゴリ定義
- */
 const CATEGORY_OPTIONS = [
   { value: "drinking", label: "🍶 飲み", emoji: "🍶" },
   { value: "travel", label: "✈️ 旅行", emoji: "✈️" },
@@ -74,103 +57,37 @@ const CATEGORY_OPTIONS = [
   { value: "other", label: "📌 その他", emoji: "📌" },
 ] as const;
 
-/**
- * デフォルトの開始日時を取得（現在時刻+2時間、30分単位に切り上げ）
- *
- * @returns YYYY-MM-DDTHH:MM形式の日時文字列
- */
-function getDefaultStartDateTime(): string {
-  const now = new Date();
-  now.setHours(now.getHours() + 2); // 2時間後
-
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const day = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-
-  // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
-
-  // 時刻が24時を超えた場合は翌日に
-  if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1);
-    const nextYear = now.getFullYear();
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
-    const nextDay = now.getDate().toString().padStart(2, "0");
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
-  }
-
-  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
-  return `${year}-${month}-${day}T${timeStr}`;
-}
-
-/**
- * デフォルトの終了日時を取得（開始日時+4時間）
- *
- * @returns YYYY-MM-DDTHH:MM形式の日時文字列
- */
-function getDefaultEndDateTime(): string {
-  const now = new Date();
-  now.setHours(now.getHours() + 6); // 2時間後 + 4時間 = 6時間後
-
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const day = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-
-  // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
-
-  // 時刻が24時を超えた場合は翌日に
-  if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1);
-    const nextYear = now.getFullYear();
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
-    const nextDay = now.getDate().toString().padStart(2, "0");
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
-  }
-
-  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
-  return `${year}-${month}-${day}T${timeStr}`;
-}
-
-/**
- * PostEventModalコンポーネント
- *
- * @param props - モーダル制御とsubmitハンドラーを含むProps
- * @returns イベント投稿モーダルUI
- *
- * 【処理内容】
- * 1. React Hook Formでフォーム状態管理
- * 2. Zodスキーマ（createEventSchema）でバリデーション
- * 3. 各入力フィールドの値変更をリアルタイム反映
- * 4. バリデーションエラーを日本語で表示
- * 5. 送信時にonSubmitコールバックを呼び出し
- *
- * 【使用例】
- * <PostEventModal
- *   open={isOpen}
- *   onOpenChange={setIsOpen}
- *   onSubmit={handleCreateEvent}
- *   isLoading={isCreating}
- * />
- *
- * 【設計根拠】
- * spec.md FR-001: イベント投稿モーダル表示
- * spec.md FR-002: 入力項目要件
- * spec.md FR-015: バリデーション要件
- */
-export function PostEventModal({
+export function EventEditModal({
+  event,
   open,
   onOpenChange,
   onSubmit,
   isLoading = false,
-}: PostEventModalProps) {
-  // 【ステップ1】React Hook Form初期化
+}: EventEditModalProps) {
+  // UTC文字列をJSTローカル文字列（YYYY-MM-DDTHH:MM）に変換
+  const toJSTLocalISO = (utcStr: string) => {
+    if (!utcStr) return "";
+    try {
+      const date = new Date(utcStr);
+      // Intlを使ってJSTの日時部分を取得
+      const jstParts = new Intl.DateTimeFormat("ja-JP", {
+        timeZone: "Asia/Tokyo",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).formatToParts(date);
+
+      const part = (type: string) => jstParts.find((p) => p.type === type)?.value;
+      return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}:${part("minute")}`;
+    } catch (e) {
+      console.error("Date parse error:", e);
+      return "";
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -181,20 +98,20 @@ export function PostEventModal({
   } = useForm<CreateEventInput>({
     resolver: zodResolver(createEventSchema),
     defaultValues: {
-      title: "",
-      category: "drinking",
-      date_start: getDefaultStartDateTime(),
-      date_end: getDefaultEndDateTime(),
-      capacity_min: 2,
-      capacity_max: 6,
-      price_min: 3000,
-      price_max: 5000,
-      comment: "",
+      title: event.title,
+      category: event.category as CreateEventInput["category"],
+      date_start: toJSTLocalISO(event.date_start),
+      date_end: toJSTLocalISO(event.date_end),
+      capacity_min: event.capacity_min,
+      capacity_max: event.capacity_max,
+      price_min: event.price_min ?? undefined,
+      price_max: event.price_max ?? undefined,
+      comment: event.comment ?? "",
       deadline: null,
     },
   });
 
-  // 【ステップ2】フォーム値を監視
+  // フォーム値を監視
   const priceMin = watch("price_min");
   const priceMax = watch("price_max");
   const capacityMin = watch("capacity_min");
@@ -202,16 +119,21 @@ export function PostEventModal({
   const dateStart = watch("date_start");
   const dateEnd = watch("date_end");
 
-  // 【ステップ3】フォーム送信ハンドラー
   const onFormSubmit = async (data: CreateEventInput) => {
     // JSTとして解釈してUTCに変換
     const toISO = (dateStr: string) => {
       if (!dateStr) return dateStr;
       // 既にタイムゾーン情報が含まれている場合はそのまま
       if (dateStr.includes("+") || dateStr.endsWith("Z")) return dateStr;
-      // JST (+09:00) として解釈
-      const date = new Date(`${dateStr}:00+09:00`);
-      return date.toISOString();
+
+      try {
+        // JST (+09:00) として解釈してDateオブジェクトを作成
+        const date = new Date(`${dateStr}:00+09:00`);
+        return date.toISOString();
+      } catch (e) {
+        console.error("Date conversion error:", e);
+        return dateStr;
+      }
     };
 
     const submitData = {
@@ -220,35 +142,27 @@ export function PostEventModal({
       date_end: toISO(data.date_end),
     };
 
-    await onSubmit(submitData);
-    reset(); // 送信成功後にフォームをリセット
+    await onSubmit(event.id, submitData);
+    onOpenChange(false);
   };
 
-  // 【ステップ4】キャンセル・閉じる時のリセットハンドラー
   const handleClose = (open: boolean) => {
     if (!open) {
-      reset(); // モーダルを閉じる時にフォーム状態をリセット
+      reset();
     }
     onOpenChange(open);
-  };
-
-  const handleCancel = () => {
-    reset(); // フォーム状態をリセット
-    onOpenChange(false); // モーダルを閉じる
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>イベントを投稿</DialogTitle>
-          <DialogDescription>
-            つながりリスト内の該当カテゴリOKユーザーに配信されます（匿名投稿）
-          </DialogDescription>
+          <DialogTitle>イベントを編集</DialogTitle>
+          <DialogDescription>イベントの内容を変更します。</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
-          {/* カテゴリ選択 (T049) */}
+          {/* カテゴリ選択 */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
               カテゴリ <span className="text-destructive">*</span>
@@ -257,7 +171,7 @@ export function PostEventModal({
               onValueChange={(value) =>
                 setValue("category", value as "drinking" | "travel" | "tennis" | "other")
               }
-              defaultValue="drinking"
+              defaultValue={event.category}
             >
               <SelectTrigger>
                 <SelectValue placeholder="カテゴリを選択" />
@@ -284,7 +198,7 @@ export function PostEventModal({
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
 
-          {/* 日時ピッカー (T050) - DateRangePicker使用 */}
+          {/* 日時ピッカー */}
           <DateRangePicker
             value={{
               start: dateStart || "",
@@ -299,7 +213,7 @@ export function PostEventModal({
             disabled={isLoading}
           />
 
-          {/* 想定人数 (T051) - DualRangeSlider使用 */}
+          {/* 想定人数 */}
           <div className="space-y-2">
             <DualRangeSlider
               value={[capacityMin ?? 2, capacityMax ?? 6]}
@@ -320,7 +234,7 @@ export function PostEventModal({
             )}
           </div>
 
-          {/* 価格帯スライダー (T052) - DualRangeSlider使用 */}
+          {/* 価格帯 */}
           <div className="space-y-2">
             <DualRangeSlider
               value={[priceMin ?? 3000, priceMax ?? 5000]}
@@ -343,7 +257,7 @@ export function PostEventModal({
             )}
           </div>
 
-          {/* コメント (T053) */}
+          {/* コメント */}
           <div className="space-y-2">
             <label className="text-sm font-medium">コメント（任意）</label>
             <Textarea
@@ -355,21 +269,17 @@ export function PostEventModal({
             {errors.comment && <p className="text-sm text-destructive">{errors.comment.message}</p>}
           </div>
 
-          {/* エラーメッセージ表示エリア (T055) */}
-          {Object.keys(errors).length > 0 && (
-            <div className="rounded-md bg-destructive/10 p-4">
-              <p className="text-sm font-medium text-destructive">
-                入力内容に誤りがあります。エラーメッセージを確認してください。
-              </p>
-            </div>
-          )}
-
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => handleClose(false)}
+              disabled={isLoading}
+            >
               キャンセル
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "投稿中..." : "投稿する"}
+              {isLoading ? "保存中..." : "保存する"}
             </Button>
           </DialogFooter>
         </form>

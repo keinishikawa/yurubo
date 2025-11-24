@@ -65,7 +65,7 @@ AntigravityのUI上にある「Task List (Artifact)」は、**Issueを解決す�
 
 > SNS が「見る関係」を作ったのであれば、ゆるぼは「動く関係」を作る。
 
-**現在の状態**: 初期企画・仕様策定フェーズ（実装前）
+**現在の状態**: 初期企画・仕様策定フェーズ（実装中）
 
 ### アーキテクチャ概要
 
@@ -79,7 +79,6 @@ AntigravityのUI上にある「Task List (Artifact)」は、**Issueを解決す�
 | Infra           | Vercel / Supabase Cloud                        |
 
 **主要データモデル**: users, events, participants, stores, messages, settlements, tasks
-
 詳細は [docs/techplan.md](docs/techplan.md) を参照。
 
 ### 設計哲学
@@ -102,7 +101,13 @@ AntigravityのUI上にある「Task List (Artifact)」は、**Issueを解決す�
 - 不要な抽象化・汎用化・将来の拡張を見越した設計は行わない
   - 明示的に依頼された場合のみ実装
 
-**目的**: 冗長な実装や複雑な条件分岐を避け、開発初期の効率を最大化
+- **未リリース段階の実装原則**:
+  - 機能フラグ・後方互換レイヤー・バージョン分岐は作成しない
+  - 「現在の仕様に対する単一の実装パス」のみを記述
+  - 不要な抽象化・汎用化は行わない（YAGNI）
+- **禁止事項**:
+  - ❌ 不要な抽象化・過剰設計
+  - ❌ 推測による仕様追加
 
 ### 技術的な制約 (Technical Constraints)
 
@@ -118,138 +123,81 @@ AntigravityのUI上にある「Task List (Artifact)」は、**Issueを解決す�
 
 - **Trunk-Based Development** を採用
 - `main` ブランチは常に動作保証された状態を維持
-- すべての変更は PR 経由で `main` に統合（直接 push 禁止）
+- すべての変更は PR 経由で `main` に統合
 
 ### ブランチ命名規則
 
-| 種別                                      | 命名例                                      | 内容                                                 |
-| ----------------------------------------- | ------------------------------------------- | ---------------------------------------------------- |
-| **機能開発（User Story単位）** ⭐CRITICAL | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting`（UI+API+テスト） |
-| **Phase/基盤構築**                        | `feature/000-{説明}`                        | 例：`feature/000-phase2-foundation`                  |
-| 環境構築                                  | `infra/<対象>`                              | 例：`infra/setup-ci`                                 |
-| バグ修正                                  | `fix/<内容>`                                | 例：`fix/ui-modal-close`                             |
-| リファクタ                                | `refactor/<範囲>`                           | 例：`refactor/event-schema`                          |
-| ドキュメント                              | `docs/<内容>`                               | 例：`docs/add-gemini-context`                        |
-| 実験／検証                                | `exp/<内容>`                                | 例：`exp/ai-prompt-tuning`                           |
+| 種別         | 命名例                                      | 備考                                |
+| ------------ | ------------------------------------------- | ----------------------------------- |
+| **機能開発** | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting` |
+| **基盤構築** | `feature/000-{説明}`                        | 例：`feature/000-phase2-foundation` |
+| **修正/他**  | `fix/...`, `refactor/...`, `docs/...`       |                                     |
 
-**⭐ CRITICAL: Epic vs User Story の重要な違い**:
+**重要**: 1つのブランチは「**1 User Story完結**」に対応させる（Epic単位ではない）。
 
-- **Epic**: 複数のUser Storyを含む大きな機能単位（例: Epic 001 = イベント作成機能全体）
-- **User Story**: 独立して完結できる小さな機能単位（例: US1 = イベント投稿、US2 = タイムライン閲覧）
-- **必須**: 1つのEpicに複数User Storyがある場合、**必ずUser Story単位でブランチを分ける**
-- **命名**: `feature/{Epic番号}-us{US番号}-{機能名}` 形式を厳守
+### コミットメッセージ規約
 
-**重要原則**:
+[Conventional Commits](https://www.conventionalcommits.org/)に従います。
 
-- **1 User Story = 1ブランチ = 1 PR = UI + API + テスト全部含む**
-- 機能開発は必ず`feature/{3桁数字}-`形式を使用
-- Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
-
-**アンチパターン（禁止）**:
-❌ Epic単位のブランチ（例: `feature/001-event-creation`に複数User Storyを混在）
-→ 複数セッションでの作業衝突、PRが巨大化
-❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
-→ 仕様編集が衝突する
-
-### 運用ルール
-
-- 1つのブランチは「**1 User Story完結**」に対応（Epicではない）
-- UI/API分割せず、1ストーリーを1ブランチで完結させる
-- 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
-- 作業終了後、PRを作成しCI通過後に`main`へマージ（1 PR = 1 User Story）
-- マージ後はブランチ自動削除（GitHub設定推奨）
-- 複数User Storyを含むEpicの場合、各User Storyごとに独立したブランチを作成
-
-### 並行開発戦略
-
-**依存関係に基づく並列開発:**
+**フォーマット**:
 
 ```
-# 基盤構築（依存: なし）
-feature/000-phase2-foundation ← 最優先でマージ
-
-# Epic 001の並列開発（依存: Phase 2のみ）
-feature/001-us1-event-posting  ← User Story 1（イベント投稿）
-feature/001-us2-timeline-view  ← User Story 2（タイムライン閲覧）
-feature/001-us3-event-edit     ← User Story 3（イベント編集）
-
-# 各User Storyは独立してマージ可能
-# US1とUS2は並行開発可能（ファイル衝突なし）
-# US3はUS1に依存（イベント作成後に編集機能）
+<type>(<scope>): <subject>
 ```
 
-**原則:**
+※ `<subject>` は日本語で記述してください。
 
-- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
-- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
-- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
-- Epic全体を1つのPRにまとめない（レビューが困難になるため）
-- main更新後は `git pull origin main` で差分を早期吸収
+**Type一覧**:
 
-### CI / Branch Protection
+- **feat**: 新機能
+- **fix**: バグ修正
+- **docs**: ドキュメントのみの変更
+- **style**: コードの動作に影響しない変更（フォーマット等）
+- **refactor**: バグ修正や機能追加ではないコード変更
+- **test**: テストの追加・修正
+- **chore**: ビルドプロセスやツールの変更
 
-- `.github/workflows/ci.yml` に lint + test を自動化
-- PR時にCIが緑でない場合はマージ不可（保護ルール）
-- mainブランチは常にテスト通過済み状態を保証
+**運用ルール**:
 
-**GitHub設定例**:
+- **こまめなコミット**: 作業の論理的な区切り（1つの関数実装、1つのテスト追加など）ごとにコミットすることを推奨します。
+- **WIPコミット**: 作業途中でも `wip: ...` としてコミットし、進捗を保存することを許容します。
 
-- Require PR before merge ✅
-- Require status checks ✅
-- Block force pushes ✅
-- Delete branch after merge ✅
+### Pull Request ガイドライン
 
-### PRレビュー確認のベストプラクティス
+**PRタイトル**: `[機能番号] 簡潔な説明`
+例: `[001-US1] イベント投稿機能の実装`
 
-**重要**: GitHub APIには2種類のコメントエンドポイントが存在します。
+**PR説明テンプレート**:
 
-| エンドポイント                                   | 取得できるコメント                           | 用途                               |
-| ------------------------------------------------ | -------------------------------------------- | ---------------------------------- |
-| `/repos/{owner}/{repo}/issues/{number}/comments` | **Issue comments**（PR全体への総合コメント） | AIレビューなどのPR全体へのコメント |
-| `/repos/{owner}/{repo}/pulls/{number}/comments`  | **Review comments**（コード行への指摘）      | 特定コード行への指摘コメント       |
+```markdown
+## 概要
 
-**推奨コマンド**:
+[何を実装したか]
 
-```bash
-# ✅ 推奨: gh CLIの高レベルコマンドを使用
-gh pr view {PR番号}                    # PR全体の情報を表示
-gh pr view {PR番号} --comments         # すべてのコメントを表示
-gh pr checks {PR番号}                  # CI/CDステータスを確認
+## User Story
 
-# ⚠️ 低レベルAPI使用時の注意
-# AIレビューなどの総合コメントを取得する場合
-gh api repos/{owner}/{repo}/issues/{PR番号}/comments
+[関連するUser Story]
 
-# コード行への指摘コメントを取得する場合
-gh api repos/{owner}/{repo}/pulls/{PR番号}/comments
+## 変更内容
+
+- [変更点1]
+
+## テスト
+
+- [ ] 単体テスト: すべてパス
+- [ ] E2Eテスト: 該当シナリオパス
+
+## チェックリスト
+
+- [ ] 型エラーなし
+- [ ] リントエラーなし
 ```
 
-**注意事項**:
+**ベストプラクティス**:
 
-- AIレビューはGitHub Actionsで動作し、**Issue comment**として投稿される
-- `/pulls/{number}/comments`ではAIレビューが取得できない
-- 完全なレビュー情報を得るには両方のエンドポイントを使用するか、`gh pr view --comments`を使用
-
----
-
-## 主要な設計原則
-
-### 1. ストーリー駆動開発
-
-- 実装は**ユーザーストーリー**を中心に組織化
-- 各ストーリーには受入基準、バリデーションルール、エラーハンドリングを含む
-
-### 2. シンプルさ優先（YAGNI）
-
-- 最小構成で動く実装を構築
-- 複雑なオーケストレーションは延期
-- 「小さな関数を積み重ねる」哲学
-
-### 3. 型安全性とバリデーション
-
-- TypeScript strict mode使用
-- Zodなどでバリデーションスキーマを定義
-- フロントエンドとバックエンドでスキーマ再利用
+- **User Story単位のPR**: 1PR = 1 User Story
+- **self-review**: PRを出す前に自分でコードを見直す
+- **tasks.mdの更新**: タスク完了時は必ず`[X]`でマーク
 
 ---
 
@@ -312,40 +260,34 @@ tests/
 
 ## エラーハンドリング
 
-### 統一されたエラーレスポンス形式
+### 統一レスポンス形式
 
 ```typescript
-// 成功時
 {
-  success: true,
-  message: '成功メッセージ',
-  code: 'SUCCESS_CODE'
-}
-
-// エラー時
-{
-  success: false,
-  message: 'エラーメッセージ',
-  code: 'ERROR_CODE'
+  success: boolean;
+  message: string; // 日本語
+  code?: string;
+  data?: T;
 }
 ```
 
 ### 原則
 
-- すべてのユーザー入力をバリデーション
+- すべてのユーザー入力をバリデーション（Zod使用）
 - エラーメッセージは日本語で明確に
-- 一時的な障害はリトライロジック実装
-- エラーをログに記録
+- エラーはログに記録する
 
 ---
 
 ## 学習補助システム
 
-プロジェクトは**ハイブリッド学習方式**を採用し、コード内コメント（基本）+ `.learning/`ディレクトリ（詳細解説）の2層構造で学習を支援する。
+### コードコメント記述ルール
 
-### コメント記述ルール（コード内）
+- **ファイル冒頭**: 概要と依存関係、`@see .learning/tasks/...` へのリンク
+- **関数/メソッド**: JSDoc形式で説明、引数、戻り値を記述
+- **インライン**: 複雑なロジックのみ簡潔に
 
-**目的**: コードの可読性を保ちながら、基本的な理解を支援
+### .learning/ ディレクトリ
 
 #### 1. ファイル全体のコメント（ファイル冒頭に記述）
 
@@ -491,17 +433,16 @@ npm run lint
 
 ---
 
-## 重要な参照ドキュメント
+### 読み込むべきファイル優先順位
 
-- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様（6フェーズ設計、UI構成）
-- [docs/techplan.md](docs/techplan.md) - 技術仕様（データモデル、AIモジュール、通知ロジック）
-- [docs/figma.md](docs/figma.md) - UI/UXフロー、画面遷移、Prototypeガイド
+1. **必須**: CLAUDE.md / GEMINI.md
+2. **仕様**: specs/{epic-id}/spec.md
+3. **設計**: specs/{epic-id}/plan.md
+4. **タスク**: specs/{epic-id}/tasks.md
 
-## Active Technologies
 
-- TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS (001-event-creation)
-- Supabase (PostgreSQL 15) with Row-Level Security (001-event-creation)
 
-## Recent Changes
+### 重要な参照ドキュメント
 
-- 001-event-creation: Added TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS
+- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様
+- [docs/techplan.md](docs/techplan.md) - 技術仕様

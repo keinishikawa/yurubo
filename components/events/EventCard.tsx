@@ -10,20 +10,28 @@
  * 2. カテゴリに応じた絵文字を表示
  * 3. 開催日時、想定人数、価格帯、コメント、匿名IDを表示
  * 4. 投稿者の実名は一切表示しない（匿名性保証）
+ * 5. 幹事の場合、編集・中止ボタンを表示
  *
  * 【主要機能】
  * - イベント情報の視覚的表示
  * - カテゴリ絵文字アイコン
  * - 匿名ID表示（🍶A形式）
+ * - イベント編集・中止（幹事のみ）
  *
  * 【依存関係】
  * - @/lib/utils/generateAnonId: カテゴリ絵文字取得
  * - spec.md FR-011: イベントカード表示要件
  */
 
-'use client'
+"use client";
 
-import { getCategoryEmoji } from '@/lib/utils/generateAnonId'
+import { useState } from "react";
+import { getCategoryEmoji } from "@/lib/utils/generateAnonId";
+import { Button } from "@/components/ui/button";
+import { EventEditModal } from "./EventEditModal";
+import { updateEvent } from "@/app/actions/updateEvent";
+import { cancelEvent } from "@/app/actions/cancelEvent";
+import type { CreateEventInput } from "@/lib/validation/event.schema";
 
 /**
  * イベントカード表示用の型定義
@@ -33,6 +41,7 @@ import { getCategoryEmoji } from '@/lib/utils/generateAnonId'
  *
  * 【フィールド】
  * - id: イベント一意ID
+ * - host_id: 幹事ユーザーID
  * - anon_id: 匿名ID（例: 🍶A）
  * - category: イベントカテゴリ
  * - title: イベントタイトル
@@ -43,48 +52,55 @@ import { getCategoryEmoji } from '@/lib/utils/generateAnonId'
  * - price_min: 最小予算（任意）
  * - price_max: 最大予算（任意）
  * - comment: コメント（任意）
+ * - status: イベントステータス（recruiting | cancelled | etc）
  */
 export type EventCardData = {
-  id: string
-  anon_id: string
-  category: string
-  title: string
-  date_start: string
-  date_end: string
-  capacity_min: number
-  capacity_max: number
-  price_min: number | null
-  price_max: number | null
-  comment: string | null
-}
+  id: string;
+  host_id: string;
+  anon_id: string;
+  category: string;
+  title: string;
+  date_start: string;
+  date_end: string;
+  capacity_min: number;
+  capacity_max: number;
+  price_min: number | null;
+  price_max: number | null;
+  comment: string | null;
+  status: string;
+};
 
 /**
  * EventCardコンポーネントのProps
  */
 type EventCardProps = {
-  event: EventCardData
-}
+  event: EventCardData;
+  currentUserId?: string;
+  onEventCancelled?: (eventId: string) => void;
+};
 
 /**
  * 日時フォーマット関数
  *
  * @param dateString - ISO 8601形式の日時文字列
  * @returns 日本語表記の日時（例: 12/01（日）19:00）
+ */
+/**
+ * 日時フォーマット関数
  *
- * 【処理内容】
- * 1. Date オブジェクトに変換
- * 2. 日本語ロケールでフォーマット
- * 3. 月/日（曜日）時:分 形式で返却
+ * @param dateString - ISO 8601形式の日時文字列
+ * @returns 日本語表記の日時（例: 12/01（日）19:00）
  */
 function formatDateTime(dateString: string): string {
-  const date = new Date(dateString)
-  const month = date.getMonth() + 1
-  const day = date.getDate()
-  const weekday = ['日', '月', '火', '水', '木', '金', '土'][date.getDay()]
-  const hours = String(date.getHours()).padStart(2, '0')
-  const minutes = String(date.getMinutes()).padStart(2, '0')
-
-  return `${month}/${day}（${weekday}）${hours}:${minutes}`
+  const date = new Date(dateString);
+  return new Intl.DateTimeFormat("ja-JP", {
+    timeZone: "Asia/Tokyo",
+    month: "numeric",
+    day: "numeric",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
 }
 
 /**
@@ -93,115 +109,164 @@ function formatDateTime(dateString: string): string {
  * @param priceMin - 最小予算
  * @param priceMax - 最大予算
  * @returns フォーマット済み価格帯文字列（例: 3,000~5,000円）
- *
- * 【処理内容】
- * 1. 両方nullの場合は「未設定」を返す
- * 2. 片方のみnullの場合は設定済みの方を返す
- * 3. 両方設定されている場合は「最小~最大円」形式で返す
- * 4. 3桁区切りカンマを追加
  */
-function formatPriceRange(
-  priceMin: number | null,
-  priceMax: number | null
-): string {
+function formatPriceRange(priceMin: number | null, priceMax: number | null): string {
   if (priceMin == null && priceMax == null) {
-    return '未設定'
+    return "未設定";
   }
   if (priceMin == null) {
-    return `〜${priceMax?.toLocaleString()}円`
+    return `〜${priceMax?.toLocaleString()}円`;
   }
   if (priceMax == null) {
-    return `${priceMin.toLocaleString()}円〜`
+    return `${priceMin.toLocaleString()}円〜`;
   }
-  return `${priceMin.toLocaleString()}〜${priceMax.toLocaleString()}円`
+  return `${priceMin.toLocaleString()}〜${priceMax.toLocaleString()}円`;
 }
+
+// カテゴリラベルのマッピング
+const CATEGORY_LABELS: Record<string, string> = {
+  drinking: "飲み",
+  travel: "旅行",
+  tennis: "テニス",
+  other: "その他",
+};
 
 /**
  * EventCardコンポーネント
- *
- * @param props - イベントデータを含むProps
- * @returns タイムラインに表示されるイベントカード
- *
- * 【処理内容】
- * 1. propsからイベントデータを取得
- * 2. カテゴリ絵文字を取得（getCategoryEmoji）
- * 3. 日時・価格帯をフォーマット
- * 4. カード形式でUIを表示
- *
- * 【UI構成】
- * - ヘッダー: カテゴリ絵文字 + 匿名ID
- * - ボディ:
- *   - 開催日時（開始〜終了）
- *   - 想定人数（最小〜最大人）
- *   - 価格帯（オプション）
- *   - コメント（オプション）
- *
- * 【設計根拠】
- * spec.md FR-011: イベントカード表示要件
- * spec.md FR-005: 匿名ID表示（実名非表示）
- *
- * 【注意】
- * - 投稿者の実名は一切表示しない（匿名性保証）
- * - price_min/price_max/commentはnullの可能性あり
  */
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, currentUserId, onEventCancelled }: EventCardProps) {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   // 【データ準備】カテゴリ絵文字を取得
-  const categoryEmoji = getCategoryEmoji(event.category)
+  const categoryEmoji = getCategoryEmoji(event.category);
+  const categoryLabel = CATEGORY_LABELS[event.category] || "その他";
 
   // 【データ準備】日時フォーマット
-  const startDateTime = formatDateTime(event.date_start)
-  const endDateTime = formatDateTime(event.date_end)
+  const startDateTime = formatDateTime(event.date_start);
+  const endDateTime = formatDateTime(event.date_end);
 
   // 【データ準備】価格帯フォーマット
-  const priceRange = formatPriceRange(event.price_min, event.price_max)
+  const priceRange = formatPriceRange(event.price_min, event.price_max);
+
+  // 幹事かどうか判定
+  const isHost = currentUserId === event.host_id;
+  const isCancelled = event.status === "cancelled";
+
+  const handleUpdate = async (eventId: string, data: CreateEventInput) => {
+    setIsUpdating(true);
+    try {
+      const result = await updateEvent(eventId, data);
+      if (result.success) {
+        // 成功時の処理
+        alert("イベントを更新しました");
+        // TODO: 画面更新（router.refresh()など）
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("エラーが発生しました");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!confirm("本当にイベントを中止しますか？この操作は取り消せません。")) return;
+
+    try {
+      const result = await cancelEvent(event.id);
+      if (result.success) {
+        alert("イベントを中止しました");
+        if (onEventCancelled) {
+          onEventCancelled(event.id);
+        }
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("エラーが発生しました");
+    }
+  };
 
   return (
-    <div className="rounded-lg border bg-card p-4 shadow-sm">
-      {/* ヘッダー: カテゴリ絵文字 + 匿名ID */}
-      <div className="mb-2 flex items-center gap-2">
-        <span className="text-2xl">{categoryEmoji}</span>
-        <span className="text-sm font-medium text-muted-foreground">
-          {event.anon_id}
-        </span>
-      </div>
-
-      {/* タイトル */}
-      <h3 className="mb-3 text-lg font-semibold">{event.title}</h3>
-
-      {/* イベント詳細 */}
-      <div className="space-y-2 text-sm">
-        {/* 開催日時 */}
-        <div className="flex items-start gap-2">
-          <span className="text-muted-foreground">📅</span>
-          <div>
-            <div>{startDateTime}</div>
-            <div className="text-muted-foreground">〜 {endDateTime}</div>
+    <div
+      className={`rounded-lg border bg-card p-4 shadow-sm ${isCancelled ? "opacity-60 bg-gray-100" : ""}`}
+    >
+      {/* 上段: タイトル・属性・アクション */}
+      <div className="mb-3 flex items-start justify-between gap-4">
+        <div className="space-y-1">
+          {/* タイトル + カテゴリ + 作成者 */}
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-semibold leading-none">{event.title}</h3>
+            <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
+              <span>{categoryEmoji}</span>
+              <span>{categoryLabel}</span>
+            </span>
+            <span className="flex items-center gap-1 text-sm text-muted-foreground">
+              {/* 作成者アイコンは不要との指示のため削除し、IDのみ表示 */}
+              <span>{event.anon_id}</span>
+            </span>
+            {isCancelled && (
+              <span className="rounded border border-red-500 px-1 text-xs font-bold text-red-500">
+                中止
+              </span>
+            )}
           </div>
         </div>
 
+        {/* アクションボタン（幹事のみ） */}
+        {isHost && !isCancelled && (
+          <div className="flex shrink-0 gap-2">
+            <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+              編集
+            </Button>
+            <Button variant="destructive" size="sm" onClick={handleCancel}>
+              中止
+            </Button>
+          </div>
+        )}
+      </div>
+
+      {/* 中段: イベント詳細（横並び） */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+        {/* 開催日時 */}
+        <div className="flex items-center gap-1">
+          <span>📅</span>
+          <span>
+            {startDateTime} 〜 {endDateTime.split("（")[1] || endDateTime}
+          </span>
+        </div>
+
         {/* 想定人数 */}
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">👥</span>
+        <div className="flex items-center gap-1">
+          <span>👥</span>
           <span>
             {event.capacity_min}〜{event.capacity_max}人
           </span>
         </div>
 
-        {/* 価格帯（オプション） */}
+        {/* 価格帯 */}
         {(event.price_min != null || event.price_max != null) && (
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">💰</span>
+          <div className="flex items-center gap-1">
+            <span>💰</span>
             <span>{priceRange}</span>
           </div>
         )}
-
-        {/* コメント（オプション） */}
-        {event.comment && (
-          <div className="mt-3 rounded bg-muted p-2">
-            <p className="text-sm">{event.comment}</p>
-          </div>
-        )}
       </div>
+
+      {/* 下段: コメント */}
+      {event.comment && <div className="rounded bg-muted p-2 text-sm">{event.comment}</div>}
+
+      <EventEditModal
+        event={event}
+        open={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        onSubmit={handleUpdate}
+        isLoading={isUpdating}
+      />
     </div>
-  )
+  );
 }

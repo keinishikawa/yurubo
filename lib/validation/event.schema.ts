@@ -21,7 +21,7 @@
  * - spec.md NFR-002: バリデーション要件
  */
 
-import { z } from 'zod'
+import { z } from "zod";
 
 /**
  * カテゴリ型
@@ -35,7 +35,7 @@ import { z } from 'zod'
  * z.enum()のデフォルトエラーメッセージは英語
  * フロントエンドでカスタムメッセージを使用することを推奨
  */
-export const categorySchema = z.enum(['drinking', 'travel', 'tennis', 'other'])
+export const categorySchema = z.enum(["drinking", "travel", "tennis", "other"]);
 
 /**
  * イベント作成フォームのバリデーションスキーマ
@@ -77,50 +77,56 @@ export const createEventSchema = z
   .object({
     // タイトル（必須、1〜50文字）
     title: z
-      .string({ message: 'タイトルを入力してください' })
-      .min(1, 'タイトルを入力してください')
-      .max(50, 'タイトルは50文字以内で入力してください'),
+      .string({ message: "タイトルを入力してください" })
+      .min(1, "タイトルを入力してください")
+      .max(50, "タイトルは50文字以内で入力してください"),
 
     // カテゴリ（必須）
     category: categorySchema,
 
     // 開始日時（必須、未来の日時）
-    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
+    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM または ISO 8601
     date_start: z
-      .string({ message: '開始日時を選択してください' })
-      .min(1, '開始日時を選択してください')
-      .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '開始日時の形式が正しくありません')
+      .string({ message: "開始日時を選択してください" })
+      .min(1, "開始日時を選択してください")
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:?\d{2})?$/,
+        "開始日時の形式が正しくありません"
+      )
       .refine(
         (date) => new Date(date) > new Date(),
-        '開始日時は現在時刻より未来を選択してください'
+        "開始日時は現在時刻より未来を選択してください"
       ),
 
     // 終了日時（必須、開始日時より未来）
-    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM
+    // HTML5 datetime-local形式: YYYY-MM-DDTHH:MM または ISO 8601
     // ※date_startとの比較は.refine()で実施
     date_end: z
-      .string({ message: '終了日時を選択してください' })
-      .min(1, '終了日時を選択してください')
-      .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/, '終了日時の形式が正しくありません'),
+      .string({ message: "終了日時を選択してください" })
+      .min(1, "終了日時を選択してください")
+      .regex(
+        /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d{1,3})?)?(Z|[+-]\d{2}:?\d{2})?$/,
+        "終了日時の形式が正しくありません"
+      ),
 
     // 最小参加人数（必須、1以上）
     capacity_min: z
-      .number({ message: '最小参加人数を入力してください' })
-      .int('最小参加人数は整数で入力してください')
-      .min(2, '最小参加人数は2人以上で入力してください'),
+      .number({ message: "最小参加人数を入力してください" })
+      .int("最小参加人数は整数で入力してください")
+      .min(2, "最小参加人数は2人以上で入力してください"),
 
     // 最大参加人数（必須、最小参加人数以上）
     // ※capacity_minとの比較は.refine()で実施
     capacity_max: z
-      .number({ message: '最大参加人数を入力してください' })
-      .int('最大参加人数は整数で入力してください')
-      .max(100, '最大参加人数は100人以下で入力してください'),
+      .number({ message: "最大参加人数を入力してください" })
+      .int("最大参加人数は整数で入力してください")
+      .max(100, "最大参加人数は100人以下で入力してください"),
 
     // 最小予算（オプション、0以上）
     price_min: z
       .number()
-      .int('最小予算は整数で入力してください')
-      .min(0, '最小予算は0円以上で入力してください')
+      .int("最小予算は整数で入力してください")
+      .min(0, "最小予算は0円以上で入力してください")
       .optional()
       .nullable(),
 
@@ -128,22 +134,18 @@ export const createEventSchema = z
     // ※price_minとの比較は.refine()で実施
     price_max: z
       .number()
-      .int('最大予算は整数で入力してください')
-      .max(1000000, '最大予算は1000,000円以下で入力してください')
+      .int("最大予算は整数で入力してください")
+      .max(1000000, "最大予算は1000,000円以下で入力してください")
       .optional()
       .nullable(),
 
     // 備考（オプション、500文字以内）
-    comment: z
-      .string()
-      .max(500, '備考は500文字以内で入力してください')
-      .optional()
-      .nullable(),
+    comment: z.string().max(500, "備考は500文字以内で入力してください").optional().nullable(),
 
     // 募集締切（オプション）
     deadline: z
       .string()
-      .datetime({ message: '募集締切の形式が正しくありません' })
+      .datetime({ message: "募集締切の形式が正しくありません" })
       .optional()
       .nullable(),
   })
@@ -152,46 +154,46 @@ export const createEventSchema = z
     // 終了日時 > 開始日時
     (data) => new Date(data.date_end) > new Date(data.date_start),
     {
-      message: '終了日時は開始日時より未来を選択してください',
-      path: ['date_end'], // エラーをdate_endフィールドに関連付け
+      message: "終了日時は開始日時より未来を選択してください",
+      path: ["date_end"], // エラーをdate_endフィールドに関連付け
     }
   )
   .refine(
     // 最大参加人数 >= 最小参加人数
     (data) => data.capacity_max >= data.capacity_min,
     {
-      message: '最大参加人数は最小参加人数以上で入力してください',
-      path: ['capacity_max'], // エラーをcapacity_maxフィールドに関連付け
+      message: "最大参加人数は最小参加人数以上で入力してください",
+      path: ["capacity_max"], // エラーをcapacity_maxフィールドに関連付け
     }
   )
   .refine(
     // 最大予算 >= 最小予算（両方が入力されている場合のみ）
     (data) => {
       // 両方nullの場合はOK
-      if (data.price_min == null && data.price_max == null) return true
+      if (data.price_min == null && data.price_max == null) return true;
       // 片方のみnullの場合はOK
-      if (data.price_min == null || data.price_max == null) return true
+      if (data.price_min == null || data.price_max == null) return true;
       // 両方入力されている場合は最大 >= 最小
-      return data.price_max >= data.price_min
+      return data.price_max >= data.price_min;
     },
     {
-      message: '最大予算は最小予算以上で入力してください',
-      path: ['price_max'], // エラーをprice_maxフィールドに関連付け
+      message: "最大予算は最小予算以上で入力してください",
+      path: ["price_max"], // エラーをprice_maxフィールドに関連付け
     }
   )
   .refine(
     // 募集締切 < 開催開始時刻（T071: Edge Case対応）
     (data) => {
       // deadlineが未設定の場合はバリデーションスキップ
-      if (data.deadline == null) return true
+      if (data.deadline == null) return true;
       // 募集締切は開催開始時刻より前である必要がある
-      return new Date(data.deadline) < new Date(data.date_start)
+      return new Date(data.deadline) < new Date(data.date_start);
     },
     {
-      message: '募集締切は開催開始時刻より前に設定してください',
-      path: ['deadline'],
+      message: "募集締切は開催開始時刻より前に設定してください",
+      path: ["deadline"],
     }
-  )
+  );
 
 /**
  * イベント作成入力の型
@@ -204,7 +206,7 @@ export const createEventSchema = z
  * Zodスキーマから自動的に型を推論（z.infer）
  * スキーマ変更時に型も自動更新される
  */
-export type CreateEventInput = z.infer<typeof createEventSchema>
+export type CreateEventInput = z.infer<typeof createEventSchema>;
 
 /**
  * イベント編集フォームのバリデーションスキーマ
@@ -218,9 +220,9 @@ export type CreateEventInput = z.infer<typeof createEventSchema>
  * 【特徴】
  * 作成スキーマと同じルールを使用（継承）
  */
-export const updateEventSchema = createEventSchema
+export const updateEventSchema = createEventSchema;
 
 /**
  * イベント編集入力の型
  */
-export type UpdateEventInput = z.infer<typeof updateEventSchema>
+export type UpdateEventInput = z.infer<typeof updateEventSchema>;
