@@ -40,6 +40,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -60,6 +62,8 @@ type PostEventModalProps = {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: CreateEventInput) => Promise<void>;
   isLoading?: boolean;
+  /** つながりリストの件数（0の場合に警告を表示） */
+  connectionCount?: number;
 };
 
 /**
@@ -169,6 +173,7 @@ export function PostEventModal({
   onOpenChange,
   onSubmit,
   isLoading = false,
+  connectionCount,
 }: PostEventModalProps) {
   // 【ステップ1】React Hook Form初期化
   const {
@@ -246,6 +251,16 @@ export function PostEventModal({
             つながりリスト内の該当カテゴリOKユーザーに配信されます（匿名投稿）
           </DialogDescription>
         </DialogHeader>
+
+        {/* つながりリスト未設定時の警告表示 (FR-019) */}
+        {connectionCount === 0 && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              つながりリストが設定されていません。設定画面から追加してください。
+            </AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
           {/* カテゴリ選択 (T049) */}

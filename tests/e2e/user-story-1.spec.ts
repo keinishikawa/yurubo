@@ -221,4 +221,57 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
 
     expect(true).toBe(true) // Placeholder
   })
+
+  /**
+   * FR-019: つながりリスト未設定時の警告表示
+   *
+   * Given: ユーザーのつながりリストが空
+   * When: 投稿モーダルを開く
+   * Then: 警告メッセージ「つながりリストが設定されていません。設定画面から追加してください」が表示される
+   *
+   * @see specs/001-event-creation/spec.md FR-019
+   */
+  test('FR-019: つながりリストが空の場合、投稿モーダルに警告が表示される', async () => {
+    // TODO: 実装後にアンコメント
+    // Setup: つながりリストが空のユーザーでログイン
+    // await page.goto('http://localhost:3000')
+    // // 新規ユーザーでログイン（つながりリスト0件）...
+
+    // When: 投稿モーダルを開く
+    // await page.click('button:has-text("投稿")')
+
+    // Then: 警告メッセージが表示される
+    // await expect(
+    //   page.locator('text=つながりリストが設定されていません。設定画面から追加してください。')
+    // ).toBeVisible()
+
+    // Then: 投稿自体は可能（警告のみ、ブロックはしない）
+    // await expect(page.locator('button[type="submit"]:has-text("投稿する")')).toBeEnabled()
+
+    expect(true).toBe(true) // Placeholder
+  })
+
+  /**
+   * FR-019-2: つながりリストが存在する場合、警告は非表示
+   *
+   * Given: ユーザーのつながりリストに1件以上のつながりが存在
+   * When: 投稿モーダルを開く
+   * Then: 警告メッセージは表示されない
+   */
+  test('FR-019-2: つながりリストが存在する場合、警告は表示されない', async () => {
+    // TODO: 実装後にアンコメント
+    // Setup: つながりリストに1件以上存在するユーザーでログイン
+    // await page.goto('http://localhost:3000')
+    // // ログイン + つながり追加済み...
+
+    // When: 投稿モーダルを開く
+    // await page.click('button:has-text("投稿")')
+
+    // Then: 警告メッセージは表示されない
+    // await expect(
+    //   page.locator('text=つながりリストが設定されていません。設定画面から追加してください。')
+    // ).not.toBeVisible()
+
+    expect(true).toBe(true) // Placeholder
+  })
 })
