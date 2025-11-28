@@ -129,9 +129,7 @@ export default function HomePage() {
 
       if (result.success) {
         // 成功時の処理 (T059)
-        toast.success(result.message, {
-          description: `匿名ID: ${result.data?.anon_id}`,
-        });
+        toast.success(result.message);
 
         // モーダルを閉じる
         setIsModalOpen(false);

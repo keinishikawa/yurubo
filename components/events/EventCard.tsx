@@ -3,19 +3,19 @@
  *
  * 【概要】
  * タイムラインに表示されるイベントカードコンポーネント
- * イベントの基本情報を匿名IDと共に表示する
+ * イベントの基本情報を完全匿名で表示する
  *
  * 【処理フロー】
  * 1. イベントデータをpropsで受け取る
  * 2. カテゴリに応じた絵文字を表示
- * 3. 開催日時、想定人数、価格帯、コメント、匿名IDを表示
- * 4. 投稿者の実名は一切表示しない（匿名性保証）
+ * 3. 開催日時、想定人数、価格帯、コメントを表示
+ * 4. 投稿者情報は一切表示しない（完全匿名）
  * 5. 幹事の場合、編集・中止ボタンを表示
  *
  * 【主要機能】
  * - イベント情報の視覚的表示
  * - カテゴリ絵文字アイコン
- * - 匿名ID表示（🍶A形式）
+ * - 完全匿名表示（投稿者名非表示）
  * - イベント編集・中止（幹事のみ）
  *
  * 【依存関係】
@@ -26,8 +26,19 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { getCategoryEmoji } from "@/lib/utils/generateAnonId";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { EventEditModal } from "./EventEditModal";
 import { updateEvent } from "@/app/actions/updateEvent";
 import { cancelEvent } from "@/app/actions/cancelEvent";
@@ -136,6 +147,7 @@ const CATEGORY_LABELS: Record<string, string> = {
  */
 export function EventCard({ event, currentUserId, onEventCancelled }: EventCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
   // 【データ準備】カテゴリ絵文字を取得
@@ -159,35 +171,39 @@ export function EventCard({ event, currentUserId, onEventCancelled }: EventCardP
       const result = await updateEvent(eventId, data);
       if (result.success) {
         // 成功時の処理
-        alert("イベントを更新しました");
+        toast.success("イベントを更新しました");
         // TODO: 画面更新（router.refresh()など）
       } else {
-        alert(result.message);
+        toast.error(result.message);
       }
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました");
+      toast.error("エラーが発生しました");
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const handleCancel = async () => {
-    if (!confirm("本当にイベントを中止しますか？この操作は取り消せません。")) return;
+  const handleCancelClick = () => {
+    setIsCancelAlertOpen(true);
+  };
 
+  const handleCancelConfirm = async () => {
     try {
       const result = await cancelEvent(event.id);
       if (result.success) {
-        alert("イベントを中止しました");
+        toast.success("イベントを中止しました");
         if (onEventCancelled) {
           onEventCancelled(event.id);
         }
       } else {
-        alert(result.message);
+        toast.error(result.message);
       }
     } catch (error) {
       console.error(error);
-      alert("エラーが発生しました");
+      toast.error("エラーが発生しました");
+    } finally {
+      setIsCancelAlertOpen(false);
     }
   };
 
@@ -198,16 +214,12 @@ export function EventCard({ event, currentUserId, onEventCancelled }: EventCardP
       {/* 上段: タイトル・属性・アクション */}
       <div className="mb-3 flex items-start justify-between gap-4">
         <div className="space-y-1">
-          {/* タイトル + カテゴリ + 作成者 */}
+          {/* タイトル + カテゴリ（完全匿名） */}
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-lg font-semibold leading-none">{event.title}</h3>
             <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs font-medium text-secondary-foreground">
               <span>{categoryEmoji}</span>
               <span>{categoryLabel}</span>
-            </span>
-            <span className="flex items-center gap-1 text-sm text-muted-foreground">
-              {/* 作成者アイコンは不要との指示のため削除し、IDのみ表示 */}
-              <span>{event.anon_id}</span>
             </span>
             {isCancelled && (
               <span className="rounded border border-red-500 px-1 text-xs font-bold text-red-500">
@@ -223,7 +235,7 @@ export function EventCard({ event, currentUserId, onEventCancelled }: EventCardP
             <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
               編集
             </Button>
-            <Button variant="destructive" size="sm" onClick={handleCancel}>
+            <Button variant="destructive" size="sm" onClick={handleCancelClick}>
               中止
             </Button>
           </div>
@@ -267,6 +279,26 @@ export function EventCard({ event, currentUserId, onEventCancelled }: EventCardP
         onSubmit={handleUpdate}
         isLoading={isUpdating}
       />
+
+      <AlertDialog open={isCancelAlertOpen} onOpenChange={setIsCancelAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>イベントを中止しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              この操作は取り消せません。イベントはタイムラインから削除され、参加者に通知されます。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleCancelConfirm}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              中止する
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
