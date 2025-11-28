@@ -32,6 +32,7 @@ import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createEvent } from "@/app/actions/createEvent";
 import { signOut } from "@/app/actions/signOut";
+import { getConnectionCount } from "@/lib/services/connection.service";
 import { PostEventModal } from "@/components/events/PostEventModal";
 import { FloatingPostButton } from "@/components/layout/FloatingPostButton";
 import { EventTimeline } from "@/components/events/EventTimeline";
@@ -92,17 +93,32 @@ export default function HomePage() {
   // 【ステップ2.8】現在のユーザーID取得 (US3)
   const [currentUserId, setCurrentUserId] = useState<string | undefined>(undefined);
 
+  // 【ステップ2.9】つながりリスト数の状態管理 (FR-019)
+  const [connectionCount, setConnectionCount] = useState<number | undefined>(undefined);
+
   useEffect(() => {
     const supabase = createClient();
-    const getUser = async () => {
+    const fetchUserData = async () => {
+      // ユーザーID取得
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
+
+        // つながりリスト数を取得 (FR-019)
+        // N+1クエリを防ぐため、取得済みのuser.idを渡す
+        const result = await getConnectionCount(supabase, user.id);
+        if (result.error === null) {
+          setConnectionCount(result.count);
+        } else {
+          console.error('つながり数取得エラー:', result.error);
+          toast.error('つながり情報の取得に失敗しました');
+          setConnectionCount(0);
+        }
       }
     };
-    getUser();
+    fetchUserData();
   }, []);
 
   // 【ステップ3】イベント作成ハンドラー
@@ -116,9 +132,7 @@ export default function HomePage() {
 
       if (result.success) {
         // 成功時の処理 (T059)
-        toast.success(result.message, {
-          description: `匿名ID: ${result.data?.anon_id}`,
-        });
+        toast.success(result.message);
 
         // モーダルを閉じる
         setIsModalOpen(false);
@@ -218,6 +232,7 @@ export default function HomePage() {
         onOpenChange={setIsModalOpen}
         onSubmit={handleCreateEvent}
         isLoading={isCreating}
+        connectionCount={connectionCount}
       />
     </main>
   );

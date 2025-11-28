@@ -186,9 +186,54 @@ AIの記憶やチャット履歴に依存せず、以下の2つのファイル�
 
 **フォーマット**:
 
-```
-<type>(<scope>): <subject>
-```
+| セッション     | ブランチ                            | 依存関係          | 状態   |
+| --------- | ------------------------------- | ------------- | ---- |
+| Claude #1 | `feature/000-phase2-foundation` | なし            | マージ済 |
+| Claude #2 | `feature/001-us1-event-posting` | Phase 2マージ済み  | 並列開発 |
+| Claude #3 | `feature/001-us2-timeline-view` | Phase 2マージ済み  | 並列開発 |
+| Claude #4 | `feature/001-us3-event-edit`    | US1マージ待ち     | 待機中  |
+
+**原則:**
+- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
+- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
+- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
+- Epic全体を1つのPRにまとめない（レビューが困難になるため）
+- 各セッションは独立したストーリー番号で作業
+- main更新後は `git pull origin main` で差分を早期吸収
+
+### CI / Branch Protection
+
+- `.github/workflows/ci.yml` に lint + test を自動化
+- PR時にCIが緑でない場合はマージ不可（保護ルール）
+- mainブランチは常にテスト通過済み状態を保証
+
+**GitHub設定例**:
+- Require PR before merge ✅
+- Require status checks ✅
+- Block force pushes ✅
+- Delete branch after merge ✅
+
+### プルリクエスト作成ワークフロー
+
+**基本原則**:
+
+1. **PR作成後、claude-reviewの結果を必ず確認する**
+   - `gh pr view <PR番号> --comments`でレビュー結果を取得
+
+2. **Critical Issuesは必ず修正する**
+   - 🔴 Critical Issues: パフォーマンス、セキュリティ、バグなど重大な問題
+   - 修正→再コミット→プッシュ→再度レビュー確認
+
+3. **Moderate/Minor Issuesの対応方針**
+   - 🟡 Moderate Issues: 可能な限り修正（コード品質、保守性に影響）
+   - 💡 Minor Suggestions: ユーザーに確認してから判断
+
+4. **すべてのCIチェックが通過するまでマージしない**
+   - lint-and-test、claude-reviewともにSUCCESS状態を確認
+
+### PRレビュー確認のベストプラクティス
+
+**重要**: GitHub APIには2種類のコメントエンドポイントが存在します。
 
 ※ `<subject>` は日本語で記述してください。
 
