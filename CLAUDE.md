@@ -185,49 +185,21 @@ feature/001-us3-event-edit     ← User Story 3（イベント編集）
 
 ### プルリクエスト作成ワークフロー
 
-**基本フロー**:
+**基本原則**:
 
-1. **変更のコミット・プッシュ**
-   ```bash
-   git add -A
-   git commit -m "commit message"
-   git push -u origin <ブランチ名>
-   ```
+1. **PR作成後、claude-reviewの結果を必ず確認する**
+   - `gh pr view <PR番号> --comments`でレビュー結果を取得
 
-2. **PRを作成**
-   ```bash
-   gh pr create --title "タイトル" --body "説明" --base main
-   ```
+2. **Critical Issuesは必ず修正する**
+   - 🔴 Critical Issues: パフォーマンス、セキュリティ、バグなど重大な問題
+   - 修正→再コミット→プッシュ→再度レビュー確認
 
-3. **CI完了を待機（30-60秒）**
-   - lint-and-test
-   - claude-review
+3. **Moderate/Minor Issuesの対応方針**
+   - 🟡 Moderate Issues: 可能な限り修正（コード品質、保守性に影響）
+   - 💡 Minor Suggestions: ユーザーに確認してから判断
 
-4. **claude-reviewの結果を確認**
-   ```bash
-   gh pr view <PR番号> --comments
-   ```
-
-5. **Critical Issuesの確認と修正**
-   - 🔴 Critical Issues（必須修正）がある場合:
-     - 指摘内容を確認
-     - 修正を実施
-     - 再コミット・プッシュ
-     - ステップ3に戻る
-   - 🟡 Moderate Issues / 💡 Minor Suggestions（推奨）:
-     - 時間があれば対応
-     - 次のPRで対応も可
-
-6. **すべてのチェックが通過したら完了**
-   ```bash
-   gh pr checks <PR番号>
-   # すべてSUCCESSを確認
-   ```
-
-**重要原則**:
-- ✅ Critical Issuesは**必ず修正**してからマージ
-- ⚠️ Moderate/Minor Issuesは**判断して対応**
-- 🚫 CIが赤の状態でマージしない
+4. **すべてのCIチェックが通過するまでマージしない**
+   - lint-and-test、claude-reviewともにSUCCESS状態を確認
 
 ### PRレビュー確認のベストプラクティス
 
