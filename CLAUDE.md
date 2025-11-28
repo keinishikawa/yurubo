@@ -4,13 +4,113 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## プロジェクト憲法 (Project Instructions)
+
+あなたは、このプロジェクトにおける優秀なシニアエンジニアであり、自律的な開発エージェントです。以下のルールを厳守して開発を進めてください。
+
+### 1. 基本行動指針 (Core Behavior)
+
+- **言語:** 思考プロセス、チャット応答、作成するドキュメント、コミットメッセージなど、すべて **日本語** で行ってください。
+- **役割:** Next.js (App Router), Supabase, TypeScript のエキスパートとして振る舞ってください。
+
+### 2. GitHub Issue 至上主義 (SSOT Strategy)
+
+このプロジェクトにおける「要件の正解（Single Source of Truth）」は、常に **GitHub Issue** です。
+
+- **情報の優先度:**
+  1. **GitHub Issue (最優先/絶対)**
+  2. コードベースの現状
+  3. `spec.md` / `tasks.md` (これらは初期生成用のアーカイブであり、**実装中は参照しないでください**)
+
+- **タスク着手時のルール:**
+  - ユーザーからタスク（Issue番号）を指示された場合、必ず最初にターミナルで `gh issue view <number>` を実行し、最新の要件と文脈を把握してください。
+  - Issueの内容とコードの現状が食い違っている場合は、ユーザーに確認を求めてください。
+
+### 3. タスクリストの運用 (Task Management)
+
+AntigravityのUI上にある「Task List (Artifact)」は、**Issueを解決するための「一時的な戦術プラン」**として扱います。
+
+- **作成:** Issueの要件（What）を満たすために必要な、具体的な実装ステップ（How）をTask Listとして生成してください。
+- **粒度:** ファイル作成、関数実装、テスト追加など、実行可能なレベルまで分解してください。
+- **完了:** Issueが解決（PR作成）された時点で、Task Listは役割を終えます。
+
+### 4. 実装とテスト (TDD & E2E)
+
+- **テスト駆動:** ロジックや機能要件については、実装前にテストケース（再現スクリプトやテストコード）を作成・実行し、失敗することを確認してください。UI実装などの詳細は「ハイブリッドテスト戦略」に従います。
+- **E2Eテスト (Playwright):**
+  - ブラウザ操作による検証を行った後、その操作手順を **Playwright のテストコードとして永続化** してください。
+  - 「手動で確認して終わり」にせず、自動テスト資産を残すことを義務とします。
+
+### 5. 完了の定義 (Definition of Done)
+
+タスクの完了は以下の状態を指します。
+
+1. Issueの要件がすべて満たされている。
+2. 関連するテスト（Unit/E2E）がパスしている。
+3. **Lintエラー・型エラーが存在しない（`npm run lint`, `npm run type-check` がパスする）。**
+4. **GitHub PR が作成されている。**
+   - 最後に `gh pr create` を使用してPull Requestを作成してください。
+   - PRの本文には `Closes #<issue_number>` を含め、変更内容の要約を記載してください。
+
+### 6. 禁止事項 (Deny List)
+
+- ユーザーの許可なく `spec.md` などの仕様ドキュメントを書き換えないでください。
+- 破壊的なコマンド（`rm -rf` 等）は慎重に扱ってください。
+
+### 7. 外部記憶管理 (Harness Protocol)
+
+AIの記憶やチャット履歴に依存せず、以下の2つのファイルを「正」として参照・更新してください。
+（参考: Anthropic「Effective harnesses for long-running agents」）
+
+#### A. `ROADMAP.md` （長期記憶 / Git管理）
+
+- **役割**: Epic/マイルストーン単位の進捗ダッシュボード
+- **内容**: プロジェクト概要、アーキテクチャ概要、Epic進捗一覧
+- **更新タイミング**: User Story完了時（PRマージ後）
+- **注意**: 詳細仕様は記載しない（`docs/`, `specs/` を参照）
+
+#### B. `current_task.md` （短期記憶 / Git管理外）
+
+- **役割**: 現在のワークツリーにおける作業ログ
+- **内容**: 現在のIssue番号、思考プロセス、エラーログ、次のステップ
+- **更新タイミング**: 作業の1ステップごと（頻繁に更新）
+- **Git運用**: `.gitignore` に追加済み。**絶対にコミットしないこと。**
+  - 理由: `git worktree` 並列開発時のマージコンフリクト防止
+- **新規worktree作成時**: テンプレートからコピーして作成
+  ```bash
+  cp current_task.template.md current_task.md
+  ```
+
+#### 作業プロトコル
+
+1. **Initialize（状況把握）**:
+   - `gh issue view <number>` で最新の要件を確認
+   - `ROADMAP.md` でプロジェクト全体像を把握
+   - `current_task.md` で直前の作業状況を把握（なければ作成）
+
+2. **Plan（計画）**:
+   - `current_task.md` に「これからやるタスク」と「検証方法」を記述
+
+3. **Act & Update（実行と記録）**:
+   - コードを実装・テストを実行
+   - **重要**: 結果（成功/失敗）と次のアクションを `current_task.md` に追記
+
+4. **Commit（セーブ）**:
+   - タスク完了＋テストパス後にGitコミット
+   - ※ `current_task.md` はコミットに含めない
+
+5. **Milestone Update（マイルストーン更新）**:
+   - PRマージ後、`ROADMAP.md` の進捗を更新
+
+---
+
 ## プロジェクト概要
 
 **ゆるぼ (YURUBO)** は、人間関係の「誘う・断る」摩擦をゼロにする匿名型イベント調整プラットフォーム。
 
 > SNS が「見る関係」を作ったのであれば、ゆるぼは「動く関係」を作る。
 
-**現在の状態**: 初期企画・仕様策定フェーズ（実装前）
+**現在の状態**: 初期企画・仕様策定フェーズ（実装中）
 
 ### アーキテクチャ概要
 
@@ -24,7 +124,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Infra           | Vercel / Supabase Cloud                        |
 
 **主要データモデル**: users, events, participants, stores, messages, settlements, tasks
-
 詳細は [docs/techplan.md](docs/techplan.md) を参照。
 
 ### 設計哲学
@@ -33,15 +132,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - AIは候補提示まで。確定操作は必ず人間が行う
 - 店舗予約などの決済・契約操作は自動化しない
-
----
-
-## 応答言語
-
-- **応答言語**: 日本語
-- **コードコメント**: すべて日本語で記述
-- **技術用語**: 英語のまま使用可（例: Server Components, Props）
-- **変数名・関数名**: 英語（言語規約に従う）
 
 ---
 
@@ -56,37 +146,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - 不要な抽象化・汎用化・将来の拡張を見越した設計は行わない
   - 明示的に依頼された場合のみ実装
 
-**目的**: 冗長な実装や複雑な条件分岐を避け、開発初期の効率を最大化
+- **未リリース段階の実装原則**:
+  - 機能フラグ・後方互換レイヤー・バージョン分岐は作成しない
+  - 「現在の仕様に対する単一の実装パス」のみを記述
+  - 不要な抽象化・汎用化は行わない（YAGNI）
+- **禁止事項**:
+  - ❌ 不要な抽象化・過剰設計
+  - ❌ 推測による仕様追加
 
-### 実行環境制約
-
-- **Python等のランタイムコードを実行しない**
-- 静的なコード例・疑似コード・構造の説明を優先
-- ファイル操作、環境変数、パッケージインストールなど実行環境依存処理は記述しない
-- 「実行した場合の推定結果」提示も行わない
-
-**目的**: 存在しない実行環境を前提にした回答による混乱を防ぐ
-
-### 応答ポリシー
-
-- 不明点は推測せず、必要な情報を明確に質問
-- 問題解決に関係のない文言（雑談・感謝など）は含めない
-- 回答は質問内容に直接関連したものに限定、冗長な文章を避ける
-
-### 禁止事項
+### 技術的な制約 (Technical Constraints)
 
 - ❌ 不要な抽象化・過剰設計
 - ❌ 後方互換コード・将来拡張のための分岐
-- ❌ Python等のコード実行
-- ❌ 環境依存処理の自動追加
 - ❌ 推測による仕様追加
-
-### 期待されるアウトプット
-
-- ✅ 明確でシンプルな実装方針
-- ✅ 過度な抽象化や技術的複雑性のないコード
-- ✅ 必要な場合のみ追加ヒアリング
-- ✅ 静的コード例・非実行前提の構造化された出力
 
 ---
 
@@ -96,303 +168,171 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Trunk-Based Development** を採用
 - `main` ブランチは常に動作保証された状態を維持
-- すべての変更は PR 経由で `main` に統合（直接 push 禁止）
-- Claude / Cursor のセッション単位で責務を分離し、各自専用ブランチで作業
+- すべての変更は PR 経由で `main` に統合
 
 ### ブランチ命名規則
 
-| 種別                         | 命名例                       | 内容                                        |
-| -------------------------- | ------------------------- | ----------------------------------------- |
-| **機能開発（User Story単位）** ⭐CRITICAL | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting`（UI+API+テスト） |
-| **Phase/基盤構築**            | `feature/000-{説明}`        | 例：`feature/000-phase2-foundation`         |
-| 環境構築                       | `infra/<対象>`              | 例：`infra/setup-ci`                        |
-| バグ修正                       | `fix/<内容>`                | 例：`fix/ui-modal-close`                    |
-| リファクタ                      | `refactor/<範囲>`           | 例：`refactor/event-schema`                 |
-| 実験／検証                      | `exp/<内容>`                | 例：`exp/claude-prompt-tuning`              |
+| 種別         | 命名例                                      | 備考                                |
+| ------------ | ------------------------------------------- | ----------------------------------- |
+| **機能開発** | `feature/{3桁Epic番号}-us{US番号}-{機能名}` | 例：`feature/001-us1-event-posting` |
+| **基盤構築** | `feature/000-{説明}`                        | 例：`feature/000-phase2-foundation` |
+| **修正/他**  | `fix/...`, `refactor/...`, `docs/...`       |                                     |
 
-**⭐ CRITICAL: Epic vs User Story の重要な違い**:
-- **Epic**: 複数のUser Storyを含む大きな機能単位（例: Epic 001 = イベント作成機能全体）
-- **User Story**: 独立して完結できる小さな機能単位（例: US1 = イベント投稿、US2 = タイムライン閲覧）
-- **必須**: 1つのEpicに複数User Storyがある場合、**必ずUser Story単位でブランチを分ける**
-- **命名**: `feature/{Epic番号}-us{US番号}-{機能名}` 形式を厳守
+**重要**: 1つのブランチは「**1 User Story完結**」に対応させる（Epic単位ではない）。
 
-**重要原則**:
-- **1 User Story = 1ブランチ = 1 PR = UI + API + テスト全部含む**
-- SpecKit機能は必ず`feature/{3桁数字}-`形式を使用
-- Phase/基盤構築も数字プレフィックスで管理（000番台推奨）
+### コミットメッセージ規約
 
-**アンチパターン（禁止）**:
-❌ Epic単位のブランチ（例: `feature/001-event-creation`に複数User Storyを混在）
-  → 複数セッションでの作業衝突、tasks.md競合、PRが巨大化
-❌ 同一ストーリーをUI/APIで分割（例: `001-ui-xxx`, `001-api-xxx`）
-  → SpecKitスクリプトが競合し、spec.md編集が衝突する
+[Conventional Commits](https://www.conventionalcommits.org/)に従います。
 
-### 運用ルール
-
-- 1つのブランチは「**1 User Story完結**」に対応（Epicではない）
-- UI/API分割せず、1ストーリーを1ブランチで完結させる
-- 作業時間の目安：**1〜3時間〜半日で完了できる粒度**
-- 作業終了後、PRを作成しCI通過後に`main`へマージ（1 PR = 1 User Story）
-- マージ後はブランチ自動削除（GitHub設定推奨）
-- 複数User Storyを含むEpicの場合、各User Storyごとに独立したブランチを作成
-
-### 並行開発戦略（Claude複数セッション運用）
-
-**依存関係に基づく並列開発:**
+**フォーマット**:
 
 ```
-# 基盤構築（依存: なし）
-feature/000-phase2-foundation ← 最優先でマージ
-
-# Epic 001の並列開発（依存: Phase 2のみ）
-feature/001-us1-event-posting  ← User Story 1（イベント投稿）
-feature/001-us2-timeline-view  ← User Story 2（タイムライン閲覧）
-feature/001-us3-event-edit     ← User Story 3（イベント編集）
-
-# 各User Storyは独立してマージ可能
-# US1とUS2は並行開発可能（ファイル衝突なし）
-# US3はUS1に依存（イベント作成後に編集機能）
+<type>(<scope>): <subject>
 ```
 
-**実運用例:**
+※ `<subject>` は日本語で記述してください。
 
-| セッション     | ブランチ                            | 依存関係          | 状態   |
-| --------- | ------------------------------- | ------------- | ---- |
-| Claude #1 | `feature/000-phase2-foundation` | なし            | マージ済 |
-| Claude #2 | `feature/001-us1-event-posting` | Phase 2マージ済み  | 並列開発 |
-| Claude #3 | `feature/001-us2-timeline-view` | Phase 2マージ済み  | 並列開発 |
-| Claude #4 | `feature/001-us3-event-edit`    | US1マージ待ち     | 待機中  |
+**Type一覧**:
 
-**原則:**
-- 依存のないUser Story同士は並列開発OK（例: US1とUS2は独立）
-- 依存のあるUser Storyは前のUser Storyのmainマージを待つ（例: US3はUS1に依存）
-- 各User Storyは独立したPRで完結（1 PR = 1 User Story）
-- Epic全体を1つのPRにまとめない（レビューが困難になるため）
-- 各セッションは独立したストーリー番号で作業
-- main更新後は `git pull origin main` で差分を早期吸収
+- **feat**: 新機能
+- **fix**: バグ修正
+- **docs**: ドキュメントのみの変更
+- **style**: コードの動作に影響しない変更（フォーマット等）
+- **refactor**: バグ修正や機能追加ではないコード変更
+- **test**: テストの追加・修正
+- **chore**: ビルドプロセスやツールの変更
 
-### CI / Branch Protection
+**運用ルール**:
 
-- `.github/workflows/ci.yml` に lint + test を自動化
-- PR時にCIが緑でない場合はマージ不可（保護ルール）
-- mainブランチは常にテスト通過済み状態を保証
+- **こまめなコミット**: 作業の論理的な区切り（1つの関数実装、1つのテスト追加など）ごとにコミットすることを推奨します。
+- **WIPコミット**: 作業途中でも `wip: ...` としてコミットし、進捗を保存することを許容します。
 
-**GitHub設定例**:
-- Require PR before merge ✅
-- Require status checks ✅
-- Block force pushes ✅
-- Delete branch after merge ✅
+### Pull Request ガイドライン
 
-### PRレビュー確認のベストプラクティス
+**PRタイトル**: `[機能番号] 簡潔な説明`
+例: `[001-US1] イベント投稿機能の実装`
 
-**重要**: GitHub APIには2種類のコメントエンドポイントが存在します。
+**PR説明テンプレート**:
 
-| エンドポイント | 取得できるコメント | 用途 |
-|--------------|-----------------|------|
-| `/repos/{owner}/{repo}/issues/{number}/comments` | **Issue comments**（PR全体への総合コメント） | ClaudeレビューなどのPR全体へのコメント |
-| `/repos/{owner}/{repo}/pulls/{number}/comments` | **Review comments**（コード行への指摘） | 特定コード行への指摘コメント |
+```markdown
+## 概要
 
-**推奨コマンド**:
-```bash
-# ✅ 推奨: gh CLIの高レベルコマンドを使用
-gh pr view {PR番号}                    # PR全体の情報を表示
-gh pr view {PR番号} --comments         # すべてのコメントを表示
-gh pr checks {PR番号}                  # CI/CDステータスを確認
+[何を実装したか]
 
-# ⚠️ 低レベルAPI使用時の注意
-# Claudeレビューなどの総合コメントを取得する場合
-gh api repos/{owner}/{repo}/issues/{PR番号}/comments
+## User Story
 
-# コード行への指摘コメントを取得する場合
-gh api repos/{owner}/{repo}/pulls/{PR番号}/comments
+[関連するUser Story]
+
+## 変更内容
+
+- [変更点1]
+
+## テスト
+
+- [ ] 単体テスト: すべてパス
+- [ ] E2Eテスト: 該当シナリオパス
+
+## チェックリスト
+
+- [ ] 型エラーなし
+- [ ] リントエラーなし
 ```
 
-**注意事項**:
-- ClaudeレビューはGitHub Actionsで動作し、**Issue comment**として投稿される
-- `/pulls/{number}/comments`ではClaudeレビューが取得できない
-- 完全なレビュー情報を得るには両方のエンドポイントを使用するか、`gh pr view --comments`を使用
+**ベストプラクティス**:
 
----
-
-## 開発ワークフロー: SpecKit
-
-SpecKitは仕様優先開発ワークフローです。
-
-### SpecKitコマンド順序
-
-1. **`/speckit.specify`** - 自然言語から機能仕様を作成
-2. **`/speckit.clarify`** - 仕様の曖昧な部分を質問
-3. **`/speckit.plan`** - 設計成果物と実装計画を生成
-4. **`/speckit.tasks`** - 依存関係順のタスクリスト生成
-5. **`/speckit.implement`** - タスクを処理して実装（完了タスクを自動的に`[X]`マーク）
-6. **`/speckit.analyze`** - 成果物間の整合性分析
-7. **`/speckit.checklist`** - 機能固有チェックリスト生成
-
-### 基本原則
-
-- 新機能実装時は必ず`/speckit.specify`から開始
-- 仕様フェーズをスキップしない
-- テンプレートは`.specify/templates/`を使用
-
----
-
-## 主要な設計原則
-
-### 1. ストーリー駆動開発
-
-- 実装は**ユーザーストーリー**を中心に組織化
-- 各ストーリーには受入基準、バリデーションルール、エラーハンドリングを含む
-
-### 2. シンプルさ優先（YAGNI）
-
-- 最小構成で動く実装を構築
-- 複雑なオーケストレーションは延期
-- 「小さな関数を積み重ねる」哲学
-
-### 3. 型安全性とバリデーション
-
-- TypeScript strict mode使用
-- Zodなどでバリデーションスキーマを定義
-- フロントエンドとバックエンドでスキーマ再利用
+- **User Story単位のPR**: 1PR = 1 User Story
+- **self-review**: PRを出す前に自分でコードを見直す
+- **tasks.mdの更新**: タスク完了時は必ず`[X]`でマーク
 
 ---
 
 ## テスト戦略と要件
 
+### ハイブリッドテスト戦略 (Hybrid Testing Strategy)
+
+**「堅牢なロジック」と「柔軟なUI開発」を両立させるため、以下の戦略を採用します。**
+
+| 対象                     | テスト方針                   | 具体的なアクション                                               |
+| :----------------------- | :--------------------------- | :--------------------------------------------------------------- |
+| **ロジック・複雑な処理** | **TDD (Test Driven)**        | 実装前にUnit Test (Jest) を書き、ロジックの正当性を保証する。    |
+| **UI / UX**              | **試行錯誤 (Trial & Error)** | Unit Test不要。ブラウザでの目視確認と微調整を優先する。          |
+| **User Story (機能)**    | **E2E (Playwright)**         | **PR作成前の必須要件**。機能全体が正しく動作することを保証する。 |
+
 ### テスト構成
 
 ```
 tests/
-  unit/       ← Jest + React Testing Library
-  e2e/        ← Playwright
+  unit/       ← Jest (ロジック用)
+  e2e/        ← Playwright (User Story検証用)
 ```
 
-### テスト層の方針
+### テスト実行ガイドライン
 
-| 層               | 対象            | 主目的             | 推奨ツール      | 備考             |
-| --------------- | ------------- | --------------- | ---------- | -------------- |
-| 単体（Unit）        | ロジック・小コンポーネント | ロジック・描画テスト      | Jest + RTL | 状態変化やバリデーションなど |
-| 統合（Integration） | コンポーネント間連携    | storeやhooks動作確認 | RTL        | 状況に応じて         |
-| E2E（End-to-End） | 画面操作〜API応答    | UXと主要フロー保証      | Playwright | 初期段階はE2EメインでOK |
+#### 1. ロジック実装時 (TDD)
 
-### 実行ポリシー
+- 対象: ユーティリティ関数、複雑なデータ変換、バリデーションロジック
+- 手順:
+  1. `tests/unit/` にテストファイルを作成
+  2. テストケースを記述 (Fail)
+  3. 実装 (Pass)
+  4. リファクタリング
 
-- **PR作成時**: Lint + Unit Test（GitHub Actions自動実行）
-- **mainマージ前 or 定期実行**: E2E（Playwright）を nightly で実行
-- **初期フェーズ**: E2E優先で体験保証、Unit Testは段階的に追加
+#### 2. UI実装時
 
-### Bottom-Up TDD Workflow
+- 対象: コンポーネントの見た目、単純なインタラクション
+- 手順:
+  1. Storybookや実際の画面で確認しながら実装
+  2. 複雑な状態管理が含まれる場合のみ、そのロジック部分を切り出してUnit Testする
 
-```
-Phase 1: 要件理解
-  ↓
-Phase 2: 単体テスト（RED → GREEN → REFACTOR）
-  ↓
-Phase 3: 統合テスト
-  ↓
-Phase 4: E2Eテスト（受入シナリオ全カバー）
-```
+#### 3. 機能完成時 (E2E)
 
-### テストカバレッジ要件
-
-#### 1. 単体テスト（Jest）
-- **対象**: ユーティリティ関数、バリデーションロジック、ビジネスロジック
-- **配置**: 実装ファイルと同じディレクトリに `*.test.ts`
-- **実行**: `npm test`
-
-#### 2. 統合テスト（Jest）
-- **対象**: APIルート、データベース相互作用、コンポーネント間連携
-- **配置**: 実装ファイルと同じディレクトリに `route.test.ts` または `integration.test.ts`
-- **実行**: `npm test`
-
-#### 3. E2Eテスト（Playwright）
-- **対象**: 重要なユーザーフロー、受入シナリオ
-- **配置**: `tests/e2e/` にUser Story単位
-- **重要**: spec.mdの受入シナリオを**すべて**テストケースに含める
-- **実行**: `npm run test:e2e`
-
-### テスト作成のガイドライン
-
-1. **受入基準をテスト仕様として使用**
-   - spec.mdの受入シナリオ → テストケース
-   - Given-When-Then形式を活用
-
-2. **AAA パターン**
-   ```typescript
-   test('タイトルが有効な場合イベントを保存', async () => {
-     // Arrange: 準備
-     const eventData = { title: 'テストイベント' };
-
-     // Act: 実行
-     const result = await saveEvent(eventData);
-
-     // Assert: 検証
-     expect(result.success).toBe(true);
-   });
-   ```
-
-3. **テストは独立させる**
-   - 他のテストに依存しない
-   - 実行順序に依存しない
-
-4. **エラーケースを含める**
-   - 正常系・異常系の両方をテスト
-
-### タスク完了の定義（Definition of Done）
-
-- ✅ Phase 2: 単体テスト作成済み、すべてパス
-- ✅ Phase 3: 統合テスト作成済み、すべてパス
-- ✅ Phase 4: E2Eテスト作成済み、受入シナリオ全カバー
-- ✅ 型エラーなし
-- ✅ リントエラーなし
-- ✅ **tasks.md更新**: 完了したタスクは必ず`- [X]`でマーク（/speckit.implementが自動更新）
+- 対象: User Story全体のフロー
+- 手順:
+  1. `tests/e2e/` にUser Story単位のテストを作成
+  2. 正常系・異常系の主要シナリオを網羅
+  3. `npm run test:e2e` がパスすることを確認してからPRを作成
 
 ### CI/CD実行フロー
 
 **.github/workflows/ci.yml**:
-- Lint実行（ESLint）
-- 単体・統合テスト実行（Jest）
-- E2Eテスト実行（Playwright）
-- すべて通過で緑チェック → PRマージ可能
+
+- Lint & Type Check
+- Unit Test (Jest)
+- E2E Test (Playwright)
+- **すべて通過でマージ可能**
 
 ---
 
 ## エラーハンドリング
 
-### 統一されたエラーレスポンス形式
+### 統一レスポンス形式
 
 ```typescript
-// 成功時
 {
-  success: true,
-  message: '成功メッセージ',
-  code: 'SUCCESS_CODE'
-}
-
-// エラー時
-{
-  success: false,
-  message: 'エラーメッセージ',
-  code: 'ERROR_CODE'
+  success: boolean;
+  message: string; // 日本語
+  code?: string;
+  data?: T;
 }
 ```
 
 ### 原則
 
-- すべてのユーザー入力をバリデーション
+- すべてのユーザー入力をバリデーション（Zod使用）
 - エラーメッセージは日本語で明確に
-- 一時的な障害はリトライロジック実装
-- エラーをログに記録
+- エラーはログに記録する
 
 ---
 
 ## 学習補助システム
 
-プロジェクトは**ハイブリッド学習方式**を採用し、コード内コメント（基本）+ `.learning/`ディレクトリ（詳細解説）の2層構造で学習を支援する。
+### コードコメント記述ルール
 
-### コメント記述ルール（コード内）
+- **ファイル冒頭**: 概要と依存関係、`@see .learning/tasks/...` へのリンク
+- **関数/メソッド**: JSDoc形式で説明、引数、戻り値を記述
+- **インライン**: 複雑なロジックのみ簡潔に
 
-**目的**: コードの可読性を保ちながら、基本的な理解を支援
+### .learning/ ディレクトリ
 
 #### 1. ファイル全体のコメント（ファイル冒頭に記述）
 
@@ -411,6 +351,7 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 ```
 
 **変更点**:
+
 - 【処理フロー】【主要機能】は削除 → `.learning/` へ移動
 - `@see` タグで学習ガイドへのリンクを追加
 
@@ -426,6 +367,7 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 ```
 
 **変更点**:
+
 - 【処理内容】【使用例】は削除 → `.learning/` へ移動
 - JSDoc形式を維持（IDE補完のため）
 
@@ -433,12 +375,11 @@ Phase 4: E2Eテスト（受入シナリオ全カバー）
 
 ```typescript
 // 複雑なロジックのみコメント（簡潔に）
-const filteredUsers = users.filter(user =>
-  user.category_flags[categoryId] === true
-);
+const filteredUsers = users.filter((user) => user.category_flags[categoryId] === true);
 ```
 
 **変更点**:
+
 - 【文法】【処理】タグは削除
 - 自明でないロジックのみコメント
 
@@ -462,22 +403,6 @@ const filteredUsers = users.filter(user =>
     └── testing-strategy.md
 ```
 
-#### タスク実装ガイドのテンプレート
-
-`.specify/templates/learning-task-template.md` を参照
-
-**記載内容**:
-- 実装概要（spec.mdからの抜粋）
-- 技術解説（使用技術、文法・パターン解説）
-- 実装手順（ステップバイステップ）
-- コード例（Bad/Good比較）
-- テストケース
-- トラブルシューティング
-
-**作成タイミング**:
-- Phase 3以降: タスク実装時に手動作成
-- Phase 4以降: `/speckit.implement` による自動生成
-
 ### エラー発生時の対応
 
 #### エラー連続時の対応手順
@@ -490,6 +415,7 @@ const filteredUsers = users.filter(user =>
    - 関連するファイル・設定を確認
 
 2. **ユーザーに修正方針を提示**
+
    ```
    【エラー分析結果】
    - エラー内容: [エラーメッセージ]
@@ -513,17 +439,6 @@ const filteredUsers = users.filter(user =>
 - バリデーションを必ず実装する
 - テストファーストで実装する
 - 小さい単位でコミット・検証する
-
----
-
-## ベストプラクティス
-
-1. **常にSpecKitワークフローを使用** - 仕様フェーズをスキップしない
-2. **ユーザーストーリーに対してバリデーション** - 各機能をストーリーにマッピング
-3. **テストファーストで記述** - 受入基準をテスト仕様として使用
-4. **シンプルに保つ** - 早すぎる最適化や複雑な抽象化を避ける
-5. **エラーメッセージ** - 明確で実行可能な日本語メッセージ
-6. **一貫したAPI形式** - 常に `{ success, message, code }` 構造
 
 ---
 
@@ -563,15 +478,14 @@ npm run lint
 
 ---
 
-## 重要な参照ドキュメント
+### 読み込むべきファイル優先順位
 
-- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様（6フェーズ設計、UI構成）
-- [docs/techplan.md](docs/techplan.md) - 技術仕様（データモデル、AIモジュール、通知ロジック）
-- [docs/figma.md](docs/figma.md) - UI/UXフロー、画面遷移、Prototypeガイド
+1. **必須**: CLAUDE.md / GEMINI.md
+2. **仕様**: specs/{epic-id}/spec.md
+3. **設計**: specs/{epic-id}/plan.md
+4. **タスク**: specs/{epic-id}/tasks.md
 
-## Active Technologies
-- TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS (001-event-creation)
-- Supabase (PostgreSQL 15) with Row-Level Security (001-event-creation)
+### 重要な参照ドキュメント
 
-## Recent Changes
-- 001-event-creation: Added TypeScript 5.x / Next.js 15 (App Router) + React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS
+- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様
+- [docs/techplan.md](docs/techplan.md) - 技術仕様
