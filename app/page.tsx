@@ -105,14 +105,17 @@ export default function HomePage() {
       } = await supabase.auth.getUser();
       if (user) {
         setCurrentUserId(user.id);
-      }
 
-      // つながりリスト数を取得 (FR-019)
-      const result = await getConnectionCount(supabase);
-      if (result.error === null) {
-        setConnectionCount(result.count);
-      } else {
-        setConnectionCount(0);
+        // つながりリスト数を取得 (FR-019)
+        // N+1クエリを防ぐため、取得済みのuser.idを渡す
+        const result = await getConnectionCount(supabase, user.id);
+        if (result.error === null) {
+          setConnectionCount(result.count);
+        } else {
+          console.error('つながり数取得エラー:', result.error);
+          toast.error('つながり情報の取得に失敗しました');
+          setConnectionCount(0);
+        }
       }
     };
     fetchUserData();

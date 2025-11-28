@@ -166,5 +166,26 @@ describe('connection.service', () => {
       expect(result.count).toBe(0)
       expect(result.error).toBeNull()
     })
+
+    it('userIdが引数で渡された場合、auth.getUser()を呼ばない（N+1クエリ対策）', async () => {
+      // Given: userIdを直接指定
+      const userId = 'user-direct-123'
+
+      const mockQuery = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockResolvedValue({ count: 5, error: null }),
+      }
+
+      mockSupabase.from.mockReturnValue(mockQuery)
+
+      // When: userIdを引数で渡してつながり数を取得
+      const result = await getConnectionCount(mockSupabase as unknown as SupabaseClient<Database>, userId)
+
+      // Then: つながり数が返され、auth.getUser()は呼ばれない
+      expect(result.count).toBe(5)
+      expect(result.error).toBeNull()
+      expect(mockSupabase.auth.getUser).not.toHaveBeenCalled()
+      expect(mockQuery.eq).toHaveBeenCalledWith('user_id', userId)
+    })
   })
 })
