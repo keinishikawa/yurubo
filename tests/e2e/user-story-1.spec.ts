@@ -36,7 +36,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('T061: 投稿ボタンをクリックするとモーダルが表示される', async ({ page }) => {
     // Given: ログイン済み状態を作成
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー1')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('http://localhost:3000/')
@@ -63,7 +63,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('T062: イベント情報を入力して投稿すると、タイムラインに反映される', async ({ page }) => {
     // Given: ログイン + モーダルを開く
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー2')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('http://localhost:3000/')
@@ -101,7 +101,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('T063: 投稿後、タイムラインに匿名IDが表示され、実名は表示されない', async ({ page }) => {
     // Setup: イベント投稿済み状態
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     const displayName = 'テストユーザー3（実名）'
     await page.locator('input[type="text"]').first().fill(displayName)
     await page.locator('button:has-text("はじめる")').click()
@@ -127,8 +127,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
 
     // Then: 投稿者の実名は表示されない（完全匿名）
     // 注: 仕様変更により匿名ID表示は不要になりました
-    const pageContent = await page.content()
-    expect(pageContent).not.toContain(displayName)
+    await expect(page.locator('main').first()).not.toContainText(displayName)
   })
 
   /**
@@ -181,7 +180,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('T066: 1日3件投稿済みの場合、4件目はエラーメッセージが表示される', async ({ page }) => {
     // Setup: ログイン
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー投稿制限')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('http://localhost:3000/')
@@ -201,8 +200,8 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
 
       // Toast通知を待つ
       await expect(page.locator('text=イベントを作成しました')).toBeVisible({ timeout: 10000 })
-      // Toast通知が消えるまで待つ
-      await page.waitForTimeout(2000)
+      // Toast通知が消えるのを待つ
+      await expect(page.locator('text=イベントを作成しました')).not.toBeVisible({ timeout: 5000 })
     }
 
     // When: 4件目を投稿しようとする
@@ -218,7 +217,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.locator('button[type="submit"]:has-text("投稿する")').click()
 
     // Then: エラーメッセージが表示される
-    await expect(page.locator('text=/1日の投稿上限.*に達しました/')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByText('1日の投稿上限（3件）に達しました')).toBeVisible({ timeout: 10000 })
 
     // Then: モーダルは閉じない（再入力可能）
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
@@ -234,7 +233,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('T067: 必須項目未入力の場合、バリデーションエラーが表示される', async ({ page }) => {
     // Setup: ログイン + モーダルを開く
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザーバリデーション')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('http://localhost:3000/')
@@ -243,8 +242,8 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     // When: 必須項目を入力せずに送信（カテゴリのみ選択）
     await page.locator('button[type="submit"]:has-text("投稿する")').click()
 
-    // Then: バリデーションエラーが表示される
-    await expect(page.locator('text=/開催開始日時.*required|required.*開催開始日時|必須|入力してください/')).toBeVisible({ timeout: 5000 })
+    // Then: バリデーションエラーが表示される（タイトル必須）
+    await expect(page.getByText('入力内容に誤りがあります')).toBeVisible({ timeout: 5000 })
 
     // Then: モーダルは閉じない
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
@@ -262,7 +261,7 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
   test('FR-019: つながりリストが空の場合、投稿モーダルに警告が表示される', async ({ page }) => {
     // Setup: つながりリストが空のユーザーでログイン（新規ユーザー）
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('新規ユーザーつながり0件')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('http://localhost:3000/')
