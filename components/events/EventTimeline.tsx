@@ -14,6 +14,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { createClient } from "@/lib/supabase/client";
 import { EventCard } from "@/components/events/EventCard";
 import { fetchTimeline } from "@/app/actions/fetchTimeline";
 import type { Database } from "@/lib/supabase/types";
@@ -171,7 +172,74 @@ export function EventTimeline({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // 【ステップ5】イベント中止時のハンドラー
+  // 【ステップ5】Supabase Realtimeでリアルタイム更新を実装（T092対応）
+  useEffect(() => {
+    const supabase = createClient();
+
+    // eventsテーブルの変更を購読
+    const channel = supabase
+      .channel('events-timeline-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'events',
+          filter: 'status=eq.recruiting', // 募集中のイベントのみ
+        },
+        (payload) => {
+          console.log('新しいイベントが作成されました:', payload);
+          // 新しいイベントをタイムラインの先頭に追加
+          const newEvent = payload.new as Event;
+          setEvents((prev) => {
+            // 重複チェック
+            if (prev.some((e) => e.id === newEvent.id)) {
+              return prev;
+            }
+            // 先頭に追加（新しいものが上）
+            return [newEvent, ...prev];
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'events',
+        },
+        (payload) => {
+          console.log('イベントが更新されました:', payload);
+          const updatedEvent = payload.new as Event;
+          setEvents((prev) =>
+            prev.map((event) =>
+              event.id === updatedEvent.id ? updatedEvent : event
+            )
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'events',
+        },
+        (payload) => {
+          console.log('イベントが削除されました:', payload);
+          const deletedEventId = payload.old.id as string;
+          setEvents((prev) => prev.filter((event) => event.id !== deletedEventId));
+        }
+      )
+      .subscribe();
+
+    // クリーンアップ
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // 【ステップ6】イベント中止時のハンドラー
   const handleEventCancelled = useCallback((eventId: string) => {
     setEvents((prev) => prev.filter((event) => event.id !== eventId));
   }, []);
