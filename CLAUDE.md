@@ -63,6 +63,7 @@ git gtr add <branch_name>
 2. テスト（Unit/E2E）がパス
 3. `npm run lint` & `npm run type-check` がパス
 4. PR作成済み（`Closes #<issue_number>` を含む）
+5. **CI全チェック通過**（claude-reviewのCritical Issues修正含む）
 
 ---
 
@@ -74,9 +75,21 @@ git gtr add <branch_name>
 | UI/UX | 目視確認 |
 | User Story | E2E（Playwright） |
 
+**E2E義務**: ブラウザ確認で終わらず、**Playwrightテストとして永続化**すること
+
 ---
 
-## 6. ブランチ・コミット規約
+## 6. PRワークフロー
+
+1. PR作成後、`gh pr view <PR番号> --comments` でclaude-review結果を確認
+2. 🔴 Critical Issues → **必ず修正**
+3. 🟡 Moderate Issues → 可能な限り修正
+4. 💡 Minor Suggestions → ユーザーに確認
+5. **CI全チェック通過までマージしない**
+
+---
+
+## 7. ブランチ・コミット規約
 
 **ブランチ命名:** `feature/{Epic番号}-us{US番号}-{機能名}`
 
@@ -93,7 +106,15 @@ git gtr add <branch_name>
 
 ---
 
-## 7. 禁止事項
+## 8. コードコメント
+
+- **ファイル冒頭**: 概要・依存関係
+- **関数**: JSDoc形式（`@param`, `@returns`）
+- **インライン**: 複雑なロジックのみ簡潔に
+
+---
+
+## 9. 禁止事項
 
 - ユーザー許可なく `spec.md` を書き換えない
 - 破壊的コマンド（`rm -rf` 等）は慎重に
@@ -101,7 +122,7 @@ git gtr add <branch_name>
 
 ---
 
-## 8. エラー対応
+## 10. エラー対応
 
 **同じエラーが2回連続したら:**
 1. エラー分析結果を提示
@@ -110,7 +131,7 @@ git gtr add <branch_name>
 
 ---
 
-## 9. レスポンス形式
+## 11. レスポンス形式
 
 ```typescript
 { success: boolean; message: string; code?: string; data?: T; }
@@ -118,7 +139,7 @@ git gtr add <branch_name>
 
 ---
 
-## 10. プロジェクト概要
+## 12. プロジェクト概要
 
 **ゆるぼ (YURUBO)**: 匿名型イベント調整プラットフォーム
 
@@ -130,7 +151,7 @@ git gtr add <branch_name>
 
 ---
 
-## 11. 開発コマンド
+## 13. 開発コマンド
 
 ```bash
 npm run dev          # 開発サーバー
@@ -142,7 +163,7 @@ npm run type-check   # 型チェック
 
 ---
 
-## 12. 参照ドキュメント
+## 14. 参照ドキュメント
 
 - [docs/firstspec.md](docs/firstspec.md) - 詳細仕様
 - [docs/techplan.md](docs/techplan.md) - 技術仕様
