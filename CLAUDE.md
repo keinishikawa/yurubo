@@ -103,6 +103,7 @@ git gtr add <branch_name>
 **並列開発:**
 - 依存のないUser Story同士は並列OK
 - 1 PR = 1 User Story
+- **tasks.md はfeatureブランチで更新しない**（コンフリクト防止、mainでマージ後に更新）
 
 ---
 
