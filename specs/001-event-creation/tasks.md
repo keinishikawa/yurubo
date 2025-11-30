@@ -233,15 +233,15 @@
 
 ### Unit Tests for User Story 3（TDD Phase 2）
 
-- [ ] T094 [P] [US3] Write unit test for event update service in lib/services/event.service.test.ts
-- [ ] T095 [P] [US3] Write unit test for edit permission check in lib/services/event.service.test.ts
+- [x] T094 [P] [US3] Write unit test for event update service in lib/services/event.service.test.ts
+- [x] T095 [P] [US3] Write unit test for edit permission check in lib/services/event.service.test.ts
 
 ### Implementation for User Story 3（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [ ] T096 [US3] Implement event update service in lib/services/event.service.ts
-- [ ] T097 [US3] Implement edit permission check (status === 'recruiting' && host_id === current_user)
+- [x] T096 [US3] Implement event update service in lib/services/event.service.ts
+- [x] T097 [US3] Implement edit permission check (status === 'recruiting' && host_id === current_user)
 
 #### Server Actions
 
@@ -258,9 +258,9 @@
 
 #### ページ実装
 
-- [ ] T105 [US3] Create My Events page in app/my/page.tsx
-- [ ] T106 [US3] Add edit button to EventCard for own events
-- [ ] T107 [US3] Integrate EditEventModal with updateEvent Server Action
+- [ ] T105 [US3] Create My Events page in app/my/page.tsx (Note: 現在はホーム画面で編集可能)
+- [x] T106 [US3] Add edit button to EventCard for own events
+- [x] T107 [US3] Integrate EditEventModal with updateEvent Server Action
 
 ### E2E Tests for User Story 3（TDD Phase 4）
 
@@ -275,8 +275,8 @@
 
 #### Unit Tests for イベント中止機能（TDD Phase 2）
 
-- [ ] T112 [P] Write unit test for event cancellation service in lib/services/event.service.test.ts
-- [ ] T113 [P] Write unit test for cancellation permission check (host only) in lib/services/event.service.test.ts
+- [x] T112 [P] Write unit test for event cancellation service in lib/services/event.service.test.ts
+- [x] T113 [P] Write unit test for cancellation permission check (host only) in lib/services/event.service.test.ts
 
 #### Implementation for イベント中止機能（TDD Phase 3）
 
@@ -491,15 +491,15 @@
 
 ## Task Count Summary
 
-- **Phase 1 (Setup)**: 9 tasks
-- **Phase 2 (Foundational)**: 29 tasks
-- **Phase 3 (User Story 1)**: 35 tasks
-- **Phase 4 (User Story 2)**: 20 tasks
-- **Phase 4.5 (User Story 4)**: 29 tasks
-- **Phase 5 (User Story 3)**: 18 tasks
-- **Phase 6 (Polish)**: 26 tasks
+- **Phase 1 (Setup)**: 9 tasks (✅ 9/9 完了)
+- **Phase 2 (Foundational)**: 29 tasks (✅ 29/29 完了)
+- **Phase 3 (User Story 1)**: 35 tasks (28/35 完了, E2E 7件未完了)
+- **Phase 4 (User Story 2)**: 20 tasks (13/20 完了, E2E・エッジケース 7件未完了)
+- **Phase 4.5 (User Story 4)**: 29 tasks (✅ 29/29 完了)
+- **Phase 5 (User Story 3)**: 31 tasks (21/31 完了, テスト・E2E 10件未完了)
+- **Phase 6 (Polish)**: 21 tasks (0/21 未着手)
 
-**Total**: 166 tasks
+**Total**: 174 tasks (完了: 129, 未完了: 45)
 
 ---
 
