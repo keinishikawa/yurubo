@@ -58,6 +58,3 @@ next-env.d.ts
 playwright-report/
 test-results/
 *.log
-
-# Current task
-current_task.md
