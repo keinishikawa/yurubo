@@ -93,6 +93,8 @@ git gtr add <branch_name>
 
 **ブランチ命名:** `feature/{Epic番号}-us{US番号}-{機能名}`
 
+**PRタイトル:** `[{ブランチ名}] {説明}` 例: `[001-us1-e2e] User Story 1 - E2Eテスト`
+
 **コミット:** [Conventional Commits](https://www.conventionalcommits.org/)
 - `feat:` 新機能
 - `fix:` バグ修正
