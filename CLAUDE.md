@@ -69,13 +69,36 @@ git gtr add <branch_name>
 
 ## 5. テスト戦略
 
-| 対象 | 方針 |
-|------|------|
-| ロジック | TDD（Jest） |
-| UI/UX | 目視確認 |
-| User Story | E2E（Playwright） |
+### テスト種別と実行タイミング
 
-**E2E義務**: ブラウザ確認で終わらず、**Playwrightテストとして永続化**すること
+| 種別 | 対象 | 実行タイミング |
+|------|------|----------------|
+| Unit (Jest) | ビジネスロジック、ユーティリティ | 実装中・push前 |
+| E2E (Playwright) | User Story全体の動作 | push前（必須） |
+| 目視確認 | レイアウト崩れ、アニメーション | 実装中のみ |
+
+### push前チェックリスト
+
+```bash
+# 全チェックを一括実行（推奨）
+npm run precheck
+
+# 個別実行する場合:
+# npm run lint && npm run type-check && npm test && npm run test:e2e
+```
+
+### 目視確認の定義
+
+目視確認はテストで自動化しづらい以下の項目に限定:
+- レスポンシブレイアウトの崩れ
+- アニメーション・トランジションの滑らかさ
+- 色・フォントの視認性
+
+**注意**: 機能動作の確認は目視ではなくE2Eで担保すること
+
+### E2E義務
+
+ブラウザ確認で終わらず、**Playwrightテストとして永続化**すること
 
 ---
 
@@ -167,6 +190,7 @@ npm test             # Jestテスト
 npm run test:e2e     # Playwrightテスト
 npm run lint         # リント
 npm run type-check   # 型チェック
+npm run precheck     # push前の全チェック（lint + type-check + test + e2e）
 ```
 
 ---
