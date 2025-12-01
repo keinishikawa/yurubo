@@ -87,27 +87,25 @@ function getDefaultStartDateTime(): string {
   const now = new Date();
   now.setHours(now.getHours() + 2); // 2時間後
 
+  const minute = now.getMinutes();
+
+  // 30分単位に切り上げ（Dateオブジェクトで直接設定することで、日付も自動調整される）
+  if (minute > 0 && minute <= 30) {
+    now.setMinutes(30);
+  } else if (minute > 30) {
+    now.setHours(now.getHours() + 1);
+    now.setMinutes(0);
+  } else {
+    now.setMinutes(0);
+  }
+
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
   const day = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours();
-  const minute = now.getMinutes();
+  const hour = now.getHours().toString().padStart(2, "0");
+  const min = now.getMinutes().toString().padStart(2, "0");
 
-  // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
-
-  // 時刻が24時を超えた場合は翌日に
-  if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1);
-    const nextYear = now.getFullYear();
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
-    const nextDay = now.getDate().toString().padStart(2, "0");
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
-  }
-
-  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
-  return `${year}-${month}-${day}T${timeStr}`;
+  return `${year}-${month}-${day}T${hour}:${min}`;
 }
 
 /**
@@ -119,27 +117,25 @@ function getDefaultEndDateTime(): string {
   const now = new Date();
   now.setHours(now.getHours() + 6); // 2時間後 + 4時間 = 6時間後
 
+  const minute = now.getMinutes();
+
+  // 30分単位に切り上げ（Dateオブジェクトで直接設定することで、日付も自動調整される）
+  if (minute > 0 && minute <= 30) {
+    now.setMinutes(30);
+  } else if (minute > 30) {
+    now.setHours(now.getHours() + 1);
+    now.setMinutes(0);
+  } else {
+    now.setMinutes(0);
+  }
+
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
   const day = now.getDate().toString().padStart(2, "0");
-  const hour = now.getHours();
-  const minute = now.getMinutes();
+  const hour = now.getHours().toString().padStart(2, "0");
+  const min = now.getMinutes().toString().padStart(2, "0");
 
-  // 30分単位に切り上げ
-  const roundedMinute = minute <= 0 ? 0 : minute <= 30 ? 30 : 0;
-  const roundedHour = roundedMinute === 0 && minute > 30 ? (hour + 1) % 24 : hour;
-
-  // 時刻が24時を超えた場合は翌日に
-  if (roundedMinute === 0 && minute > 30 && hour === 23) {
-    now.setDate(now.getDate() + 1);
-    const nextYear = now.getFullYear();
-    const nextMonth = (now.getMonth() + 1).toString().padStart(2, "0");
-    const nextDay = now.getDate().toString().padStart(2, "0");
-    return `${nextYear}-${nextMonth}-${nextDay}T00:00`;
-  }
-
-  const timeStr = `${roundedHour.toString().padStart(2, "0")}:${roundedMinute.toString().padStart(2, "0")}`;
-  return `${year}-${month}-${day}T${timeStr}`;
+  return `${year}-${month}-${day}T${hour}:${min}`;
 }
 
 /**
@@ -209,13 +205,14 @@ export function PostEventModal({
 
   // 【ステップ3】フォーム送信ハンドラー
   const onFormSubmit = async (data: CreateEventInput) => {
-    // JSTとして解釈してUTCに変換
+    // datetime-local形式をISO 8601形式に変換
     const toISO = (dateStr: string) => {
       if (!dateStr) return dateStr;
       // 既にタイムゾーン情報が含まれている場合はそのまま
       if (dateStr.includes("+") || dateStr.endsWith("Z")) return dateStr;
-      // JST (+09:00) として解釈
-      const date = new Date(`${dateStr}:00+09:00`);
+      // datetime-local形式 (YYYY-MM-DDTHH:MM) をDateオブジェクトに変換
+      // ブラウザのローカルタイムゾーンとして解釈される
+      const date = new Date(dateStr);
       return date.toISOString();
     };
 

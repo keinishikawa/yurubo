@@ -94,7 +94,7 @@ export const createEventSchema = z
         "開始日時の形式が正しくありません"
       )
       .refine(
-        (date) => new Date(date) > new Date(),
+        (date) => new Date(date).getTime() > Date.now(),
         "開始日時は現在時刻より未来を選択してください"
       ),
 
