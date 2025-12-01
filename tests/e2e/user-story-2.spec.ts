@@ -83,6 +83,7 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
 
     // カテゴリ選択: 飲み
+    await page.waitForSelector('select[name="category"]', { state: 'visible' })
     await page.selectOption('select[name="category"]', 'drinking')
 
     // 開催日時入力
@@ -161,6 +162,7 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
     await page.locator('button:has-text("投稿")').click()
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
 
+    await page.waitForSelector('select[name="category"]', { state: 'visible' })
     await page.selectOption('select[name="category"]', 'tennis')
 
     const tomorrow = new Date()
