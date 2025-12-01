@@ -194,8 +194,6 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
 
       // モーダルが閉じることを確認（投稿成功の証拠）
       await expect(page.locator('text=イベントを投稿')).not.toBeVisible({ timeout: 10000 })
-      // 次の投稿のために少し待機
-      await page.waitForTimeout(500)
     }
 
     // When: 4件目を投稿しようとする
