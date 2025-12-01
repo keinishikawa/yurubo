@@ -107,6 +107,11 @@ git gtr add <branch_name>
 - 1 PR = 1 User Story
 - **tasks.md はfeatureブランチで更新しない**（コンフリクト防止、mainでマージ後に更新）
 
+**main直接プッシュ禁止:**
+- 全ての変更はブランチ → PR経由でマージ
+- ドキュメント/ルール変更は `chore/docs-update` ブランチを使用
+- リベースは未プッシュのローカルコミットのみ許可
+
 ---
 
 ## 8. コードコメント
