@@ -10,15 +10,41 @@
  * - ローカル開発サーバーの自動起動
  * - テストレポートの生成
  * - スクリーンショット・ビデオキャプチャの設定
+ * - ワークツリー間のポート競合回避（ハッシュベース）
  */
 
 import { defineConfig, devices } from "@playwright/test";
+import * as crypto from "crypto";
+
+/**
+ * テスト用ポートを取得
+ *
+ * 【ポート決定ロジック】
+ * 1. CI環境: 常に3000（競合なし）
+ * 2. TEST_PORT環境変数: 明示指定された場合はそれを使用
+ * 3. ローカル: ディレクトリパスのハッシュから計算（3000-3099）
+ *
+ * これにより複数ワークツリーで同時にE2Eテストを実行しても
+ * ポート競合が発生しない
+ */
+const getPort = (): number => {
+  // CI環境では常に3000
+  if (process.env.CI) {
+    return 3000;
+  }
+  // 明示指定があればそれを使用
+  if (process.env.TEST_PORT) {
+    return parseInt(process.env.TEST_PORT, 10);
+  }
+  // ローカル: ディレクトリパスからハッシュ計算
+  const hash = crypto.createHash("md5").update(process.cwd()).digest("hex");
+  return 3000 + (parseInt(hash.substring(0, 4), 16) % 100);
+};
 
 /**
  * 開発サーバーのポート番号
- * Next.jsのデフォルトポート
  */
-const PORT = process.env.PORT || 3000;
+const PORT = getPort();
 
 /**
  * ベースURL
@@ -131,7 +157,7 @@ export default defineConfig({
    * - timeout: タイムアウト時間（ミリ秒）
    */
   webServer: {
-    command: "npm run dev",
+    command: `npm run dev -- -p ${PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
