@@ -229,13 +229,14 @@ export function PostEventModal({
       end_vs_start: new Date(data.date_end).getTime() > new Date(data.date_start).getTime(),
     });
 
-    // JSTとして解釈してUTCに変換
+    // datetime-local形式をISO 8601形式に変換
     const toISO = (dateStr: string) => {
       if (!dateStr) return dateStr;
       // 既にタイムゾーン情報が含まれている場合はそのまま
       if (dateStr.includes("+") || dateStr.endsWith("Z")) return dateStr;
-      // JST (+09:00) として解釈
-      const date = new Date(`${dateStr}:00+09:00`);
+      // datetime-local形式 (YYYY-MM-DDTHH:MM) をDateオブジェクトに変換
+      // ブラウザのローカルタイムゾーンとして解釈される
+      const date = new Date(dateStr);
       return date.toISOString();
     };
 
