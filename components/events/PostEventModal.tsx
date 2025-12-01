@@ -85,7 +85,6 @@ const CATEGORY_OPTIONS = [
  */
 function getDefaultStartDateTime(): string {
   const now = new Date();
-  const originalTime = now.toISOString();
   now.setHours(now.getHours() + 2); // 2時間後
 
   const minute = now.getMinutes();
@@ -106,14 +105,7 @@ function getDefaultStartDateTime(): string {
   const hour = now.getHours().toString().padStart(2, "0");
   const min = now.getMinutes().toString().padStart(2, "0");
 
-  const result = `${year}-${month}-${day}T${hour}:${min}`;
-  console.log("[DEBUG] getDefaultStartDateTime:", {
-    original: originalTime,
-    result,
-    parsed: new Date(result).toISOString(),
-  });
-
-  return result;
+  return `${year}-${month}-${day}T${hour}:${min}`;
 }
 
 /**
@@ -203,11 +195,6 @@ export function PostEventModal({
     },
   });
 
-  // DEBUG: Log validation errors whenever they change
-  if (Object.keys(errors).length > 0) {
-    console.log("[DEBUG] Validation errors:", errors);
-  }
-
   // 【ステップ2】フォーム値を監視
   const priceMin = watch("price_min");
   const priceMax = watch("price_max");
@@ -218,17 +205,6 @@ export function PostEventModal({
 
   // 【ステップ3】フォーム送信ハンドラー
   const onFormSubmit = async (data: CreateEventInput) => {
-    // DEBUG: Log form data and current time
-    console.log("[DEBUG] Form submit data:", {
-      date_start: data.date_start,
-      date_end: data.date_end,
-      current_time: new Date().toISOString(),
-      date_start_parsed: new Date(data.date_start).toISOString(),
-      date_end_parsed: new Date(data.date_end).toISOString(),
-      start_vs_now: new Date(data.date_start).getTime() > Date.now(),
-      end_vs_start: new Date(data.date_end).getTime() > new Date(data.date_start).getTime(),
-    });
-
     // datetime-local形式をISO 8601形式に変換
     const toISO = (dateStr: string) => {
       if (!dateStr) return dateStr;
@@ -245,11 +221,6 @@ export function PostEventModal({
       date_start: toISO(data.date_start),
       date_end: toISO(data.date_end),
     };
-
-    console.log("[DEBUG] Submit data after toISO:", {
-      date_start: submitData.date_start,
-      date_end: submitData.date_end,
-    });
 
     await onSubmit(submitData);
     reset(); // 送信成功後にフォームをリセット
