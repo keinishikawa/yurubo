@@ -208,16 +208,16 @@
 
 ### E2E Tests for User Story 2（TDD Phase 4）
 
-- [ ] T087 [US2] E2E test: タイムライン表示（シナリオ1） in tests/e2e/user-story-2.spec.ts
-- [ ] T088 [US2] E2E test: 投稿カード情報表示（シナリオ2） in tests/e2e/user-story-2.spec.ts
-- [ ] T089 [US2] E2E test: 匿名化確認（シナリオ3） in tests/e2e/user-story-2.spec.ts
-- [ ] T090 [US2] E2E test: 無限スクロール（シナリオ4） in tests/e2e/user-story-2.spec.ts
-- [ ] T091 [US2] E2E test: 空状態メッセージ表示（シナリオ5） in tests/e2e/user-story-2.spec.ts
+- [x] T087 [US2] E2E test: タイムライン表示（シナリオ1） in tests/e2e/user-story-2.spec.ts
+- [x] T088 [US2] E2E test: 投稿カード情報表示（シナリオ2） in tests/e2e/user-story-2.spec.ts
+- [x] T089 [US2] E2E test: 匿名化確認（シナリオ3） in tests/e2e/user-story-2.spec.ts
+- [x] T090 [US2] E2E test: 無限スクロール（シナリオ4） in tests/e2e/user-story-2.spec.ts
+- [x] T091 [US2] E2E test: 空状態メッセージ表示（シナリオ5） in tests/e2e/user-story-2.spec.ts
 
 ### Edge Cases for User Story 2
 
-- [ ] T092 [US2] Handle simultaneous posts from multiple users with real-time update
-- [ ] T093 [US2] Optimize timeline query performance for 50+ events
+- [x] T092 [US2] Handle simultaneous posts from multiple users with real-time update
+- [x] T093 [US2] Optimize timeline query performance for 50+ events
 
 **Checkpoint**: User Story 1とUser Story 2が両方とも独立して機能
 
