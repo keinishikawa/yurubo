@@ -17,7 +17,7 @@
  * - spec.md: User Story 2の受入シナリオ定義
  */
 
-import { test, expect } from '@playwright/test'
+import { test, expect, Page } from '@playwright/test'
 
 /**
  * テストスイート: User Story 2 - タイムライン閲覧（つながりベース）
@@ -31,13 +31,13 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
    * @param page - Playwrightのページオブジェクト
    * @param displayName - 表示名
    */
-  async function signIn(page: any, displayName: string) {
+  async function signIn(page: Page, displayName: string) {
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
     await page.locator('input[type="text"]').first().fill(displayName)
     await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
     await expect(page.locator('h1:has-text("タイムライン")')).toBeVisible()
   }
 

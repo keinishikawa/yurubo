@@ -187,18 +187,30 @@ export function EventTimeline({
           table: 'events',
           filter: 'status=eq.recruiting', // 募集中のイベントのみ
         },
-        (payload) => {
-          console.log('新しいイベントが作成されました:', payload);
+        async (payload) => {
           // 新しいイベントをタイムラインの先頭に追加
           const newEvent = payload.new as Event;
-          setEvents((prev) => {
-            // 重複チェック
-            if (prev.some((e) => e.id === newEvent.id)) {
-              return prev;
-            }
-            // 先頭に追加（新しいものが上）
-            return [newEvent, ...prev];
-          });
+
+          // つながりリストとカテゴリのフィルタリングを確認するため、
+          // fetchTimelineを再度呼び出して、このイベントが含まれているか確認
+          const result = await fetchTimeline({ page: 0, limit: 1 });
+
+          if (!result.success || !result.data) {
+            return;
+          }
+
+          // 最新のイベントが新規イベントと一致する場合のみ追加
+          const latestEvent = result.data[0];
+          if (latestEvent && latestEvent.id === newEvent.id) {
+            setEvents((prev) => {
+              // 重複チェック
+              if (prev.some((e) => e.id === newEvent.id)) {
+                return prev;
+              }
+              // 先頭に追加（新しいものが上）
+              return [newEvent, ...prev];
+            });
+          }
         }
       )
       .on(
@@ -209,7 +221,6 @@ export function EventTimeline({
           table: 'events',
         },
         (payload) => {
-          console.log('イベントが更新されました:', payload);
           const updatedEvent = payload.new as Event;
           setEvents((prev) =>
             prev.map((event) =>
@@ -226,7 +237,6 @@ export function EventTimeline({
           table: 'events',
         },
         (payload) => {
-          console.log('イベントが削除されました:', payload);
           const deletedEventId = payload.old.id as string;
           setEvents((prev) => prev.filter((event) => event.id !== deletedEventId));
         }
