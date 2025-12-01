@@ -79,7 +79,7 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
     await signIn(page, 'カード情報テストユーザー')
 
     // イベント投稿を作成
-    await page.locator('button:has-text("＋")').click()
+    await page.locator('button:has-text("投稿")').click()
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
 
     // カテゴリ選択: 飲み
@@ -158,7 +158,7 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
     await signIn(page, '匿名化テストユーザー')
 
     // イベント投稿を作成
-    await page.locator('button:has-text("＋")').click()
+    await page.locator('button:has-text("投稿")').click()
     await expect(page.locator('text=イベントを投稿')).toBeVisible()
 
     await page.selectOption('select[name="category"]', 'tennis')
