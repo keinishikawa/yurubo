@@ -245,16 +245,16 @@
 
 #### Server Actions
 
-- [x] T098 [US3] Create event update Server Action in app/actions/updateEvent.ts
-- [ ] T099 [US3] Write integration test for event update API in app/actions/updateEvent.test.ts
+- [ ] T098 [US3] Create event update Server Action in app/actions/updateEvent.ts
+- [x] T099 [US3] Write integration test for event update API in app/actions/updateEvent.test.ts
 
 #### UIコンポーネント
 
-- [x] T100 [P] [US3] Create EditEventModal component in components/events/EditEventModal.tsx
-- [x] T101 [US3] Pre-fill existing event data in EditEventModal
-- [x] T102 [US3] Add permission check for edit button visibility
-- [x] T103 [US3] Add warning message for confirmed events (Note: キャンセル済みイベントは編集不可として実装)
-- [ ] T104 [US3] Write unit test for EditEventModal in components/events/EditEventModal.test.tsx
+- [ ] T100 [P] [US3] Create EditEventModal component in components/events/EditEventModal.tsx
+- [ ] T101 [US3] Pre-fill existing event data in EditEventModal
+- [ ] T102 [US3] Add permission check for edit button visibility
+- [ ] T103 [US3] Add warning message for confirmed events
+- [x] T104 [US3] Write unit test for EditEventModal in components/events/EditEventModal.test.tsx
 
 #### ページ実装
 
@@ -264,10 +264,10 @@
 
 ### E2E Tests for User Story 3（TDD Phase 4）
 
-- [ ] T108 [US3] E2E test: 編集画面表示（シナリオ1） in tests/e2e/user-story-3.spec.ts (Note: プレースホルダー実装済み tests/e2e/event-edit.spec.ts)
-- [ ] T109 [US3] E2E test: イベント編集反映（シナリオ2） in tests/e2e/user-story-3.spec.ts
-- [ ] T110 [US3] E2E test: 参加者承認後の編集不可（シナリオ3） in tests/e2e/user-story-3.spec.ts
-- [ ] T111 [US3] E2E test: 他ユーザーの投稿編集ボタン非表示（シナリオ4） in tests/e2e/user-story-3.spec.ts
+- [x] T108 [US3] E2E test: 編集画面表示（シナリオ1） in tests/e2e/user-story-3.spec.ts
+- [x] T109 [US3] E2E test: イベント編集反映（シナリオ2） in tests/e2e/user-story-3.spec.ts
+- [x] T110 [US3] E2E test: 参加者承認後の編集不可（シナリオ3） in tests/e2e/user-story-3.spec.ts
+- [x] T111 [US3] E2E test: 他ユーザーの投稿編集ボタン非表示（シナリオ4） in tests/e2e/user-story-3.spec.ts
 
 ### イベント中止機能（FR-020対応）
 
@@ -280,23 +280,23 @@
 
 #### Implementation for イベント中止機能（TDD Phase 3）
 
-- [x] T114 Implement event cancellation service in lib/services/event.service.ts
-- [x] T115 Update event status to 'cancelled' and set cancelled_at timestamp (Note: statusのみ更新、cancelled_atはDBトリガーで対応予定)
-- [x] T116 Create cancellation Server Action in app/actions/cancelEvent.ts
-- [ ] T117 Write integration test for cancellation Server Action in app/actions/cancelEvent.test.ts
+- [ ] T114 Implement event cancellation service in lib/services/event.service.ts
+- [ ] T115 Update event status to 'cancelled' and set cancelled_at timestamp
+- [ ] T116 Create cancellation Server Action in app/actions/cancelEvent.ts
+- [x] T117 Write integration test for cancellation Server Action in app/actions/cancelEvent.test.ts
 
 #### UIコンポーネント
 
-- [x] T118 [P] Add cancel button to EventCard (visible only for host) in components/events/EventCard.tsx
-- [x] T119 [P] Create CancelEventModal confirmation dialog in components/events/CancelEventModal.tsx (Note: AlertDialogとしてEventCard.tsx内に実装)
-- [x] T120 Integrate CancelEventModal with cancelEvent Server Action
-- [ ] T121 Write unit test for CancelEventModal in components/events/CancelEventModal.test.tsx
+- [ ] T118 [P] Add cancel button to EventCard (visible only for host) in components/events/EventCard.tsx
+- [ ] T119 [P] Create CancelEventModal confirmation dialog in components/events/CancelEventModal.tsx
+- [ ] T120 Integrate CancelEventModal with cancelEvent Server Action
+- [x] T121 Write unit test for CancelEventModal in components/events/CancelEventModal.test.tsx
 
 #### E2E Tests for イベント中止機能（TDD Phase 4）
 
-- [ ] T122 E2E test: イベント中止ボタン表示（幹事のみ） in tests/e2e/event-cancellation.spec.ts (Note: プレースホルダー実装済み tests/e2e/event-edit.spec.ts)
-- [ ] T123 E2E test: イベント中止実行とタイムライン非表示 in tests/e2e/event-cancellation.spec.ts
-- [ ] T124 E2E test: 中止イベントの参加者への通知 in tests/e2e/event-cancellation.spec.ts
+- [x] T122 E2E test: イベント中止ボタン表示（幹事のみ） in tests/e2e/event-cancellation.spec.ts
+- [x] T123 E2E test: イベント中止実行とタイムライン非表示 in tests/e2e/event-cancellation.spec.ts
+- [x] T124 E2E test: 中止イベントの参加者への通知 in tests/e2e/event-cancellation.spec.ts
 
 **Checkpoint**: すべてのUser Storyが独立して機能
 
