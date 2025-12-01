@@ -85,7 +85,7 @@ const CATEGORY_OPTIONS = [
  */
 function getDefaultStartDateTime(): string {
   const now = new Date();
-  now.setHours(now.getHours() + 2); // 2時間後
+  now.setHours(now.getHours() + 4); // 4時間後（CI環境での時間経過に対応）
 
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
@@ -117,7 +117,7 @@ function getDefaultStartDateTime(): string {
  */
 function getDefaultEndDateTime(): string {
   const now = new Date();
-  now.setHours(now.getHours() + 6); // 2時間後 + 4時間 = 6時間後
+  now.setHours(now.getHours() + 8); // 4時間後 + 4時間 = 8時間後
 
   const year = now.getFullYear();
   const month = (now.getMonth() + 1).toString().padStart(2, "0");
