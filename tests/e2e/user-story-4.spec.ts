@@ -74,7 +74,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.locator('button:has-text("はじめる")').click()
 
     // Then: タイムライン画面に遷移する
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
     await expect(page.locator('h1:has-text("タイムライン")')).toBeVisible()
 
     // Then: ログアウトボタンが表示される（ログイン状態の証明）
@@ -94,13 +94,13 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.goto('http://localhost:3000/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー2')
     await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
 
     // When: 再度ホーム画面にアクセス（ページリロード）
     await page.reload()
 
     // Then: タイムライン画面が直接表示される（ウェルカム画面にリダイレクトされない）
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
     await expect(page.locator('h1:has-text("タイムライン")')).toBeVisible()
 
     // Then: ログアウトボタンが表示される
@@ -123,7 +123,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page1.goto('http://localhost:3000/welcome')
     await page1.locator('input[type="text"]').first().fill('テストユーザー3')
     await page1.locator('button:has-text("はじめる")').click()
-    await expect(page1).toHaveURL('http://localhost:3000/')
+    await expect(page1).toHaveURL('/')
 
     // セッションCookieを保存
     const cookies = await context1.cookies()
@@ -136,7 +136,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page2.goto('http://localhost:3000')
 
     // Then: タイムライン画面が表示される（ログイン状態維持）
-    await expect(page2).toHaveURL('http://localhost:3000/')
+    await expect(page2).toHaveURL('/')
     await expect(page2.locator('h1:has-text("タイムライン")')).toBeVisible()
     await expect(page2.locator('button:has-text("ログアウト")')).toBeVisible()
 
@@ -156,7 +156,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.goto('http://localhost:3000/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー4')
     await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
 
     // When: ログアウトボタンをクリック
     await page.locator('button:has-text("ログアウト")').first().click()
@@ -169,12 +169,12 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.locator('button:has-text("ログアウト")').last().click()
 
     // Then: ウェルカム画面にリダイレクトされる
-    await expect(page).toHaveURL('http://localhost:3000/welcome')
+    await expect(page).toHaveURL('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
 
     // Then: 次回アクセス時も登録画面が表示される
     await page.goto('http://localhost:3000')
-    await expect(page).toHaveURL('http://localhost:3000/welcome')
+    await expect(page).toHaveURL('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
   })
 
@@ -193,7 +193,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.goto('http://localhost:3000/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー5')
     await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('http://localhost:3000/')
+    await expect(page).toHaveURL('/')
 
     // セッション有効期限切れをシミュレート（Cookieを削除）
     await page.context().clearCookies()
@@ -202,7 +202,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.goto('http://localhost:3000')
 
     // Then: 自動的にウェルカム画面にリダイレクトされる
-    await expect(page).toHaveURL('http://localhost:3000/welcome')
+    await expect(page).toHaveURL('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
   })
 
