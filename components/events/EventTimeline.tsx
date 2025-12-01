@@ -187,30 +187,20 @@ export function EventTimeline({
           table: 'events',
           filter: 'status=eq.recruiting', // 募集中のイベントのみ
         },
-        async (payload) => {
+        (payload) => {
           // 新しいイベントをタイムラインの先頭に追加
           const newEvent = payload.new as Event;
 
-          // つながりリストとカテゴリのフィルタリングを確認するため、
-          // fetchTimelineを再度呼び出して、このイベントが含まれているか確認
-          const result = await fetchTimeline({ page: 0, limit: 1 });
-
-          if (!result.success || !result.data) {
-            return;
-          }
-
-          // 最新のイベントが新規イベントと一致する場合のみ追加
-          const latestEvent = result.data[0];
-          if (latestEvent && latestEvent.id === newEvent.id) {
-            setEvents((prev) => {
-              // 重複チェック
-              if (prev.some((e) => e.id === newEvent.id)) {
-                return prev;
-              }
-              // 先頭に追加（新しいものが上）
-              return [newEvent, ...prev];
-            });
-          }
+          // RLSポリシーでつながりリストとカテゴリのフィルタリングが
+          // サーバー側で行われるため、通知されたイベントはすべて表示対象
+          setEvents((prev) => {
+            // 重複チェック
+            if (prev.some((e) => e.id === newEvent.id)) {
+              return prev;
+            }
+            // 先頭に追加（新しいものが上）
+            return [newEvent, ...prev];
+          });
         }
       )
       .on(
@@ -222,11 +212,16 @@ export function EventTimeline({
         },
         (payload) => {
           const updatedEvent = payload.new as Event;
-          setEvents((prev) =>
-            prev.map((event) =>
+          setEvents((prev) => {
+            // イベントが中止された場合はタイムラインから削除
+            if (updatedEvent.status !== 'recruiting') {
+              return prev.filter((event) => event.id !== updatedEvent.id);
+            }
+            // 募集中の場合は更新
+            return prev.map((event) =>
               event.id === updatedEvent.id ? updatedEvent : event
-            )
-          );
+            );
+          });
         }
       )
       .on(
