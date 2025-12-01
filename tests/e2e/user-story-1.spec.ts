@@ -27,6 +27,28 @@ import { test, expect } from '@playwright/test'
  */
 test.describe('User Story 1: 匿名イベント投稿', () => {
   /**
+   * ブラウザコンソールログとエラーをキャプチャ（デバッグ用）
+   */
+  test.beforeEach(async ({ page }) => {
+    // ブラウザコンソールログをキャプチャ
+    page.on('console', (msg) => {
+      console.log(`[BROWSER ${msg.type().toUpperCase()}] ${msg.text()}`)
+    })
+
+    // ページエラーをキャプチャ
+    page.on('pageerror', (err) => {
+      console.error(`[PAGE ERROR] ${err.message}`)
+    })
+
+    // ネットワークレスポンスエラーをキャプチャ
+    page.on('response', (response) => {
+      if (!response.ok() && response.url().includes('/api/')) {
+        console.error(`[API ERROR] ${response.status()} ${response.url()}`)
+      }
+    })
+  })
+
+  /**
    * T061: シナリオ1 - 投稿モーダル表示
    *
    * Given: ユーザーがログインしている
