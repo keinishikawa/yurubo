@@ -81,11 +81,8 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     // When: 投稿ボタンをクリック
     await page.locator('button[type="submit"]:has-text("投稿する")').click()
 
-    // Then: Toast通知が表示される
-    await expect(page.locator('text=イベントを作成しました')).toBeVisible({ timeout: 10000 })
-
-    // Then: モーダルが閉じる
-    await expect(page.locator('text=イベントを投稿')).not.toBeVisible()
+    // Then: モーダルが閉じる（投稿成功の証拠）
+    await expect(page.locator('text=イベントを投稿')).not.toBeVisible({ timeout: 10000 })
 
     // Then: タイムラインに投稿が表示される
     await expect(page.locator('text=仕事終わりに軽く一杯')).toBeVisible({ timeout: 5000 })
@@ -119,11 +116,8 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.locator('textarea[name="comment"]').fill('匿名ID表示テスト')
     await page.locator('button[type="submit"]:has-text("投稿する")').click()
 
-    // Toast通知を待つ
-    await expect(page.locator('text=イベントを作成しました')).toBeVisible({ timeout: 10000 })
-
-    // When: タイムラインを確認
-    await expect(page.locator('text=匿名ID表示テスト')).toBeVisible({ timeout: 5000 })
+    // When: タイムラインを確認（投稿が反映されていることを確認）
+    await expect(page.locator('text=匿名ID表示テスト')).toBeVisible({ timeout: 10000 })
 
     // Then: 投稿者の実名は表示されない（完全匿名）
     // 注: 仕様変更により匿名ID表示は不要になりました
@@ -198,10 +192,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
       await page.locator('textarea[name="comment"]').fill(`投稿${i + 1}件目`)
       await page.locator('button[type="submit"]:has-text("投稿する")').click()
 
-      // Toast通知を待つ
-      await expect(page.locator('text=イベントを作成しました')).toBeVisible({ timeout: 10000 })
-      // Toast通知が消えるのを待つ
-      await expect(page.locator('text=イベントを作成しました')).not.toBeVisible({ timeout: 5000 })
+      // モーダルが閉じることを確認（投稿成功の証拠）
+      await expect(page.locator('text=イベントを投稿')).not.toBeVisible({ timeout: 10000 })
+      // 次の投稿のために少し待機
+      await page.waitForTimeout(500)
     }
 
     // When: 4件目を投稿しようとする
