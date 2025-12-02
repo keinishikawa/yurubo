@@ -62,9 +62,25 @@ gh issue view <number> --comments
 # Issueと紐付いたブランチを作成
 gh issue develop <issue_number> --name feature/001-us1-xxx
 
-# ワークツリー作成
+# ワークツリー作成（.env.localも自動コピーされる）
 git gtr new <branch_name>
 ```
+
+**SpecKitコマンドの使用（オプション）:**
+
+SpecKitの自動実装ワークフローを使う場合：
+
+```bash
+# IMPORTANT: featureブランチでのみ実行可能（mainでは実行不可）
+# ワークツリー内、またはfeatureブランチに切り替えてから実行
+
+/speckit.implement   # tasks.mdに従って段階的に実装
+```
+
+**注意:**
+- `/speckit.implement`は**mainブランチでは実行できません**
+- 必ず`feature/`ブランチで実行すること
+- ワークツリー内で実行するのが推奨
 
 **作業中の記録:**
 
