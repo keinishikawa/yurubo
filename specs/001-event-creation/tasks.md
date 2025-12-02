@@ -1,19 +1,19 @@
 # Tasks: フェーズ1：イベント作成機能
 
-**Feature Branch**: `001-event-creation`
-**Created**: 2025-11-11
-**Status**: Draft
+**機能ブランチ**: `001-event-creation`
+**作成日**: 2025-11-11
+**ステータス**: ドラフト
 
-**Input**: Design documents from `/specs/001-event-creation/`
-**Prerequisites**: plan.md, spec.md, data-model.md, contracts/api.yaml, research.md, quickstart.md
+**入力**: `/specs/001-event-creation/` からの設計ドキュメント
+**前提条件**: plan.md, spec.md, data-model.md, contracts/api.yaml, research.md, quickstart.md
 
-**Tests**: TDD必須 - すべての実装コードには対応するテスト（単体・統合・E2E）が必須
+**テスト**: TDD必須 - すべての実装コードには対応するテスト（単体・統合・E2E）が必須
 
-**Organization**: タスクはUser Story単位で整理され、各ストーリーは独立して実装・テスト可能
+**構成**: タスクはUser Story単位で整理され、各ストーリーは独立して実装・テスト可能
 
 ---
 
-## Format: `[ID] [P?] [Story] Description`
+## フォーマット: `[ID] [P?] [Story] 説明`
 
 - **[P]**: 並行実行可能（異なるファイル、依存関係なし）
 - **[Story]**: User Storyラベル（US1, US2, US3）
@@ -25,15 +25,15 @@
 
 **目的**: プロジェクトの基本構造とツール設定
 
-- [x] T001 Create Next.js 15 project structure with TypeScript and App Router
-- [x] T002 Install core dependencies (React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS)
-- [x] T003 [P] Configure TypeScript strict mode in tsconfig.json
-- [x] T004 [P] Configure ESLint and Prettier
-- [x] T005 [P] Setup environment variables template in .env.example
-- [x] T006 [P] Initialize Supabase CLI and link to project
-- [x] T007 [P] Configure Jest for unit and integration tests in jest.config.js
-- [x] T008 [P] Configure Playwright for E2E tests in playwright.config.ts
-- [x] T009 Create project directory structure (app/, components/, lib/, tests/, supabase/)
+- [x] T001 Next.js 15プロジェクト構造をTypeScriptとApp Routerで作成
+- [x] T002 コア依存関係をインストール（React 19, Supabase Client, Zod, React Hook Form, shadcn-ui, TailwindCSS）
+- [x] T003 [P] tsconfig.jsonでTypeScript strictモードを設定
+- [x] T004 [P] ESLintとPrettierを設定
+- [x] T005 [P] .env.exampleに環境変数テンプレートを設定
+- [x] T006 [P] Supabase CLIを初期化してプロジェクトにリンク
+- [x] T007 [P] jest.config.jsでJestを単体・統合テスト用に設定
+- [x] T008 [P] playwright.config.tsでPlaywrightをE2Eテスト用に設定
+- [x] T009 プロジェクトディレクトリ構造を作成（app/, components/, lib/, tests/, supabase/）
 
 ---
 
@@ -45,50 +45,50 @@
 
 ### データベースマイグレーション
 
-- [x] T010 Create categories table migration in supabase/migrations/20251111000001_create_categories_table.sql
-- [x] T011 Create users table migration in supabase/migrations/20251111000002_create_users_table.sql
-- [x] T012 Create events table migration in supabase/migrations/20251111000003_create_events_table.sql
-- [x] T013 Create connections table migration in supabase/migrations/20251111000004_create_connections_table.sql
-- [x] T014 Create RLS policies for all tables in supabase/migrations/20251111000005_enable_rls_policies.sql
-- [x] T015 Create triggers and functions (updated_at, daily post limit check) in supabase/migrations/20251111000006_create_triggers_and_functions.sql
-- [x] T016 Create test seed data in supabase/seed.sql
-- [x] T017 Run migrations and verify database setup with Supabase CLI
+- [x] T010 supabase/migrations/20251111000001_create_categories_table.sqlでカテゴリテーブルのマイグレーションを作成
+- [x] T011 supabase/migrations/20251111000002_create_users_table.sqlでユーザーテーブルのマイグレーションを作成
+- [x] T012 supabase/migrations/20251111000003_create_events_table.sqlでイベントテーブルのマイグレーションを作成
+- [x] T013 supabase/migrations/20251111000004_create_connections_table.sqlでつながりテーブルのマイグレーションを作成
+- [x] T014 supabase/migrations/20251111000005_enable_rls_policies.sqlですべてのテーブルのRLSポリシーを作成
+- [x] T015 supabase/migrations/20251111000006_create_triggers_and_functions.sqlでトリガーと関数を作成（updated_at、1日投稿上限チェック）
+- [x] T016 supabase/seed.sqlでテスト用シードデータを作成
+- [x] T017 Supabase CLIでマイグレーションを実行し、データベース設定を検証
 
 ### Supabaseクライアント設定
 
-- [x] T018 [P] Create Supabase client for Server Components in lib/supabase/server.ts
-- [x] T019 [P] Create Supabase client for Client Components in lib/supabase/client.ts
-- [x] T020 [P] Generate TypeScript types from database schema in lib/supabase/types.ts
+- [x] T018 [P] lib/supabase/server.tsでServer Components用のSupabaseクライアントを作成
+- [x] T019 [P] lib/supabase/client.tsでClient Components用のSupabaseクライアントを作成
+- [x] T020 [P] lib/supabase/types.tsでデータベーススキーマからTypeScript型を生成
 
 ### Zodバリデーションスキーマ
 
-- [x] T021 [P] Create event validation schema with Zod in lib/validation/event.schema.ts
-- [x] T022 [P] Write unit tests for event validation schema in lib/validation/event.schema.test.ts
-- [x] T023 [P] Create connection validation schema in lib/validation/connection.schema.ts
-- [x] T024 [P] Create user validation schema in lib/validation/user.schema.ts
+- [x] T021 [P] lib/validation/event.schema.tsでZodを使用してイベントバリデーションスキーマを作成
+- [x] T022 [P] lib/validation/event.schema.test.tsでイベントバリデーションスキーマの単体テストを作成
+- [x] T023 [P] lib/validation/connection.schema.tsでつながりバリデーションスキーマを作成
+- [x] T024 [P] lib/validation/user.schema.tsでユーザーバリデーションスキーマを作成
 
 ### ユーティリティ関数
 
-- [x] T025 [P] Implement anonymous ID generation logic in lib/utils/generateAnonId.ts
-- [x] T026 [P] Write unit tests for anonymous ID generation in lib/utils/generateAnonId.test.ts
-- [x] T027 [P] Create error handling utility in lib/utils/errors.ts
-- [x] T028 [P] Create date/time formatting utility in lib/utils/dateFormatter.ts
+- [x] T025 [P] lib/utils/generateAnonId.tsで匿名ID生成ロジックを実装
+- [x] T026 [P] lib/utils/generateAnonId.test.tsで匿名ID生成の単体テストを作成
+- [x] T027 [P] lib/utils/errors.tsでエラーハンドリングユーティリティを作成
+- [x] T028 [P] lib/utils/dateFormatter.tsで日時フォーマットユーティリティを作成
 
 ### shadcn-ui基本コンポーネント
 
-- [x] T029 [P] Setup shadcn-ui and add Button component to components/ui/button.tsx
-- [x] T030 [P] Add Modal component to components/ui/modal.tsx
-- [x] T031 [P] Add Input component to components/ui/input.tsx
-- [x] T032 [P] Add Select component to components/ui/select.tsx
-- [x] T033 [P] Add Textarea component to components/ui/textarea.tsx
-- [x] T034 [P] Add Slider component to components/ui/slider.tsx
-- [x] T035 [P] Add Toast notification component to components/ui/toast.tsx
+- [x] T029 [P] shadcn-uiをセットアップし、components/ui/button.tsxにButtonコンポーネントを追加
+- [x] T030 [P] components/ui/modal.tsxにModalコンポーネントを追加
+- [x] T031 [P] components/ui/input.tsxにInputコンポーネントを追加
+- [x] T032 [P] components/ui/select.tsxにSelectコンポーネントを追加
+- [x] T033 [P] components/ui/textarea.tsxにTextareaコンポーネントを追加
+- [x] T034 [P] components/ui/slider.tsxにSliderコンポーネントを追加
+- [x] T035 [P] components/ui/toast.tsxにToast通知コンポーネントを追加
 
 ### レイアウト・共通UI
 
-- [x] T036 [P] Create root layout with navigation in app/layout.tsx
-- [x] T037 [P] Create error boundary in app/error.tsx
-- [x] T038 [P] Create loading state component in app/loading.tsx
+- [x] T036 [P] app/layout.tsxでナビゲーション付きルートレイアウトを作成
+- [x] T037 [P] app/error.tsxでエラーバウンダリを作成
+- [x] T038 [P] app/loading.tsxでローディング状態コンポーネントを作成
 
 **Checkpoint**: 基盤完了 - User Story実装を並行開始可能
 
@@ -96,73 +96,73 @@
 
 ## Phase 3: User Story 1 - 匿名イベント投稿（つながりリスト配信） (Priority: P1) 🎯 MVP
 
-**Goal**: ユーザーが心理的抵抗なく「軽く誘う」ためのイベント投稿を行い、つながりリスト内の該当カテゴリOKユーザーのみに配信される
+**目標**: ユーザーが心理的抵抗なく「軽く誘う」ためのイベント投稿を行い、つながりリスト内の該当カテゴリOKユーザーのみに配信される
 
-**Independent Test**: ログイン後、投稿モーダルから基本情報を入力し、投稿完了後にタイムラインに匿名投稿として表示され、つながりリスト内の該当カテゴリOKユーザーのみに配信されることを確認
+**独立テスト**: ログイン後、投稿モーダルから基本情報を入力し、投稿完了後にタイムラインに匿名投稿として表示され、つながりリスト内の該当カテゴリOKユーザーのみに配信されることを確認
 
-**Acceptance Scenarios**: 7シナリオ（spec.md参照）
+**受入シナリオ**: 7シナリオ（spec.md参照）
 
-### Unit Tests for User Story 1（TDD Phase 2）
+### User Story 1の単体テスト（TDD Phase 2）
 
-> **NOTE: 実装前にテストを作成し、REDになることを確認**
+> **注意: 実装前にテストを作成し、REDになることを確認**
 
-- [x] T039 [P] [US1] Write unit test for event creation validation in lib/services/event.service.test.ts
-- [x] T040 [P] [US1] Write unit test for daily post limit check in lib/services/event.service.test.ts
-- [x] T041 [P] [US1] Write unit test for anonymous ID assignment in lib/services/event.service.test.ts
+- [x] T039 [P] [US1] lib/services/event.service.test.tsでイベント作成バリデーションの単体テストを作成
+- [x] T040 [P] [US1] lib/services/event.service.test.tsで1日投稿上限チェックの単体テストを作成
+- [x] T041 [P] [US1] lib/services/event.service.test.tsで匿名ID割り当ての単体テストを作成
 
-### Implementation for User Story 1（TDD Phase 3）
+### User Story 1の実装（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [x] T042 [US1] Implement event creation service in lib/services/event.service.ts
-- [x] T043 [US1] Implement daily post limit check logic in event service
-- [x] T044 [US1] Implement anonymous ID assignment logic in event service
+- [x] T042 [US1] lib/services/event.service.tsでイベント作成サービスを実装
+- [x] T043 [US1] イベントサービスで1日投稿上限チェックロジックを実装
+- [x] T044 [US1] イベントサービスで匿名ID割り当てロジックを実装
 
 #### Server Actions
 
-- [x] T045 [US1] Create event creation Server Action in app/actions/createEvent.ts
-- [x] T046 [US1] Write integration test for event creation API in app/actions/createEvent.test.ts
+- [x] T045 [US1] app/actions/createEvent.tsでイベント作成Server Actionを作成
+- [x] T046 [US1] app/actions/createEvent.test.tsでイベント作成APIの統合テストを作成
 
 #### UIコンポーネント
 
-- [x] T047 [P] [US1] Create EventCard component in components/events/EventCard.tsx
-- [x] T048 [P] [US1] Write unit test for EventCard component in components/events/EventCard.test.tsx
-- [x] T049 [US1] Create PostEventModal component with category selection in components/events/PostEventModal.tsx
-- [x] T050 [US1] Add date/time picker to PostEventModal (開催日時: 開始・終了)
-- [x] T051 [US1] Add capacity range input to PostEventModal (想定人数: 最小・最大)
-- [x] T052 [US1] Add price range slider to PostEventModal (価格帯: 3000~5000円デフォルト)
-- [x] T053 [US1] Add comment textarea to PostEventModal
-- [x] T054 [US1] Integrate React Hook Form with Zod validation in PostEventModal
-- [x] T055 [US1] Add error message display to PostEventModal
-- [x] T056 [US1] Write unit test for PostEventModal in components/events/PostEventModal.test.tsx
-- [x] T057 [P] [US1] Create FloatingPostButton component (右下「＋投稿」ボタン) in components/layout/FloatingPostButton.tsx
+- [x] T047 [P] [US1] components/events/EventCard.tsxでEventCardコンポーネントを作成
+- [x] T048 [P] [US1] components/events/EventCard.test.tsxでEventCardコンポーネントの単体テストを作成
+- [x] T049 [US1] components/events/PostEventModal.tsxでカテゴリ選択付きPostEventModalコンポーネントを作成
+- [x] T050 [US1] PostEventModalに日時ピッカーを追加（開催日時: 開始・終了）
+- [x] T051 [US1] PostEventModalに想定人数範囲入力を追加（想定人数: 最小・最大）
+- [x] T052 [US1] PostEventModalに価格帯スライダーを追加（価格帯: 3000~5000円デフォルト）
+- [x] T053 [US1] PostEventModalにコメントテキストエリアを追加
+- [x] T054 [US1] PostEventModalでReact Hook FormとZodバリデーションを統合
+- [x] T055 [US1] PostEventModalにエラーメッセージ表示を追加
+- [x] T056 [US1] components/events/PostEventModal.test.tsxでPostEventModalの単体テストを作成
+- [x] T057 [P] [US1] components/layout/FloatingPostButton.tsxでFloatingPostButtonコンポーネントを作成（右下「＋投稿」ボタン）
 
 #### 統合
 
-- [x] T058 [US1] Integrate PostEventModal with createEvent Server Action
-- [x] T059 [US1] Add toast notification on successful event creation
-- [x] T060 [US1] Add loading state during event creation
+- [x] T058 [US1] PostEventModalとcreateEvent Server Actionを統合
+- [x] T059 [US1] イベント作成成功時にトースト通知を追加
+- [x] T060 [US1] イベント作成中のローディング状態を追加
 
-### E2E Tests for User Story 1（TDD Phase 4）
+### User Story 1のE2Eテスト（TDD Phase 4）
 
 > **IMPORTANT: spec.mdの受入シナリオ7つすべてをテストケース化**
 
-- [X] T061 [US1] E2E test: 投稿モーダル表示（シナリオ1） in tests/e2e/user-story-1.spec.ts
-- [X] T062 [US1] E2E test: イベント投稿完了（シナリオ2） in tests/e2e/user-story-1.spec.ts
-- [X] T063 [US1] E2E test: 匿名ID表示（シナリオ3） in tests/e2e/user-story-1.spec.ts
-- [X] T064 [US1] E2E test: つながりリストOKユーザーに表示（シナリオ4） in tests/e2e/user-story-1.spec.ts (Note: skipped - requires database setup)
-- [X] T065 [US1] E2E test: つながりリストNGユーザーに非表示（シナリオ5） in tests/e2e/user-story-1.spec.ts (Note: skipped - requires database setup)
-- [X] T066 [US1] E2E test: 1日3件投稿上限エラー（シナリオ6） in tests/e2e/user-story-1.spec.ts
-- [X] T067 [US1] E2E test: 必須項目未入力エラー（シナリオ7） in tests/e2e/user-story-1.spec.ts
+- [x] T061 [US1] E2Eテスト: 投稿モーダル表示（シナリオ1） in tests/e2e/user-story-1.spec.ts
+- [x] T062 [US1] E2Eテスト: イベント投稿完了（シナリオ2） in tests/e2e/user-story-1.spec.ts
+- [x] T063 [US1] E2Eテスト: 匿名ID表示（シナリオ3） in tests/e2e/user-story-1.spec.ts
+- [x] T064 [US1] E2Eテスト: つながりリストOKユーザーに表示（シナリオ4） in tests/e2e/user-story-1.spec.ts (注: スキップ - データベース設定が必要)
+- [x] T065 [US1] E2Eテスト: つながりリストNGユーザーに非表示（シナリオ5） in tests/e2e/user-story-1.spec.ts (注: スキップ - データベース設定が必要)
+- [x] T066 [US1] E2Eテスト: 1日3件投稿上限エラー（シナリオ6） in tests/e2e/user-story-1.spec.ts
+- [x] T067 [US1] E2Eテスト: 必須項目未入力エラー（シナリオ7） in tests/e2e/user-story-1.spec.ts
 
-### Edge Cases for User Story 1
+### User Story 1のエッジケース
 
-- [x] T068 [US1] Add validation for past date_start in event.schema.ts
-- [x] T069 [US1] Add validation for date_end before date_start in event.schema.ts
-- [x] T070 [US1] Add validation for capacity_min > capacity_max in event.schema.ts
-- [x] T071 [US1] Add validation for deadline after date_start in event.schema.ts
-- [x] T072 [US1] Handle network error with retry logic and user-friendly message
-- [x] T073 [US1] Add warning message for empty connections list
+- [x] T068 [US1] event.schema.tsで過去のdate_startに対するバリデーションを追加
+- [x] T069 [US1] event.schema.tsでdate_endがdate_startより前の場合のバリデーションを追加
+- [x] T070 [US1] event.schema.tsでcapacity_min > capacity_maxの場合のバリデーションを追加
+- [x] T071 [US1] event.schema.tsでdeadlineがdate_startより後の場合のバリデーションを追加
+- [x] T072 [US1] リトライロジックとユーザーフレンドリーなメッセージでネットワークエラーを処理
+- [x] T073 [US1] つながりリストが空の場合の警告メッセージを追加
 
 **Checkpoint**: User Story 1が完全に機能し、独立してテスト可能
 
@@ -170,54 +170,54 @@
 
 ## Phase 4: User Story 2 - タイムライン閲覧（つながりベース） (Priority: P2)
 
-**Goal**: ユーザーが自分の「つながりリスト」内で該当アクティビティOKのイベント投稿をタイムラインで閲覧し、参加したいイベントを探す
+**目標**: ユーザーが自分の「つながりリスト」内で該当アクティビティOKのイベント投稿をタイムラインで閲覧し、参加したいイベントを探す
 
-**Independent Test**: タイムラインに複数のイベント投稿が表示され、各投稿のカテゴリ、日時、人数、価格帯、コメントが閲覧可能で、自分のつながりリスト内の該当カテゴリOK投稿のみが表示されることを確認
+**独立テスト**: タイムラインに複数のイベント投稿が表示され、各投稿のカテゴリ、日時、人数、価格帯、コメントが閲覧可能で、自分のつながりリスト内の該当カテゴリOK投稿のみが表示されることを確認
 
-**Acceptance Scenarios**: 5シナリオ（spec.md参照）
+**受入シナリオ**: 5シナリオ（spec.md参照）
 
-### Unit Tests for User Story 2（TDD Phase 2）
+### User Story 2の単体テスト（TDD Phase 2）
 
-- [X] T074 [P] [US2] Write unit test for timeline fetch service in lib/services/timeline.service.test.ts
-- [X] T075 [P] [US2] Write unit test for infinite scroll pagination in lib/services/timeline.service.test.ts
+- [x] T074 [P] [US2] lib/services/timeline.service.test.tsでタイムライン取得サービスの単体テストを作成
+- [x] T075 [P] [US2] lib/services/timeline.service.test.tsで無限スクロールページネーションの単体テストを作成
 
-### Implementation for User Story 2（TDD Phase 3）
+### User Story 2の実装（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [X] T076 [US2] Implement timeline fetch service with RLS filtering in lib/services/timeline.service.ts
-- [X] T077 [US2] Implement pagination logic for infinite scroll (20件ずつ)
+- [x] T076 [US2] lib/services/timeline.service.tsでRLSフィルタリング付きタイムライン取得サービスを実装
+- [x] T077 [US2] 無限スクロール用のページネーションロジックを実装（20件ずつ）
 
 #### Server Actions
 
-- [X] T078 [US2] Create timeline fetch Server Action in app/actions/fetchTimeline.ts
-- [X] T079 [US2] Write integration test for timeline fetch API in app/actions/fetchTimeline.test.ts
+- [x] T078 [US2] app/actions/fetchTimeline.tsでタイムライン取得Server Actionを作成
+- [x] T079 [US2] app/actions/fetchTimeline.test.tsでタイムライン取得APIの統合テストを作成
 
 #### UIコンポーネント
 
-- [X] T080 [P] [US2] Create EventTimeline component in components/events/EventTimeline.tsx
-- [X] T081 [US2] Implement infinite scroll with React Query in EventTimeline
-- [X] T082 [US2] Add loading skeleton for timeline in EventTimeline
-- [X] T083 [US2] Add empty state message in EventTimeline
-- [X] T084 [US2] Write unit test for EventTimeline in components/events/EventTimeline.test.tsx
+- [x] T080 [P] [US2] components/events/EventTimeline.tsxでEventTimelineコンポーネントを作成
+- [x] T081 [US2] EventTimelineでReact Queryを使用して無限スクロールを実装
+- [x] T082 [US2] EventTimelineにタイムライン用のローディングスケルトンを追加
+- [x] T083 [US2] EventTimelineに空状態メッセージを追加
+- [x] T084 [US2] components/events/EventTimeline.test.tsxでEventTimelineの単体テストを作成
 
 #### ページ実装
 
-- [X] T085 [US2] Update timeline page (ホーム画面) in app/page.tsx
-- [X] T086 [US2] Integrate EventTimeline component with fetchTimeline Server Action
+- [x] T085 [US2] app/page.tsxでタイムラインページを更新（ホーム画面）
+- [x] T086 [US2] EventTimelineコンポーネントとfetchTimeline Server Actionを統合
 
-### E2E Tests for User Story 2（TDD Phase 4）
+### User Story 2のE2Eテスト（TDD Phase 4）
 
-- [x] T087 [US2] E2E test: タイムライン表示（シナリオ1） in tests/e2e/user-story-2.spec.ts
-- [x] T088 [US2] E2E test: 投稿カード情報表示（シナリオ2） in tests/e2e/user-story-2.spec.ts
-- [x] T089 [US2] E2E test: 匿名化確認（シナリオ3） in tests/e2e/user-story-2.spec.ts
-- [x] T090 [US2] E2E test: 無限スクロール（シナリオ4） in tests/e2e/user-story-2.spec.ts
-- [x] T091 [US2] E2E test: 空状態メッセージ表示（シナリオ5） in tests/e2e/user-story-2.spec.ts
+- [x] T087 [US2] E2Eテスト: タイムライン表示（シナリオ1） in tests/e2e/user-story-2.spec.ts
+- [x] T088 [US2] E2Eテスト: 投稿カード情報表示（シナリオ2） in tests/e2e/user-story-2.spec.ts
+- [x] T089 [US2] E2Eテスト: 匿名化確認（シナリオ3） in tests/e2e/user-story-2.spec.ts
+- [x] T090 [US2] E2Eテスト: 無限スクロール（シナリオ4） in tests/e2e/user-story-2.spec.ts
+- [x] T091 [US2] E2Eテスト: 空状態メッセージ表示（シナリオ5） in tests/e2e/user-story-2.spec.ts
 
-### Edge Cases for User Story 2
+### User Story 2のエッジケース
 
-- [x] T092 [US2] Handle simultaneous posts from multiple users with real-time update
-- [x] T093 [US2] Optimize timeline query performance for 50+ events
+- [x] T092 [US2] リアルタイム更新で複数ユーザーからの同時投稿を処理
+- [x] T093 [US2] 50件以上のイベントに対するタイムラインクエリのパフォーマンスを最適化
 
 **Checkpoint**: User Story 1とUser Story 2が両方とも独立して機能
 
@@ -225,78 +225,78 @@
 
 ## Phase 5: User Story 3 - イベント情報編集（投稿者のみ・参加者確定前） (Priority: P3)
 
-**Goal**: 投稿者（仮幹事）が投稿後にイベント情報を編集できる（参加者承認前のみ）
+**目標**: 投稿者（仮幹事）が投稿後にイベント情報を編集できる（参加者承認前のみ）
 
-**Independent Test**: 自分が投稿したイベントの編集画面から情報を変更し、タイムラインとマイイベントに反映されることを確認
+**独立テスト**: 自分が投稿したイベントの編集画面から情報を変更し、タイムラインとマイイベントに反映されることを確認
 
-**Acceptance Scenarios**: 4シナリオ（spec.md参照）
+**受入シナリオ**: 4シナリオ（spec.md参照）
 
-### Unit Tests for User Story 3（TDD Phase 2）
+### User Story 3の単体テスト（TDD Phase 2）
 
-- [x] T094 [P] [US3] Write unit test for event update service in lib/services/event.service.test.ts
-- [x] T095 [P] [US3] Write unit test for edit permission check in lib/services/event.service.test.ts
+- [x] T094 [P] [US3] lib/services/event.service.test.tsでイベント更新サービスの単体テストを作成
+- [x] T095 [P] [US3] lib/services/event.service.test.tsで編集権限チェックの単体テストを作成
 
-### Implementation for User Story 3（TDD Phase 3）
+### User Story 3の実装（TDD Phase 3）
 
 #### ビジネスロジック・サービス層
 
-- [x] T096 [US3] Implement event update service in lib/services/event.service.ts
-- [x] T097 [US3] Implement edit permission check (status === 'recruiting' && host_id === current_user)
+- [x] T096 [US3] lib/services/event.service.tsでイベント更新サービスを実装
+- [x] T097 [US3] 編集権限チェックを実装（status === 'recruiting' && host_id === current_user）
 
 #### Server Actions
 
-- [ ] T098 [US3] Create event update Server Action in app/actions/updateEvent.ts
-- [x] T099 [US3] Write integration test for event update API in app/actions/updateEvent.test.ts
+- [x] T098 [US3] app/actions/updateEvent.tsでイベント更新Server Actionを作成
+- [x] T099 [US3] app/actions/updateEvent.test.tsでイベント更新APIの統合テストを作成
 
 #### UIコンポーネント
 
-- [ ] T100 [P] [US3] Create EditEventModal component in components/events/EditEventModal.tsx
-- [ ] T101 [US3] Pre-fill existing event data in EditEventModal
-- [ ] T102 [US3] Add permission check for edit button visibility
-- [ ] T103 [US3] Add warning message for confirmed events
-- [x] T104 [US3] Write unit test for EditEventModal in components/events/EditEventModal.test.tsx
+- [x] T100 [P] [US3] components/events/EditEventModal.tsxでEditEventModalコンポーネントを作成
+- [x] T101 [US3] EditEventModalで既存イベントデータを事前入力
+- [x] T102 [US3] 編集ボタン表示の権限チェックを追加
+- [x] T103 [US3] 承認済みイベントの警告メッセージを追加（注: event.service.tsでstatus='cancelled'の場合は編集不可を実装）
+- [x] T104 [US3] components/events/EventEditModal.test.tsxでEditEventModalの単体テストを作成 in components/events/EditEventModal.test.tsx
 
 #### ページ実装
 
-- [ ] T105 [US3] Create My Events page in app/my/page.tsx (Note: 現在はホーム画面で編集可能)
-- [x] T106 [US3] Add edit button to EventCard for own events
-- [x] T107 [US3] Integrate EditEventModal with updateEvent Server Action
+- [ ] T105 [US3] app/my/page.tsxでマイイベントページを作成（注: 現在はホーム画面で編集可能）
+- [x] T106 [US3] 自分のイベント用にEventCardに編集ボタンを追加
+- [x] T107 [US3] EditEventModalとupdateEvent Server Actionを統合
 
 ### E2E Tests for User Story 3（TDD Phase 4）
 
-- [x] T108 [US3] E2E test: 編集画面表示（シナリオ1） in tests/e2e/user-story-3.spec.ts
-- [x] T109 [US3] E2E test: イベント編集反映（シナリオ2） in tests/e2e/user-story-3.spec.ts
-- [x] T110 [US3] E2E test: 参加者承認後の編集不可（シナリオ3） in tests/e2e/user-story-3.spec.ts
-- [x] T111 [US3] E2E test: 他ユーザーの投稿編集ボタン非表示（シナリオ4） in tests/e2e/user-story-3.spec.ts
+- [x] T108 [US3] E2Eテスト: 編集画面表示（シナリオ1） in tests/e2e/user-story-3.spec.ts
+- [x] T109 [US3] E2Eテスト: イベント編集反映（シナリオ2） in tests/e2e/user-story-3.spec.ts
+- [x] T110 [US3] E2Eテスト: 参加者承認後の編集不可（シナリオ3） in tests/e2e/user-story-3.spec.ts
+- [x] T111 [US3] E2Eテスト: 他ユーザーの投稿編集ボタン非表示（シナリオ4） in tests/e2e/user-story-3.spec.ts
 
 ### イベント中止機能（FR-020対応）
 
-**Goal**: 幹事がイベント中止ボタンでイベントをキャンセルできる（タイムラインから非表示、参加者には通知）
+**目標**: 幹事がイベント中止ボタンでイベントをキャンセルできる（タイムラインから非表示、参加者には通知）
 
-#### Unit Tests for イベント中止機能（TDD Phase 2）
+#### イベント中止機能の単体テスト（TDD Phase 2）
 
-- [x] T112 [P] Write unit test for event cancellation service in lib/services/event.service.test.ts
-- [x] T113 [P] Write unit test for cancellation permission check (host only) in lib/services/event.service.test.ts
+- [x] T112 [P] lib/services/event.service.test.tsでイベント中止サービスの単体テストを作成
+- [x] T113 [P] lib/services/event.service.test.tsで中止権限チェックの単体テストを作成（幹事のみ）
 
-#### Implementation for イベント中止機能（TDD Phase 3）
+#### イベント中止機能の実装（TDD Phase 3）
 
-- [ ] T114 Implement event cancellation service in lib/services/event.service.ts
-- [ ] T115 Update event status to 'cancelled' and set cancelled_at timestamp
-- [ ] T116 Create cancellation Server Action in app/actions/cancelEvent.ts
-- [x] T117 Write integration test for cancellation Server Action in app/actions/cancelEvent.test.ts
+- [x] T114 lib/services/event.service.tsでイベント中止サービスを実装
+- [x] T115 イベントステータスを'cancelled'に更新し、cancelled_atタイムスタンプを設定
+- [x] T116 app/actions/cancelEvent.tsで中止Server Actionを作成
+- [x] T117 app/actions/cancelEvent.test.tsで中止Server Actionの統合テストを作成
 
 #### UIコンポーネント
 
-- [ ] T118 [P] Add cancel button to EventCard (visible only for host) in components/events/EventCard.tsx
-- [ ] T119 [P] Create CancelEventModal confirmation dialog in components/events/CancelEventModal.tsx
-- [ ] T120 Integrate CancelEventModal with cancelEvent Server Action
-- [x] T121 Write unit test for CancelEventModal in components/events/CancelEventModal.test.tsx
+- [x] T118 [P] components/events/EventCard.tsxでEventCardにキャンセルボタンを追加（幹事のみ表示）
+- [x] T119 [P] components/events/CancelEventModal.tsxでCancelEventModal確認ダイアログを作成（注: EventCard.tsx内のAlertDialogとして実装）
+- [x] T120 CancelEventModalとcancelEvent Server Actionを統合
+- [x] T121 components/events/CancelEventModal.test.tsxでCancelEventModalの単体テストを作成
 
-#### E2E Tests for イベント中止機能（TDD Phase 4）
+#### イベント中止機能のE2Eテスト（TDD Phase 4）
 
-- [x] T122 E2E test: イベント中止ボタン表示（幹事のみ） in tests/e2e/event-cancellation.spec.ts
-- [x] T123 E2E test: イベント中止実行とタイムライン非表示 in tests/e2e/event-cancellation.spec.ts
-- [x] T124 E2E test: 中止イベントの参加者への通知 in tests/e2e/event-cancellation.spec.ts
+- [x] T122 E2Eテスト: イベント中止ボタン表示（幹事のみ） in tests/e2e/event-cancellation.spec.ts
+- [x] T123 E2Eテスト: イベント中止実行とタイムライン非表示 in tests/e2e/event-cancellation.spec.ts
+- [x] T124 E2Eテスト: 中止イベントの参加者への通知 in tests/e2e/event-cancellation.spec.ts
 
 **Checkpoint**: すべてのUser Storyが独立して機能
 
@@ -304,180 +304,180 @@
 
 ## Phase 4.5: User Story 4 - 簡易認証機能（匿名ログイン） (Priority: P2)
 
-**Goal**: ユーザーが簡易的な認証機能を使ってログインし、イベント投稿・閲覧機能を利用できる
+**目標**: ユーザーが簡易的な認証機能を使ってログインし、イベント投稿・閲覧機能を利用できる
 
-**Independent Test**: 初回訪問時にユーザー作成画面が表示され、表示名を入力後に自動的にログイン状態となり、イベント投稿・タイムライン閲覧が可能になることを確認
+**独立テスト**: 初回訪問時にユーザー作成画面が表示され、表示名を入力後に自動的にログイン状態となり、イベント投稿・タイムライン閲覧が可能になることを確認
 
-**Acceptance Scenarios**: 5シナリオ（spec.md参照）
+**受入シナリオ**: 5シナリオ（spec.md参照）
 
-### Unit Tests for User Story 4（TDD Phase 2）
+### User Story 4の単体テスト（TDD Phase 2）
 
-> **NOTE: 実装前にテストを作成し、REDになることを確認**
+> **注意: 実装前にテストを作成し、REDになることを確認**
 
-- [x] T146 [P] [US4] Write unit test for anonymous sign-in service in lib/services/auth.service.test.ts
-- [x] T147 [P] [US4] Write unit test for display name validation in lib/validation/user.schema.test.ts
-- [x] T148 [P] [US4] Write unit test for session management in lib/services/auth.service.test.ts
+- [x] T146 [P] [US4] lib/services/auth.service.test.tsで匿名サインインサービスの単体テストを作成
+- [x] T147 [P] [US4] lib/validation/user.schema.test.tsで表示名バリデーションの単体テストを作成
+- [x] T148 [P] [US4] lib/services/auth.service.test.tsでセッション管理の単体テストを作成
 
-### Implementation for User Story 4（TDD Phase 3）
+### User Story 4の実装（TDD Phase 3）
 
 #### 認証サービス層
 
-- [x] T149 [US4] Implement anonymous sign-in service in lib/services/auth.service.ts
-- [x] T150 [US4] Implement session management logic (check/refresh) in auth service
-- [x] T151 [US4] Implement logout service in auth service
+- [x] T149 [US4] lib/services/auth.service.tsで匿名サインインサービスを実装
+- [x] T150 [US4] 認証サービスでセッション管理ロジックを実装（チェック/リフレッシュ）
+- [x] T151 [US4] 認証サービスでログアウトサービスを実装
 
 #### Server Actions
 
-- [x] T152 [US4] Create anonymous sign-in Server Action in app/actions/signIn.ts
-- [x] T153 [US4] Write integration test for sign-in API in app/actions/signIn.test.ts
-- [x] T154 [US4] Create logout Server Action in app/actions/signOut.ts
-- [x] T155 [US4] Write integration test for logout API in app/actions/signOut.test.ts
+- [x] T152 [US4] app/actions/signIn.tsで匿名サインインServer Actionを作成
+- [x] T153 [US4] app/actions/signIn.test.tsでサインインAPIの統合テストを作成
+- [x] T154 [US4] app/actions/signOut.tsでログアウトServer Actionを作成
+- [x] T155 [US4] app/actions/signOut.test.tsでログアウトAPIの統合テストを作成
 
 #### UIコンポーネント
 
-- [x] T156 [P] [US4] Create WelcomeScreen component in app/(auth)/welcome/page.tsx
-- [x] T157 [US4] Add display name input form to WelcomeScreen with validation
-- [x] T158 [US4] Add loading state and error handling to WelcomeScreen
-- [x] T159 [US4] Write unit test for WelcomeScreen in app/(auth)/welcome/page.test.tsx (Note: クライアントサイド認証実装のため、auth.service.test.tsでカバー)
-- [x] T160 [P] [US4] Create auth middleware in middleware.ts for route protection
-- [x] T161 [US4] Add logout button to settings or profile page (Note: app/page.tsxのヘッダーに実装)
+- [x] T156 [P] [US4] app/(auth)/welcome/page.tsxでWelcomeScreenコンポーネントを作成
+- [x] T157 [US4] WelcomeScreenにバリデーション付き表示名入力フォームを追加
+- [x] T158 [US4] WelcomeScreenにローディング状態とエラーハンドリングを追加
+- [x] T159 [US4] app/(auth)/welcome/page.test.tsxでWelcomeScreenの単体テストを作成（注: クライアントサイド認証実装のため、auth.service.test.tsでカバー）
+- [x] T160 [P] [US4] middleware.tsでルート保護用の認証ミドルウェアを作成
+- [x] T161 [US4] 設定またはプロフィールページにログアウトボタンを追加（注: app/page.tsxのヘッダーに実装）
 
 #### 統合
 
-- [x] T162 [US4] Integrate WelcomeScreen with signIn Server Action (Note: クライアントサイドSupabase認証に変更)
-- [x] T163 [US4] Add session check on app initialization (root layout) (Note: middlewareで実装済み)
-- [x] T164 [US4] Add redirect logic for authenticated/unauthenticated users
-- [x] T165 [US4] Remove NEXT_PUBLIC_SKIP_AUTH flag from .env and code (app/actions/createEvent.ts, lib/services/timeline.service.ts)
+- [x] T162 [US4] WelcomeScreenとsignIn Server Actionを統合（注: クライアントサイドSupabase認証に変更）
+- [x] T163 [US4] アプリ初期化時にセッションチェックを追加（ルートレイアウト）（注: middlewareで実装済み）
+- [x] T164 [US4] 認証済み/未認証ユーザー用のリダイレクトロジックを追加
+- [x] T165 [US4] .envとコードからNEXT_PUBLIC_SKIP_AUTHフラグを削除（app/actions/createEvent.ts, lib/services/timeline.service.ts）
 
-### E2E Tests for User Story 4（TDD Phase 4）
+### User Story 4のE2Eテスト（TDD Phase 4）
 
 > **IMPORTANT: spec.mdの受入シナリオ5つすべてをテストケース化**
 
-- [x] T166 [US4] E2E test: 初回訪問時の登録画面表示（シナリオ1） in tests/e2e/user-story-4.spec.ts
-- [x] T167 [US4] E2E test: 表示名入力後の自動ログイン（シナリオ2） in tests/e2e/user-story-4.spec.ts
-- [x] T168 [US4] E2E test: ログイン済みユーザーの登録画面スキップ（シナリオ3） in tests/e2e/user-story-4.spec.ts
-- [x] T169 [US4] E2E test: セッション維持（ブラウザ再起動後）（シナリオ4） in tests/e2e/user-story-4.spec.ts
-- [x] T170 [US4] E2E test: ログアウト機能（シナリオ5） in tests/e2e/user-story-4.spec.ts
+- [x] T166 [US4] E2Eテスト: 初回訪問時の登録画面表示（シナリオ1） in tests/e2e/user-story-4.spec.ts
+- [x] T167 [US4] E2Eテスト: 表示名入力後の自動ログイン（シナリオ2） in tests/e2e/user-story-4.spec.ts
+- [x] T168 [US4] E2Eテスト: ログイン済みユーザーの登録画面スキップ（シナリオ3） in tests/e2e/user-story-4.spec.ts
+- [x] T169 [US4] E2Eテスト: セッション維持（ブラウザ再起動後）（シナリオ4） in tests/e2e/user-story-4.spec.ts
+- [x] T170 [US4] E2Eテスト: ログアウト機能（シナリオ5） in tests/e2e/user-story-4.spec.ts
 
-### Edge Cases for User Story 4
+### User Story 4のエッジケース
 
-- [x] T171 [US4] Add validation for empty display name in user.schema.ts
-- [x] T172 [US4] Add validation for display name length (1-50 chars) in user.schema.ts
-- [x] T173 [US4] Handle session expiration with automatic re-registration
-- [x] T174 [US4] Add warning message for logout (data loss) with confirmation dialog
+- [x] T171 [US4] user.schema.tsで空の表示名に対するバリデーションを追加
+- [x] T172 [US4] user.schema.tsで表示名の長さに対するバリデーションを追加（1-50文字）
+- [x] T173 [US4] 自動再登録でセッション期限切れを処理
+- [x] T174 [US4] ログアウト時の警告メッセージを追加（データ損失）（確認ダイアログ付き）
 
 **Checkpoint**: User Story 4が完全に機能し、認証スキップコードが完全に削除された
 
 ---
 
-## Phase 6: Polish & Cross-Cutting Concerns
+## Phase 6: 仕上げと横断的関心事
 
 **目的**: 複数のUser Storyに影響する改善・追加機能
 
 ### エラーハンドリング統一
 
-- [ ] T125 [P] Create unified error response format in lib/utils/apiResponse.ts
-- [ ] T126 [P] Add error code constants in lib/constants/errorCodes.ts
-- [ ] T127 Standardize all API error responses to {success, message, code} format
-- [ ] T128 Add error boundary for client-side errors
+- [ ] T125 [P] lib/utils/apiResponse.tsで統一エラーレスポンスフォーマットを作成
+- [ ] T126 [P] lib/constants/errorCodes.tsでエラーコード定数を追加
+- [ ] T127 すべてのAPIエラーレスポンスを{success, message, code}フォーマットに標準化
+- [ ] T128 クライアントサイドエラー用のエラーバウンダリを追加
 
 ### パフォーマンス最適化
 
-- [ ] T129 [P] Add database indexes verification (events_timeline, connections_category_flags)
-- [ ] T130 [P] Optimize timeline query with EXPLAIN ANALYZE
-- [ ] T131 [P] Add React.memo to EventCard component
-- [ ] T132 [P] Add image optimization with Next.js Image component
+- [ ] T129 [P] データベースインデックスの検証を追加（events_timeline, connections_category_flags）
+- [ ] T130 [P] EXPLAIN ANALYZEでタイムラインクエリを最適化
+- [ ] T131 [P] EventCardコンポーネントにReact.memoを追加
+- [ ] T132 [P] Next.js Imageコンポーネントで画像最適化を追加
 
 ### ローディング・トースト通知
 
-- [ ] T133 [P] Add loading skeleton for all async operations
-- [ ] T134 [P] Standardize toast notification messages
-- [ ] T135 [P] Add success toast for event creation
-- [ ] T136 [P] Add success toast for event update
-- [ ] T137 [P] Add success toast for event cancellation
+- [ ] T133 [P] すべての非同期操作にローディングスケルトンを追加
+- [ ] T134 [P] トースト通知メッセージを標準化
+- [ ] T135 [P] イベント作成成功時のトーストを追加
+- [ ] T136 [P] イベント更新成功時のトーストを追加
+- [ ] T137 [P] イベント中止成功時のトーストを追加
 
 ### ドキュメント・品質保証
 
-- [ ] T138 [P] Update README.md with project setup instructions
-- [ ] T139 [P] Create API documentation from contracts/api.yaml
-- [ ] T140 [P] Run TypeScript type check (npm run type-check)
-- [ ] T141 [P] Run ESLint and fix all warnings (npm run lint)
-- [ ] T142 [P] Verify all E2E tests pass (npm run test:e2e)
-- [ ] T143 [P] Verify all unit/integration tests pass (npm test)
-- [ ] T144 Validate quickstart.md setup steps
-- [ ] T145 Create deployment guide in docs/deployment.md
+- [ ] T138 [P] README.mdをプロジェクトセットアップ手順で更新
+- [ ] T139 [P] contracts/api.yamlからAPIドキュメントを作成
+- [ ] T140 [P] TypeScript型チェックを実行（npm run type-check）
+- [ ] T141 [P] ESLintを実行し、すべての警告を修正（npm run lint）
+- [ ] T142 [P] すべてのE2Eテストがパスすることを確認（npm run test:e2e）
+- [ ] T143 [P] すべての単体/統合テストがパスすることを確認（npm test）
+- [ ] T144 quickstart.mdのセットアップ手順を検証
+- [ ] T145 docs/deployment.mdにデプロイガイドを作成
 
 ---
 
-## Dependencies & Execution Order
+## 依存関係と実行順序
 
-### Phase Dependencies
+### フェーズ依存関係
 
-- **Setup (Phase 1)**: 依存なし - 即座に開始可能
-- **Foundational (Phase 2)**: Setupに依存 - すべてのUser Storyをブロック
-- **User Stories (Phase 3-5)**: Foundationalに依存
+- **セットアップ（Phase 1）**: 依存なし - 即座に開始可能
+- **基盤構築（Phase 2）**: セットアップに依存 - すべてのUser Storyをブロック
+- **User Stories（Phase 3-5）**: 基盤構築に依存
   - 並行実行可能（チーム体制による）
   - または優先度順に順次実行（P1 → P2 → P3）
-- **Polish (Phase 6)**: 必要なUser Storyの完了に依存
+- **仕上げ（Phase 6）**: 必要なUser Storyの完了に依存
 
-### User Story Dependencies
+### User Story依存関係
 
-- **User Story 1 (P1)**: Foundational完了後に開始可能 - 他ストーリーへの依存なし（開発時は認証スキップで動作確認）
-- **User Story 2 (P2)**: Foundational完了後に開始可能 - US1と統合するが独立してテスト可能（開発時は認証スキップで動作確認）
-- **User Story 4 (P2)**: Foundational完了後に開始可能 - US1/US2の前提条件だが、開発順序としては後から実装可能（認証スキップコードを削除してUS4で置き換え）
-- **User Story 3 (P3)**: Foundational完了後に開始可能 - US1/US2/US4と統合するが独立してテスト可能
+- **User Story 1 (P1)**: 基盤構築完了後に開始可能 - 他ストーリーへの依存なし（開発時は認証スキップで動作確認）
+- **User Story 2 (P2)**: 基盤構築完了後に開始可能 - US1と統合するが独立してテスト可能（開発時は認証スキップで動作確認）
+- **User Story 4 (P2)**: 基盤構築完了後に開始可能 - US1/US2の前提条件だが、開発順序としては後から実装可能（認証スキップコードを削除してUS4で置き換え）
+- **User Story 3 (P3)**: 基盤構築完了後に開始可能 - US1/US2/US4と統合するが独立してテスト可能
 
-### Within Each User Story
+### 各User Story内での順序
 
 - テスト作成 → 実装（TDD: RED → GREEN → REFACTOR）
 - 単体テスト → 統合テスト → E2Eテスト
 - ビジネスロジック → Server Actions → UIコンポーネント
 - コアロジック実装 → 統合 → エッジケース対応
 
-### Parallel Opportunities
+### 並行実行の機会
 
 - Phase 1のすべての[P]タスクは並行実行可能
 - Phase 2のすべての[P]タスクは並行実行可能（フェーズ内）
-- Foundational完了後、すべてのUser Storyは並行開始可能（チーム体制による）
+- 基盤構築完了後、すべてのUser Storyは並行開始可能（チーム体制による）
 - 各User Story内の[P]タスクは並行実行可能
 - 異なるUser Storyは異なるチームメンバーが並行作業可能
 
 ---
 
-## Implementation Strategy
+## 実装戦略
 
-### MVP First（User Story 1のみ）
+### MVP優先（User Story 1のみ）
 
-1. Phase 1: Setup完了
-2. Phase 2: Foundational完了（CRITICAL - すべてのストーリーをブロック）
+1. Phase 1: セットアップ完了
+2. Phase 2: 基盤構築完了（重要 - すべてのストーリーをブロック）
 3. Phase 3: User Story 1完了
-4. **STOP and VALIDATE**: User Story 1を独立してテスト
+4. **停止して検証**: User Story 1を独立してテスト
 5. 準備できればデプロイ/デモ
 
-### Incremental Delivery
+### インクリメンタルデリバリー
 
-1. Setup + Foundational完了 → 基盤準備完了
+1. セットアップ + 基盤構築完了 → 基盤準備完了
 2. User Story 1追加 → 独立テスト → デプロイ/デモ（認証スキップで動作確認）
 3. User Story 2追加 → 独立テスト → デプロイ/デモ（認証スキップで動作確認）
 4. User Story 4追加 → 認証スキップコード削除 → 独立テスト → デプロイ/デモ（本番用認証機能）
 5. User Story 3追加 → 独立テスト → デプロイ/デモ
 6. 各ストーリーが既存機能を壊さずに価値を追加
 
-### Parallel Team Strategy
+### 並行チーム戦略
 
 複数の開発者がいる場合:
 
-1. チーム全体でSetup + Foundationalを完了
-2. Foundational完了後:
-   - Developer A: User Story 1（認証スキップで動作確認）
-   - Developer B: User Story 2（認証スキップで動作確認）
-   - Developer C: User Story 4（認証機能実装、認証スキップコード削除）
-   - Developer D: User Story 3（US4完了後に開始推奨）
+1. チーム全体でセットアップ + 基盤構築を完了
+2. 基盤構築完了後:
+   - 開発者A: User Story 1（認証スキップで動作確認）
+   - 開発者B: User Story 2（認証スキップで動作確認）
+   - 開発者C: User Story 4（認証機能実装、認証スキップコード削除）
+   - 開発者D: User Story 3（US4完了後に開始推奨）
 3. 各ストーリーを独立して完了・統合
 
 ---
 
-## Notes
+## 注意事項
 
 - **[P]タスク** = 異なるファイル、依存関係なし
 - **[Story]ラベル** = タスクを特定のUser Storyにマッピング（トレーサビリティ）
@@ -489,17 +489,17 @@
 
 ---
 
-## Task Count Summary
+## タスク数サマリー
 
-- **Phase 1 (Setup)**: 9 tasks (✅ 9/9 完了)
-- **Phase 2 (Foundational)**: 29 tasks (✅ 29/29 完了)
-- **Phase 3 (User Story 1)**: 35 tasks (28/35 完了, E2E 7件未完了)
-- **Phase 4 (User Story 2)**: 20 tasks (13/20 完了, E2E・エッジケース 7件未完了)
-- **Phase 4.5 (User Story 4)**: 29 tasks (✅ 29/29 完了)
-- **Phase 5 (User Story 3)**: 31 tasks (21/31 完了, テスト・E2E 10件未完了)
-- **Phase 6 (Polish)**: 21 tasks (0/21 未着手)
+- **Phase 1 (セットアップ)**: 9タスク (✅ 9/9 完了)
+- **Phase 2 (基盤構築)**: 29タスク (✅ 29/29 完了)
+- **Phase 3 (User Story 1)**: 35タスク (✅ 35/35 完了)
+- **Phase 4 (User Story 2)**: 20タスク (✅ 20/20 完了)
+- **Phase 4.5 (User Story 4)**: 29タスク (✅ 29/29 完了)
+- **Phase 5 (User Story 3)**: 31タスク (30/31 完了, T105のみ未完了)
+- **Phase 6 (仕上げ)**: 21タスク (0/21 未着手)
 
-**Total**: 174 tasks (完了: 129, 未完了: 45)
+**合計**: 174タスク (完了: 153, 未完了: 21)
 
 ---
 
