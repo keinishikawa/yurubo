@@ -88,6 +88,7 @@ type EventCardProps = {
   event: EventCardData;
   currentUserId?: string;
   onEventCancelled?: (eventId: string) => void;
+  onEventUpdated?: (eventId: string, updatedData: CreateEventInput) => void;
 };
 
 /**
@@ -145,7 +146,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 /**
  * EventCardコンポーネント
  */
-export function EventCard({ event, currentUserId, onEventCancelled }: EventCardProps) {
+export function EventCard({ event, currentUserId, onEventCancelled, onEventUpdated }: EventCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isCancelAlertOpen, setIsCancelAlertOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -172,13 +173,24 @@ export function EventCard({ event, currentUserId, onEventCancelled }: EventCardP
       if (result.success) {
         // 成功時の処理
         toast.success("イベントを更新しました");
-        // TODO: 画面更新（router.refresh()など）
+        setIsEditModalOpen(false);
+        // 親コンポーネントに更新を通知（リアルタイム更新が動作しない場合のフォールバック）
+        if (onEventUpdated) {
+          onEventUpdated(eventId, data);
+        }
       } else {
-        toast.error(result.message);
+        // エラーメッセージをトーストで表示
+        toast.error(result.message || "イベントの更新に失敗しました");
+        throw new Error(result.message);
       }
     } catch (error) {
       console.error(error);
-      toast.error("エラーが発生しました");
+      if (error instanceof Error && error.message) {
+        // 既にServer Actionのエラーメッセージを表示済み
+      } else {
+        toast.error("エラーが発生しました");
+      }
+      throw error;
     } finally {
       setIsUpdating(false);
     }

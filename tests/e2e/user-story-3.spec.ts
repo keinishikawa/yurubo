@@ -131,4 +131,88 @@ test.describe("User Story 3: イベント編集", () => {
 
     expect(true).toBe(true); // Placeholder
   });
+
+  /**
+   * T105: マイイベントページ表示
+   *
+   * Given: ユーザーがログインしている
+   * When: マイイベントページ（/my）にアクセス
+   * Then: 自分が投稿したイベントのみ表示される
+   */
+  test("T105: マイイベントページ表示", async ({ /* page */ }) => {
+    // TODO: 認証環境整備後にアンコメント
+    // Setup: ログインして自分のイベントを作成
+    // await page.goto('/');
+    // await page.click('[data-testid="floating-post-button"]');
+    // await page.selectOption('[name="category"]', 'drinking');
+    // await page.fill('[name="title"]', '軽く飲みませんか？');
+    // await page.click('button:has-text("投稿する")');
+
+    // When: マイイベントページにアクセス
+    // await page.goto('/my');
+
+    // Then: ページが表示される
+    // await expect(page.locator('[data-testid="my-events-page"]')).toBeVisible();
+
+    // Then: ページタイトルが表示される
+    // await expect(page.locator('h1:has-text("マイイベント")')).toBeVisible();
+
+    // Then: 自分のイベントが表示される
+    // await expect(page.locator('text=軽く飲みませんか？')).toBeVisible();
+
+    // Then: 編集ボタンが表示される（自分のイベントのみ）
+    // await expect(page.locator('[data-testid="event-edit-button"]')).toBeVisible();
+
+    expect(true).toBe(true); // Placeholder
+  });
+
+  /**
+   * T105-2: マイイベントページ空状態
+   *
+   * Given: ユーザーがログインしているが、イベントを投稿していない
+   * When: マイイベントページにアクセス
+   * Then: 空状態メッセージが表示される
+   */
+  test("T105-2: マイイベントページ空状態", async ({ /* page */ }) => {
+    // TODO: 認証環境整備後にアンコメント
+    // Setup: ログイン（イベント未投稿）
+    // await page.goto('/');
+
+    // When: マイイベントページにアクセス
+    // await page.goto('/my');
+
+    // Then: 空状態メッセージが表示される
+    // await expect(page.locator('[data-testid="my-events-empty-state"]')).toBeVisible();
+    // await expect(page.locator('text=まだイベントを投稿していません')).toBeVisible();
+
+    // Then: タイムラインに戻るボタンが表示される
+    // await expect(page.locator('[data-testid="back-to-timeline-button"]')).toBeVisible();
+
+    expect(true).toBe(true); // Placeholder
+  });
+
+  /**
+   * T105-3: マイイベントページからの編集（シナリオ1対応）
+   *
+   * Given: マイイベントページで自分のイベントが表示されている
+   * When: イベントカードの「編集」ボタンをクリック
+   * Then: 編集モーダルが表示され、既存の情報がフォームにプリフィルされる
+   */
+  test("T105-3: マイイベントページからの編集", async ({ /* page */ }) => {
+    // TODO: 認証環境整備後にアンコメント
+    // Setup: マイイベントページで自分のイベントを表示
+    // await page.goto('/my');
+    // await expect(page.locator('text=軽く飲みませんか？')).toBeVisible();
+
+    // When: 編集ボタンをクリック
+    // await page.click('[data-testid="event-edit-button"]');
+
+    // Then: 編集モーダルが表示される
+    // await expect(page.locator('[role="dialog"][aria-label="イベントを編集"]')).toBeVisible();
+
+    // Then: 既存の情報がフォームにプリフィルされている
+    // await expect(page.locator('[name="title"]')).toHaveValue('軽く飲みませんか？');
+
+    expect(true).toBe(true); // Placeholder
+  });
 });
