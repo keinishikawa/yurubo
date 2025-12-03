@@ -142,8 +142,14 @@ export function EventEditModal({
       date_end: toISO(data.date_end),
     };
 
-    await onSubmit(event.id, submitData);
-    onOpenChange(false);
+    try {
+      await onSubmit(event.id, submitData);
+      // 成功時のみモーダルを閉じる
+      onOpenChange(false);
+    } catch (error) {
+      // エラー時はモーダルを開いたまま（親コンポーネントでトースト表示される）
+      console.error("Failed to update event:", error);
+    }
   };
 
   const handleClose = (open: boolean) => {

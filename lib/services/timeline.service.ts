@@ -23,6 +23,8 @@ export type FetchTimelineParams = {
   page?: number
   /** 1ページあたりの件数（デフォルト: 20） */
   limit?: number
+  /** 投稿者IDでフィルタリング（T105: マイイベント機能） */
+  hostId?: string
 }
 
 /**
@@ -69,7 +71,7 @@ export async function fetchTimeline(
   supabase: SupabaseClient<Database>,
   params: FetchTimelineParams = {}
 ): Promise<FetchTimelineResult> {
-  const { page = 0, limit = 20 } = params
+  const { page = 0, limit = 20, hostId } = params
 
   // 【ステップ1】現在ユーザーを取得 (T165)
   const {
@@ -91,12 +93,18 @@ export async function fetchTimeline(
 
   // 【ステップ3】イベントを取得
   // RLSポリシーによってつながりリストベースでフィルタリングされる
-  const { data: events, error: fetchError } = await supabase
+  let query = supabase
     .from('events')
     .select('*')
     .eq('status', 'recruiting')
     .order('created_at', { ascending: false })
-    .range(from, to)
+
+  // 【ステップ3.5】hostIdが指定されている場合はフィルタリング（T105: マイイベント機能）
+  if (hostId) {
+    query = query.eq('host_id', hostId)
+  }
+
+  const { data: events, error: fetchError } = await query.range(from, to)
 
   if (fetchError) {
     console.error('タイムライン取得エラー:', fetchError)

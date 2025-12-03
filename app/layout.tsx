@@ -98,14 +98,14 @@ export default function RootLayout({
 
             {/* ナビゲーションリンク */}
             <div className="flex items-center gap-6">
-              <Link href="/events" className="text-sm font-medium hover:underline">
+              <Link href="/" className="text-sm font-medium hover:underline">
                 タイムライン
               </Link>
-              <Link href="/connections" className="text-sm font-medium hover:underline">
-                つながり
+              <Link href="/my" className="text-sm font-medium hover:underline">
+                マイイベント
               </Link>
-              <Link href="/profile" className="text-sm font-medium hover:underline">
-                プロフィール
+              <Link href="/settings" className="text-sm font-medium hover:underline">
+                設定
               </Link>
             </div>
           </div>

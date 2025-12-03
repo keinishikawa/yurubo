@@ -18,6 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 import { EventCard } from "@/components/events/EventCard";
 import { fetchTimeline } from "@/app/actions/fetchTimeline";
 import type { Database } from "@/lib/supabase/types";
+import type { CreateEventInput } from "@/lib/validation/event.schema";
 
 type Event = Database["public"]["Tables"]["events"]["Row"];
 
@@ -31,6 +32,8 @@ type EventTimelineProps = {
   className?: string;
   /** 現在のユーザーID（編集・中止権限判定用） */
   currentUserId?: string;
+  /** 投稿者IDでフィルタリング（T105: マイイベント機能） */
+  filterByHostId?: string;
 };
 
 /**
@@ -89,6 +92,7 @@ export function EventTimeline({
   initialEvents = [],
   className,
   currentUserId,
+  filterByHostId,
 }: EventTimelineProps) {
   // 【ステップ1】状態管理
   const [events, setEvents] = useState<Event[]>(initialEvents);
@@ -109,7 +113,7 @@ export function EventTimeline({
     setError(null);
 
     try {
-      const result = await fetchTimeline({ page, limit: 20 });
+      const result = await fetchTimeline({ page, limit: 20, hostId: filterByHostId });
 
       if (result.success && result.data) {
         // 重複を防ぐため、既存のIDセットを作成
@@ -131,7 +135,7 @@ export function EventTimeline({
     } finally {
       setIsLoading(false);
     }
-  }, [page, isLoading, hasMore]);
+  }, [page, isLoading, hasMore, filterByHostId]);
 
   // 【ステップ3】Intersection Observerで無限スクロール実装
   useEffect(() => {
@@ -191,6 +195,11 @@ export function EventTimeline({
           // 新しいイベントをタイムラインの先頭に追加
           const newEvent = payload.new as Event;
 
+          // filterByHostIdが指定されている場合は、ホストIDをチェック
+          if (filterByHostId && newEvent.host_id !== filterByHostId) {
+            return;
+          }
+
           // RLSポリシーでつながりリストとカテゴリのフィルタリングが
           // サーバー側で行われるため、通知されたイベントはすべて表示対象
           setEvents((prev) => {
@@ -212,6 +221,12 @@ export function EventTimeline({
         },
         (payload) => {
           const updatedEvent = payload.new as Event;
+
+          // filterByHostIdが指定されている場合は、ホストIDをチェック
+          if (filterByHostId && updatedEvent.host_id !== filterByHostId) {
+            return;
+          }
+
           setEvents((prev) => {
             // イベントが中止された場合はタイムラインから削除
             if (updatedEvent.status !== 'recruiting') {
@@ -242,11 +257,27 @@ export function EventTimeline({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [filterByHostId]);
 
   // 【ステップ6】イベント中止時のハンドラー
   const handleEventCancelled = useCallback((eventId: string) => {
     setEvents((prev) => prev.filter((event) => event.id !== eventId));
+  }, []);
+
+  // 【ステップ7】イベント更新時のハンドラー
+  const handleEventUpdated = useCallback((eventId: string, updatedData: CreateEventInput) => {
+    setEvents((prev) =>
+      prev.map((event) => {
+        if (event.id === eventId) {
+          // 更新されたデータをマージ
+          return {
+            ...event,
+            ...updatedData,
+          };
+        }
+        return event;
+      })
+    );
   }, []);
 
   return (
@@ -260,6 +291,7 @@ export function EventTimeline({
               event={event}
               currentUserId={currentUserId}
               onEventCancelled={handleEventCancelled}
+              onEventUpdated={handleEventUpdated}
             />
           ))}
         </div>

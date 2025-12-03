@@ -36,7 +36,8 @@ const getPort = (): number => {
   if (process.env.TEST_PORT) {
     return parseInt(process.env.TEST_PORT, 10);
   }
-  // ローカル: ディレクトリパスからハッシュ計算
+  // ローカル: ディレクトリパスからハッシュ計算（ポート競合回避）
+  // supabase/config.tomlのadditional_redirect_urlsで3000-3099を許可済み
   const hash = crypto.createHash("md5").update(process.cwd()).digest("hex");
   return 3000 + (parseInt(hash.substring(0, 4), 16) % 100);
 };

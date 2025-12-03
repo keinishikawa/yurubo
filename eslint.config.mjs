@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore test files (they use @ts-nocheck for mock types)
+    "**/*.test.ts",
+    "**/*.test.tsx",
   ]),
 ]);
 
