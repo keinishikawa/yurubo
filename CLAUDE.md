@@ -4,268 +4,105 @@ Claude Code 向けプロジェクト設定ファイル
 
 ---
 
-## 1. 基本設定
+## プロジェクト概要
 
-- **言語**: すべて日本語（コード・コミット・ドキュメント）
-- **役割**: Next.js (App Router), Supabase, TypeScript エキスパート
-- **開発手法**: TDD（Test-Driven Development）必須
+**ゆるぼ (YURUBO)**: 匿名型イベント調整プラットフォーム
 
-### 実装開始時の必須ステップ
-
-**新しいタスクを開始する際は、必ず以下の順序で実行：**
-
-1. **Issue確認**: `gh issue view <number>` で要件を確認
-2. **TDD開始**: 実装前にテストを作成（RED状態を確認）
-3. **最小実装**: テストが通る最小限のコードを書く（GREEN状態）
-4. **リファクタリング**: コードを改善（テストは通ったまま）
-
-**禁止事項：**
-- ❌ テストなしでの実装
-- ❌ 実装後のテスト追加（後付けテスト）
-- ❌ Issueを読まずに実装開始
+| 層 | 技術 |
+|----|------|
+| Frontend | Next.js 15 / TypeScript / Tailwind / shadcn-ui |
+| Backend | Supabase (DB + Auth) |
+| Infra | Vercel / Supabase Cloud |
 
 ---
 
-## 2. GitHub Issue 至上主義 (SSOT)
+## 開発方針
 
-**要件の正解は常に GitHub Issue**
+- **言語**: すべて日本語（コード・コミット・ドキュメント）
+- **手法**: テストファースト（フェーズに応じた戦略）
+- **要件**: GitHub Issue が唯一の正解（SSOT）
+
+---
+
+## 核心ルール
+
+1. **Issue確認してから実装**: `gh issue view <number>`
+2. **テストファースト**: 初期フェーズはE2E優先、Unit Testは段階的に追加
+3. **CI全チェック通過までマージしない**: `npm run precheck`
+4. **main直接push禁止**: 必ずブランチ → PR経由
+5. **食い違いはユーザーに確認**: 勝手に判断しない
+
+---
+
+## 基本コマンド
 
 ```bash
-# タスク着手時に必ず実行
+npm run dev          # 開発サーバー
+npm run precheck     # push前の全チェック（必須）
+gh issue view <n>    # Issue確認
+git gtr new <branch> # ワークツリー作成
+```
+
+---
+
+## ワークフロー
+
+### 実装開始時
+1. `gh issue view <number>` で要件確認
+2. **作業タイプに応じた準備**（下記参照）
+3. テストを作成（E2E優先、必要に応じてUnit）
+4. テストが通る最小限の実装
+5. リファクタリング
+
+### 作業タイプ別の準備
+
+| 作業タイプ | 実装前に読む | 確認ポイント |
+|-----------|-------------|-------------|
+| UI/コンポーネント | [constitution.md VIII](.specify/memory/constitution.md) | デザイン思考、Anti-Generic |
+| テスト作成 | [constitution.md III](.specify/memory/constitution.md) | 現在フェーズの戦略 |
+| ブランチ作成 | [constitution.md ブランチ戦略](.specify/memory/constitution.md) | 命名規則 |
+
+### PR作成時
+1. `npm run precheck` 全チェック通過
+2. PRに `Closes #<issue>` を含める
+3. CI通過を確認してからマージ依頼
+
+### セッション再開時
+```bash
+git branch --show-current
+git status && git log --oneline -5
 gh issue view <number>
 ```
 
-- Issue > コードベース > spec.md/tasks.md（参考程度）
-- 食い違いがあればユーザーに確認
-
----
-
-## 3. コンテキスト継続
-
-**セッション開始時・autocompact後・再開時に実行:**
-
-```bash
-# 1. 現在のブランチとIssueを確認
-git branch --show-current
-gh issue develop --list  # 紐付いたIssue確認
-
-# 2. 作業状態を確認
-git status && git log --oneline -5
-
-# 3. Issue詳細確認
-gh issue view <number> --comments
-```
-
-**ワークツリー作成フロー:**
-
-```bash
-# Issueと紐付いたブランチを作成
-gh issue develop <issue_number> --name feature/001-us1-xxx
-
-# ワークツリー作成（.env.localも自動コピーされる）
-git gtr new <branch_name>
-```
-
-**SpecKitコマンドの使用（オプション）:**
-
-SpecKitの自動実装ワークフローを使う場合：
-
-```bash
-# IMPORTANT: featureブランチでのみ実行可能（mainでは実行不可）
-# ワークツリー内、またはfeatureブランチに切り替えてから実行
-
-/speckit.implement   # tasks.mdに従って段階的に実装
-```
-
-**注意:**
-- `/speckit.implement`は**mainブランチでは実行できません**
-- 必ず`feature/`ブランチで実行すること
-- ワークツリー内で実行するのが推奨
-
-**作業中の記録:**
-
-- 重要な判断・ブロッカーはGitHub Issueにコメント
-- WIPでもこまめにコミット（意味のあるメッセージで）
-
----
-
-## 4. 完了の定義
-
-1. Issue要件を満たしている
-2. テスト（Unit/E2E）がパス
-3. `npm run lint` & `npm run type-check` がパス
-4. PR作成済み（`Closes #<issue_number>` を含む）
-5. **CI全チェック通過**（claude-reviewのCritical Issues修正含む）
-
----
-
-## 5. テスト戦略（TDD必須）
-
-**IMPORTANT: このプロジェクトはTDD（Test-Driven Development）を採用しています**
-
-### TDDサイクル（Red-Green-Refactor）
-
-**すべての実装は以下の順序で行うこと：**
-
-1. **RED**: 失敗するテストを先に書く
-2. **GREEN**: テストが通る最小限の実装を書く
-3. **REFACTOR**: コードを改善する
-
-### テスト種別と実行タイミング
-
-| 種別             | 対象                             | 実装順序                           |
-| ---------------- | -------------------------------- | ---------------------------------- |
-| Unit (Jest)      | ビジネスロジック、ユーティリティ | **実装前**にテスト作成（TDD必須） |
-| E2E (Playwright) | User Story全体の動作             | **実装前**にテスト作成（TDD必須） |
-| 目視確認         | レイアウト崩れ、アニメーション   | 実装中のみ（自動化困難な項目）     |
-
-### push前チェックリスト
-
-```bash
-# 全チェックを一括実行（推奨）
-npm run precheck
-
-# 個別実行する場合:
-# npm run lint && npm run type-check && npm test && npm run test:e2e
-```
-
-### 目視確認の定義
-
-目視確認はテストで自動化しづらい以下の項目に限定:
-
-- レスポンシブレイアウトの崩れ
-- アニメーション・トランジションの滑らかさ
-- 色・フォントの視認性
-
-**注意**: 機能動作の確認は目視ではなくE2Eで担保すること
-
-### TDD実装フロー（厳守）
-
-**新機能・バグ修正の実装順序：**
-
-1. **テスト作成**: 失敗するテストを先に書く（RED状態を確認）
-2. **最小実装**: テストが通る最小限のコードを書く（GREEN状態）
-3. **リファクタリング**: コードを改善（テストは通ったまま）
-4. **コミット**: 意味のある単位でコミット
-
-**禁止事項：**
-- ❌ テストなしでの実装
-- ❌ 実装後のテスト追加（後付けテスト）
-- ❌ ブラウザ確認のみで完了（E2Eテストとして永続化すること）
-
-### 仕様変更時のテスト更新
-
-Issueで仕様変更があった場合:
-
-```bash
-# 1. 関連テストを検索
-grep -r "関連キーワード" tests/
-
-# 2. 期待値を新仕様に更新
-# 3. Issueコメントに更新したテストを記録
-```
-
----
-
-## 6. PRワークフロー
-
-1. PR作成後、`gh pr view <PR番号> --comments` でclaude-review結果を確認
-2. 🔴 Critical Issues → **必ず修正**
-3. 🟡 Moderate Issues → 可能な限り修正
-4. 💡 Minor Suggestions → ユーザーに確認
-5. **CI全チェック通過までマージしない**
-
----
-
-## 7. ブランチ・コミット規約
-
-**ブランチ命名:** `feature/{Epic番号}-us{US番号}-{機能名}`
-
-**PRタイトル:** `[{ブランチ名}] {説明}` 例: `[001-us1-e2e] User Story 1 - E2Eテスト`
-
-**コミット:** [Conventional Commits](https://www.conventionalcommits.org/)
-
-- `feat:` 新機能
-- `fix:` バグ修正
-- `docs:` ドキュメント
-- `test:` テスト
-- `chore:` その他
-
-**並列開発:**
-
-- 依存のないUser Story同士は並列OK
-- 1 PR = 1 User Story
-- **tasks.md はfeatureブランチで更新しない**（コンフリクト防止、mainでマージ後に更新）
-
-**main直接プッシュ禁止:**
-
-- 全ての変更はブランチ → PR経由でマージ
-- ドキュメント/ルール変更は `chore/docs-update` ブランチを使用
-- リベースは未プッシュのローカルコミットのみ許可
-
----
-
-## 8. コードコメント
-
-- **ファイル冒頭**: 概要・依存関係
-- **関数**: JSDoc形式（`@param`, `@returns`）
-- **インライン**: 複雑なロジックのみ簡潔に
-
----
-
-## 9. 禁止事項
-
-- ユーザー許可なく `spec.md` を書き換えない
-- 破壊的コマンド（`rm -rf` 等）は慎重に
-- 機能フラグ・後方互換レイヤー・過剰な抽象化は作らない（YAGNI）
-
----
-
-## 10. エラー対応
-
-**同じエラーが2回連続したら:**
-
+### エラーが2回連続したら
 1. エラー分析結果を提示
 2. 複数の修正方針を提案
 3. ユーザーの判断を待つ
 
 ---
 
-## 11. レスポンス形式
+## 完了の定義
 
-```typescript
-{ success: boolean; message: string; code?: string; data?: T; }
-```
-
----
-
-## 12. プロジェクト概要
-
-**ゆるぼ (YURUBO)**: 匿名型イベント調整プラットフォーム
-
-| 層       | 技術                                           |
-| -------- | ---------------------------------------------- |
-| Frontend | Next.js 15 / TypeScript / Tailwind / shadcn-ui |
-| Backend  | Supabase (DB + Auth)                           |
-| Infra    | Vercel / Supabase Cloud                        |
+- [ ] Issue要件を満たしている
+- [ ] テスト（Unit/E2E）がパス
+- [ ] `npm run precheck` がパス
+- [ ] PR作成済み（`Closes #<issue>`）
+- [ ] CI全チェック通過
 
 ---
 
-## 13. 開発コマンド
+## 禁止事項
 
-```bash
-npm run dev          # 開発サーバー
-npm test             # Jestテスト
-npm run test:e2e     # Playwrightテスト
-npm run lint         # リント
-npm run type-check   # 型チェック
-npm run precheck     # push前の全チェック（lint + type-check + test + e2e）
-```
+- ユーザー許可なく `spec.md` を書き換えない
+- 破壊的コマンド（`rm -rf` 等）は慎重に
+- 過剰な抽象化は作らない（YAGNI）
 
 ---
 
-## 14. 参照ドキュメント
+## 参照ドキュメント
 
-- [.specify/memory/constitution.md](.specify/memory/constitution.md) - **プロジェクト憲法（Core Principles、デザイン原則、ブランチ戦略）**
-- [docs/firstspec.md](docs/firstspec.md) - 詳細仕様
-- [docs/techplan.md](docs/techplan.md) - 技術仕様
+| 用途 | 参照先 |
+|------|--------|
+| SpecKit使用時 | [docs/agent/speckit.md](docs/agent/speckit.md) |
+| Core Principles確認 | [constitution.md](.specify/memory/constitution.md) |
+| 製品仕様の詳細 | [docs/firstspec.md](docs/firstspec.md) |
