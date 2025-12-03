@@ -42,8 +42,8 @@ const mockLt = jest.fn();
 const validEventData = {
   title: "週末飲み会",
   category: "drinking" as const,
-  date_start: "2025-12-01T19:00", // ISO string (HTML5 datetime-local format)
-  date_end: "2025-12-01T22:00", // ISO string
+  date_start: "2025-12-10T19:00", // ISO string (HTML5 datetime-local format) - 未来の日付に変更
+  date_end: "2025-12-10T22:00", // ISO string
   capacity_min: 3,
   capacity_max: 5,
   price_min: 3000,

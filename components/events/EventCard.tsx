@@ -244,10 +244,20 @@ export function EventCard({ event, currentUserId, onEventCancelled, onEventUpdat
         {/* アクションボタン（幹事のみ） */}
         {isHost && !isCancelled && (
           <div className="flex shrink-0 gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditModalOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditModalOpen(true)}
+              data-testid="event-edit-button"
+            >
               編集
             </Button>
-            <Button variant="destructive" size="sm" onClick={handleCancelClick}>
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={handleCancelClick}
+              data-testid="event-cancel-button"
+            >
               中止
             </Button>
           </div>
