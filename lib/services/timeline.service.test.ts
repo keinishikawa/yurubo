@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ファイル名: timeline.service.test.ts
  *

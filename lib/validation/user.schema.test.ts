@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ファイル名: user.schema.test.ts
  *

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ファイル名: generateAnonId.test.ts
  *

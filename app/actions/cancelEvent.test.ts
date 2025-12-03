@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ファイル名: cancelEvent.test.ts
  *

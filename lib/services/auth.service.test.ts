@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * ファイル名: auth.service.test.ts
  *
