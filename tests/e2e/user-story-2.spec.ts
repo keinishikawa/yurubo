@@ -33,13 +33,13 @@ test.describe('User Story 2: タイムライン閲覧（つながりベース）
    */
   async function signIn(page: Page, displayName: string) {
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
     await page.locator('input[type="text"]').first().fill(displayName)
 
     // ナビゲーション完了を待機してからボタンをクリック
     await Promise.all([
-      page.waitForURL('http://localhost:3000/'),
+      page.waitForURL('/'),
       page.locator('button:has-text("はじめる")').click()
     ])
 

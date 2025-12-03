@@ -60,8 +60,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.context().clearCookies()
     await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー1')
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
 
     // When: 「＋投稿」ボタンをクリック
     await page.locator('button:has-text("投稿")').click()
@@ -87,8 +89,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.context().clearCookies()
     await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー2')
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
     await page.locator('button:has-text("投稿")').click()
 
     // When: フォームに入力
@@ -123,8 +127,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.goto('/welcome')
     const displayName = 'テストユーザー3（実名）'
     await page.locator('input[type="text"]').first().fill(displayName)
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
 
     // イベント投稿
     await page.locator('button:has-text("投稿")').click()
@@ -198,8 +204,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.context().clearCookies()
     await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー投稿制限')
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
 
     // 同じカテゴリで3件投稿
     for (let i = 0; i < 3; i++) {
@@ -249,8 +257,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.context().clearCookies()
     await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザーバリデーション')
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
     await page.locator('button:has-text("投稿")').click()
 
     // When: 必須項目を入力せずに送信（カテゴリのみ選択）
@@ -277,8 +287,10 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
     await page.context().clearCookies()
     await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('新規ユーザーつながり0件')
-    await page.locator('button:has-text("はじめる")').click()
-    await expect(page).toHaveURL('/')
+    await Promise.all([
+      page.waitForURL('/'),
+      page.locator('button:has-text("はじめる")').click()
+    ])
 
     // When: 投稿モーダルを開く
     await page.locator('button:has-text("投稿")').click()

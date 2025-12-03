@@ -37,7 +37,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.context().clearCookies()
 
     // When: ホーム画面にアクセス
-    await page.goto('http://localhost:3000')
+    await page.goto('')
 
     // Then: ウェルカム画面が表示される
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
@@ -63,7 +63,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T167: 表示名を入力して「はじめる」を押すとタイムライン画面に遷移する', async ({ page }) => {
     // Given: ウェルカム画面が表示されている
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
 
     // When: 表示名を入力
@@ -91,7 +91,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T168: ログイン済みユーザーは登録画面をスキップしてタイムラインが表示される', async ({ page }) => {
     // Given: ログイン済み状態を作成
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー2')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('/')
@@ -120,7 +120,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     // Given: 最初のセッションでログイン
     const context1 = await browser.newContext()
     const page1 = await context1.newPage()
-    await page1.goto('http://localhost:3000/welcome')
+    await page1.goto('/welcome')
     await page1.locator('input[type="text"]').first().fill('テストユーザー3')
     await page1.locator('button:has-text("はじめる")').click()
     await expect(page1).toHaveURL('/')
@@ -133,7 +133,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     const context2 = await browser.newContext()
     await context2.addCookies(cookies)
     const page2 = await context2.newPage()
-    await page2.goto('http://localhost:3000')
+    await page2.goto('')
 
     // Then: タイムライン画面が表示される（ログイン状態維持）
     await expect(page2).toHaveURL('/')
@@ -153,7 +153,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T169: ログアウトボタンを押すとログアウトし、次回アクセス時に登録画面が表示される', async ({ page }) => {
     // Given: ログイン済み状態
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー4')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('/')
@@ -173,7 +173,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
 
     // Then: 次回アクセス時も登録画面が表示される
-    await page.goto('http://localhost:3000')
+    await page.goto('')
     await expect(page).toHaveURL('/welcome')
     await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
   })
@@ -190,7 +190,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T170: セッション有効期限切れ時に自動的に登録画面が表示される', async ({ page }) => {
     // Given: ログイン後、Cookieを削除してセッション有効期限切れをシミュレート
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
     await page.locator('input[type="text"]').first().fill('テストユーザー5')
     await page.locator('button:has-text("はじめる")').click()
     await expect(page).toHaveURL('/')
@@ -199,7 +199,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
     await page.context().clearCookies()
 
     // When: ホーム画面にアクセス
-    await page.goto('http://localhost:3000')
+    await page.goto('')
 
     // Then: 自動的にウェルカム画面にリダイレクトされる
     await expect(page).toHaveURL('/welcome')
@@ -214,7 +214,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T171: 表示名が空の場合、ボタンが無効化される', async ({ page }) => {
     // Given: ウェルカム画面が表示されている
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
 
     // Then: HTML5のrequired属性によりボタンが無効化されている
     const submitButton = page.locator('button:has-text("はじめる")')
@@ -224,7 +224,7 @@ test.describe('User Story 4: 簡易認証機能（匿名ログイン）', () => 
   test('T172: 表示名が50文字を超える場合、入力が制限される', async ({ page }) => {
     // Given: ウェルカム画面が表示されている
     await page.context().clearCookies()
-    await page.goto('http://localhost:3000/welcome')
+    await page.goto('/welcome')
 
     // When: 51文字の表示名を入力
     const longName = 'あ'.repeat(51)
