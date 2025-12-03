@@ -1,18 +1,19 @@
 <!--
 Sync Impact Report:
-Version: 1.0.0 → 1.1.0
+Version: 1.1.0 → 1.2.0
 Modified principles:
   - Principle III: テストファースト → 初期フェーズはE2E優先に更新
 Added sections:
   - ブランチ戦略（Trunk-Based Development）
   - テスト層の方針詳細化
   - 実行ポリシー明記
+  - Principle VIII: 独自性重視のフロントエンドデザイン（Anti-Generic UI）
 Removed sections: N/A
 Templates requiring updates:
   ✅ plan-template.md - Constitution Check section already present
   ✅ spec-template.md - User Scenarios & Requirements structure aligns with Principle I
   ✅ tasks-template.md - Test-first requirements align with Principle III
-  ⚠️ CLAUDE.md - Updated with branch strategy and test policy
+  ✅ CLAUDE.md - デザインガイドラインをconstitutionへ移行、参照に置き換え
 Follow-up TODOs: None
 -->
 
@@ -115,6 +116,55 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 - 自動的に修正を試みず、ユーザーの選択を待つ
 
 **根拠**: コード内学習により、開発者のスキル向上とコードの可読性を同時に実現する。
+
+### VIII. 独自性重視のフロントエンドデザイン（Anti-Generic UI）
+
+AIが生成しがちな画一的・汎用的なUIを回避し、プロダクショングレードの独自性あるインターフェースを構築する。
+
+**デザイン思考プロセス（実装前に必須）**:
+1. **目的**: このUIは何を解決するか？誰が使うか？
+2. **トーン**: 大胆な美的方向性を選択する
+   - ミニマル、マキシマリスト、レトロフューチャリスティック、オーガニック、ラグジュアリー、遊び心、エディトリアル、ブルータリスト、アールデコ、ソフト/パステル、インダストリアルなど
+   - YURUBOの場合：親しみやすさ・カジュアルさ・使いやすさを基調としつつ、独自の美的方向性を追求
+3. **制約**: 技術要件（Next.js、Tailwind、shadcn-ui、パフォーマンス、アクセシビリティ）
+4. **差別化**: このプロダクトを記憶に残すものは何か？
+5. **批判的思考**: 明確なコンセプトの方向性を定め、それを正確に実行する
+
+**美的ガイドライン（必須）**:
+
+| 要素 | 方針 |
+|------|------|
+| **タイポグラフィ** | 個性的で興味深いフォントを選択。Inter、Roboto、Arial、システムフォントは禁止。ディスプレイ用と本文用を使い分ける |
+| **色とテーマ** | 統一感のある美しいデザイン。CSS変数で一貫性を保つ。アクセントカラーを効果的に際立たせる |
+| **モーション** | ページ読み込み時の段階的アニメーション、ホバー・スクロールトリガーなど。CSSソリューション優先、必要に応じてframer-motion |
+| **空間構成** | 予想外のレイアウト、非対称性、重なり、豊かなネガティブスペース、制御された密度 |
+| **背景とビジュアル** | 単色統一を避け、雰囲気と奥行きを演出。グラデーション、ノイズテクスチャ、幾何学模様、レイヤー効果など |
+
+**禁止事項（Anti-Generic）**:
+- ❌ 汎用フォント（Inter、Roboto、Arial、システムフォント）
+- ❌ 決まりきった配色（白背景 + 紫グラデーションなど）
+- ❌ 予測可能なレイアウトとコンポーネントパターン
+- ❌ コンテキスト固有の特性が欠如した型どおりのデザイン
+- ❌ 世代を超えて同じ選択に収束すること（例：Space Grotesk）
+
+**実装の複雑さとビジョンの一致**:
+- マキシマリスト的デザイン → 精巧なコード、豊富なアニメーション・エフェクト
+- ミニマリスト的デザイン → 抑制、精密さ、スペース・タイポグラフィへの細心の注意
+- エレガントさはビジョンを正確に実現することで生まれる
+
+**技術スタック別ガイドライン**:
+- **Tailwind CSS**: ユーティリティファースト、カスタムカラーは`tailwind.config.ts`で定義
+- **shadcn-ui**: 基本コンポーネントとして活用、YURUBOの雰囲気に合わせてカスタマイズ
+- **Next.js**: Server Components優先、`next/image`で最適化、`next/font`でフォント読み込み
+
+**実装チェックリスト**:
+- [ ] アクセシビリティ（WAI-ARIA、キーボード操作）
+- [ ] レスポンシブデザイン（モバイル、タブレット、デスクトップ）
+- [ ] パフォーマンス（不要な再レンダリング回避）
+- [ ] 一貫性（既存UIとの整合性）
+- [ ] E2Eテスト（`data-testid`属性の設定）
+
+**根拠**: 独自性のあるUIはユーザー体験とブランド価値を高め、プロダクトを記憶に残るものにする。
 
 ## 開発ワークフロー
 
@@ -226,9 +276,13 @@ AIは候補提示・段取り整理までを担当し、確定操作は必ず人
 複雑性は正当化されなければならない。
 実行時の開発ガイダンスは`CLAUDE.md`を参照する。
 
-**Version**: 1.1.0 | **Ratified**: 2025-11-11 | **Last Amended**: 2025-11-13
+**Version**: 1.2.0 | **Ratified**: 2025-11-11 | **Last Amended**: 2025-12-03
 
 <!--
+Version 1.2.0 Change Log:
+- Added: Principle VIII - 独自性重視のフロントエンドデザイン（Anti-Generic UI）
+- Migrated: CLAUDE.mdのデザインガイドラインを憲法へ統合
+
 Version 1.1.0 Change Log:
 - Added: ブランチ戦略（Trunk-Based Development）セクション
 - Modified: テストファースト原則を「初期フェーズはE2E優先」に更新
