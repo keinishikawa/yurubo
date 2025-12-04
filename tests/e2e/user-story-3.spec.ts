@@ -17,6 +17,7 @@
  */
 
 import { test, expect } from "@playwright/test";
+import { signIn } from "./helpers/auth";
 
 test.describe("User Story 3: イベント編集", () => {
   /**
@@ -141,13 +142,7 @@ test.describe("User Story 3: イベント編集", () => {
    */
   test("T105: マイイベントページ表示", async ({ page }) => {
     // Given: ログイン済み状態を作成
-    await page.context().clearCookies();
-    await page.goto("/welcome");
-    await page.locator('input[type="text"]').first().fill("T105テストユーザー");
-    await Promise.all([
-      page.waitForURL("/"),
-      page.locator('button:has-text("はじめる")').click(),
-    ]);
+    await signIn(page, "T105テストユーザー");
 
     // Given: 自分のイベントを投稿
     await page.locator('button:has-text("投稿")').click();
@@ -192,13 +187,7 @@ test.describe("User Story 3: イベント編集", () => {
    */
   test("T105-2: マイイベントページ空状態", async ({ page }) => {
     // Given: ログイン済み状態を作成（イベント未投稿）
-    await page.context().clearCookies();
-    await page.goto("/welcome");
-    await page.locator('input[type="text"]').first().fill("T105-2空状態テストユーザー");
-    await Promise.all([
-      page.waitForURL("/"),
-      page.locator('button:has-text("はじめる")').click(),
-    ]);
+    await signIn(page, "T105-2空状態テストユーザー");
 
     // When: マイイベントページにアクセス
     await page.goto("/my");
@@ -225,13 +214,7 @@ test.describe("User Story 3: イベント編集", () => {
    */
   test("T105-3: マイイベントページからの編集", async ({ page }) => {
     // Given: ログイン済み状態を作成
-    await page.context().clearCookies();
-    await page.goto("/welcome");
-    await page.locator('input[type="text"]').first().fill("T105-3編集テストユーザー");
-    await Promise.all([
-      page.waitForURL("/"),
-      page.locator('button:has-text("はじめる")').click(),
-    ]);
+    await signIn(page, "T105-3編集テストユーザー");
 
     // Given: 自分のイベントを投稿
     await page.locator('button:has-text("投稿")').click();

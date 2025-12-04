@@ -4,65 +4,67 @@
  *
  * 【概要】
  * 認証サービス（auth.service.ts）の単体テスト
- * Supabase Anonymous Sign-inを使用した匿名ログイン機能をテスト
+ * Magic Link認証を使用したログイン機能をテスト
  *
  * 【テスト対象】
- * - T146: 匿名サインイン機能
+ * - signInWithMagicLink: Magic Link送信機能
  * - T148: セッション管理（check/refresh）機能
+ * - signOut: ログアウト機能
  *
  * 【依存関係】
  * - Jest: テストフレームワーク
  * - @supabase/supabase-js: Supabaseクライアント（モック）
+ *
+ * @see Issue #51 - Phase 0: 認証機能の修正（Magic Link認証への移行）
  */
 
 import { describe, it, expect } from '@jest/globals';
 
-// TODO: auth.service.ts実装後にインポートを有効化
+// TODO: Supabaseモック実装後にインポートを有効化
 // import {
-//   signInAnonymously,
+//   signInWithMagicLink,
 //   checkSession,
 //   refreshSession,
 //   signOut,
 // } from './auth.service';
 
 describe('auth.service', () => {
-  describe('T146: signInAnonymously - 匿名サインイン', () => {
-    it('should create anonymous user and return user data', async () => {
-      // TODO: 実装後にテストを有効化
+  describe('signInWithMagicLink - Magic Link認証', () => {
+    it('should send magic link email and return success', async () => {
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
-      // const result = await signInAnonymously('テストユーザー');
+      // const result = await signInWithMagicLink('test@example.com', 'http://localhost:3000/auth/callback');
       //
       // expect(result.success).toBe(true);
-      // expect(result.user).toBeDefined();
-      // expect(result.user?.id).toBeDefined();
+      // expect(result.code).toBe('MAGIC_LINK_SENT');
     });
 
-    it('should return error when display name is empty', async () => {
-      // TODO: 実装後にテストを有効化
+    it('should return error when email is invalid', async () => {
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
-      // const result = await signInAnonymously('');
+      // const result = await signInWithMagicLink('invalid-email', 'http://localhost:3000/auth/callback');
       //
       // expect(result.success).toBe(false);
-      // expect(result.error).toBe('VALIDATION_ERROR');
+      // expect(result.code).toBe('VALIDATION_ERROR');
     });
 
-    it('should return error when Supabase signInAnonymously fails', async () => {
-      // TODO: 実装後にテストを有効化
+    it('should return error when Supabase signInWithOtp fails', async () => {
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // // Supabaseエラーをモック
-      // const result = await signInAnonymously('テストユーザー');
+      // const result = await signInWithMagicLink('test@example.com', 'http://localhost:3000/auth/callback');
       //
       // expect(result.success).toBe(false);
-      // expect(result.error).toBe('SIGN_IN_FAILED');
+      // expect(result.code).toBe('SEND_FAILED');
     });
   });
 
   describe('T148: checkSession - セッションチェック', () => {
     it('should return user data when session is valid', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await checkSession();
@@ -72,7 +74,7 @@ describe('auth.service', () => {
     });
 
     it('should return error when session is expired', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await checkSession();
@@ -84,7 +86,7 @@ describe('auth.service', () => {
 
   describe('T148: refreshSession - セッションリフレッシュ', () => {
     it('should refresh session and return new tokens', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await refreshSession();
@@ -94,7 +96,7 @@ describe('auth.service', () => {
     });
 
     it('should return error when refresh fails', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await refreshSession();
@@ -106,7 +108,7 @@ describe('auth.service', () => {
 
   describe('signOut - ログアウト', () => {
     it('should sign out user successfully', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await signOut();
@@ -115,7 +117,7 @@ describe('auth.service', () => {
     });
 
     it('should return error when sign out fails', async () => {
-      // TODO: 実装後にテストを有効化
+      // TODO: Supabaseモック実装後にテストを有効化
       expect(true).toBe(true);
 
       // const result = await signOut();

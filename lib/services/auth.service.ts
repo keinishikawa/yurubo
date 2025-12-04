@@ -2,22 +2,21 @@
  * ファイル名: auth.service.ts
  *
  * 【概要】
- * 認証サービス - Supabase Anonymous Sign-inを使用した簡易認証機能
+ * 認証サービス - Supabase Magic Link認証を使用した認証機能
  *
  * 【主要機能】
- * - T149: 匿名サインイン（表示名のみで登録・ログイン）
+ * - signInWithMagicLink: Magic Link認証（メールアドレスでログイン）
  * - T150: セッション管理（check/refresh）
  * - T151: ログアウト
  *
  * 【依存関係】
  * - @supabase/supabase-js: Supabase クライアント
- * - user.schema: 表示名バリデーション
+ * - user.schema: バリデーション
  *
- * @see .specify/specs/001-event-creation/spec.md - User Story 4 仕様
+ * @see Issue #51 - Phase 0: 認証機能の修正（Magic Link認証への移行）
  */
 
 import { createClient } from '@/lib/supabase/server';
-import { createUserProfileSchema } from '@/lib/validation/user.schema';
 
 /**
  * 認証結果の型定義
@@ -34,6 +33,21 @@ export type AuthResult =
       success: false;
       error: 'VALIDATION_ERROR' | 'SIGN_IN_FAILED' | 'SESSION_EXPIRED' | 'REFRESH_FAILED' | 'SIGN_OUT_FAILED';
       message: string;
+    };
+
+/**
+ * Magic Link送信結果の型定義
+ */
+export type MagicLinkResult =
+  | {
+      success: true;
+      message: string;
+      code: 'MAGIC_LINK_SENT';
+    }
+  | {
+      success: false;
+      message: string;
+      code: 'VALIDATION_ERROR' | 'SEND_FAILED';
     };
 
 /**
@@ -54,85 +68,64 @@ export type SessionCheckResult =
     };
 
 /**
- * T149: 匿名サインイン
+ * Magic Link認証 - メールでログインリンクを送信
  *
- * Supabase Anonymous Sign-inを使用してユーザーを作成し、
- * 表示名をusersテーブルに保存する
+ * Supabase signInWithOtpを使用してMagic Linkを送信する
  *
- * @param displayName - ユーザーの表示名（1-50文字）
- * @returns 認証結果（成功時はユーザー情報、失敗時はエラー）
+ * @param email - ユーザーのメールアドレス
+ * @param redirectUrl - 認証後のリダイレクト先URL
+ * @returns Magic Link送信結果（成功時はメッセージ、失敗時はエラー）
  *
  * 【処理フロー】
- * 1. 表示名のバリデーション（createUserProfileSchema）
- * 2. Supabase Anonymous Sign-in実行
- * 3. usersテーブルにプロフィール作成（display_name保存）
- * 4. 成功時はユーザー情報を返す
+ * 1. メールアドレスのバリデーション
+ * 2. Supabase signInWithOtp実行（Magic Link送信）
+ * 3. 成功時は確認メッセージを返す
  *
  * 【エラーケース】
- * - 表示名が空またはバリデーションエラー → VALIDATION_ERROR
- * - Supabase認証エラー → SIGN_IN_FAILED
- * - プロフィール作成エラー → SIGN_IN_FAILED
+ * - メールアドレスが不正 → VALIDATION_ERROR
+ * - Supabaseエラー → SEND_FAILED
+ *
+ * @see Issue #51 - Magic Link認証への移行
  */
-export async function signInAnonymously(displayName: string): Promise<AuthResult> {
-  // Step 1: 表示名のバリデーション
-  const validationResult = createUserProfileSchema.safeParse({
-    display_name: displayName,
-  });
-
-  if (!validationResult.success) {
+export async function signInWithMagicLink(
+  email: string,
+  redirectUrl: string
+): Promise<MagicLinkResult> {
+  // Step 1: メールアドレスのバリデーション（簡易チェック）
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
     return {
       success: false,
-      error: 'VALIDATION_ERROR',
-      message: validationResult.error.issues[0].message,
+      message: '有効なメールアドレスを入力してください。',
+      code: 'VALIDATION_ERROR',
     };
   }
 
   const supabase = createClient();
 
-  // Step 2: Supabase Anonymous Sign-in
-  const { data: authData, error: signInError } = await supabase.auth.signInAnonymously();
-
-  if (signInError || !authData.user) {
-    return {
-      success: false,
-      error: 'SIGN_IN_FAILED',
-      message: '匿名ログインに失敗しました。再度お試しください。',
-    };
-  }
-
-  // Step 3: usersテーブルにプロフィール作成
-  const { error: profileError } = await supabase.from('users').upsert(
-    {
-      id: authData.user.id,
-      display_name: validationResult.data.display_name,
-      enabled_categories: validationResult.data.enabled_categories,
-      notification_preferences: validationResult.data.notification_preferences,
+  // Step 2: Supabase signInWithOtp実行（Magic Link送信）
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      // メール認証後のリダイレクト先
+      emailRedirectTo: redirectUrl,
     },
-    {
-      onConflict: 'id',
-    }
-  );
+  });
 
-  if (profileError) {
-    // プロフィール作成失敗時は認証もロールバック
-    const { error: signOutError } = await supabase.auth.signOut();
-    if (signOutError) {
-      console.error('Failed to rollback authentication:', signOutError);
-    }
+  if (error) {
+    console.error('Magic Link送信エラー:', error);
     return {
       success: false,
-      error: 'SIGN_IN_FAILED',
-      message: 'プロフィール作成に失敗しました。再度お試しください。',
+      message: 'メールの送信に失敗しました。再度お試しください。',
+      code: 'SEND_FAILED',
     };
   }
 
-  // Step 4: 成功時はユーザー情報を返す
+  // Step 3: 成功時は確認メッセージを返す
   return {
     success: true,
-    user: {
-      id: authData.user.id,
-      display_name: validationResult.data.display_name,
-    },
+    message: 'ログインリンクをメールで送信しました。メールを確認してください。',
+    code: 'MAGIC_LINK_SENT',
   };
 }
 

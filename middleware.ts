@@ -57,7 +57,8 @@ export async function middleware(request: NextRequest) {
 
   // リダイレクトロジック（T164）
   const isWelcomePage = request.nextUrl.pathname === '/welcome';
-  const isAuthRequired = !isWelcomePage && !request.nextUrl.pathname.startsWith('/_next');
+  const isAuthCallback = request.nextUrl.pathname.startsWith('/auth/callback');
+  const isAuthRequired = !isWelcomePage && !isAuthCallback && !request.nextUrl.pathname.startsWith('/_next');
 
   // 未認証ユーザーが保護されたルートにアクセス → /welcome にリダイレクト
   if (!user && isAuthRequired) {

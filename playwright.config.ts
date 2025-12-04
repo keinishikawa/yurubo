@@ -79,8 +79,10 @@ export default defineConfig({
   // CI環境では2回リトライ、ローカルでは0回
   retries: process.env.CI ? 2 : 0,
 
-  // CI環境では1ワーカー、ローカルでは並列実行
-  workers: process.env.CI ? 1 : undefined,
+  // Mailpit（ローカルメールサーバー）を使用する認証テストでは
+  // 並列実行するとメール取得でレースコンディションが発生するため
+  // 常に1ワーカーで実行する
+  workers: 1,
 
   // テストレポートの形式
   // - html: HTMLレポート生成
