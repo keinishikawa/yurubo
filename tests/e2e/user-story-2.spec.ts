@@ -17,7 +17,8 @@
  * - spec.md: User Story 2の受入シナリオ定義
  */
 
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+import { signIn } from './helpers/auth'
 
 /**
  * テストスイート: User Story 2 - タイムライン閲覧（つながりベース）
@@ -25,26 +26,6 @@ import { test, expect, Page } from '@playwright/test'
  * 【設計根拠】spec.md User Story 2の5つの受入シナリオ
  */
 test.describe('User Story 2: タイムライン閲覧（つながりベース）', () => {
-  /**
-   * 認証ヘルパー: 匿名ログインを実行
-   *
-   * @param page - Playwrightのページオブジェクト
-   * @param displayName - 表示名
-   */
-  async function signIn(page: Page, displayName: string) {
-    await page.context().clearCookies()
-    await page.goto('/welcome')
-    await expect(page.locator('text=ゆるぼへようこそ')).toBeVisible()
-    await page.locator('input[type="text"]').first().fill(displayName)
-
-    // ナビゲーション完了を待機してからボタンをクリック
-    await Promise.all([
-      page.waitForURL('/'),
-      page.locator('button:has-text("はじめる")').click()
-    ])
-
-    await expect(page.locator('h1:has-text("タイムライン")')).toBeVisible()
-  }
 
   /**
    * T087: シナリオ1 - タイムライン表示

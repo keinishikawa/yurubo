@@ -2,53 +2,52 @@
  * ファイル名: page.tsx (Welcome Screen)
  *
  * 【概要】
- * 簡易登録画面（WelcomeScreen） - User Story 4 (T156-T158, T162)
+ * ログイン/新規登録画面 - Magic Link認証
  *
  * 【主要機能】
- * - T156: WelcomeScreen作成
- * - T157: 表示名入力フォーム
- * - T158: ローディング・エラーハンドリング
- * - T162: クライアントサイドでSupabase匿名認証を実行
+ * - 新規登録タブ: 未登録メールのみ許可
+ * - ログインタブ: 登録済みメールのみ許可
+ * - Magic Link送信
+ * - 送信完了メッセージ表示
  *
  * 【処理フロー】
  * 1. 「ゆるぼへようこそ」メッセージ表示
- * 2. 表示名入力フィールド
- * 3. 「はじめる」ボタンクリック → クライアント側でSupabase認証
- * 4. 成功時は自動的にタイムライン画面にリダイレクト
- * 5. 失敗時はエラーメッセージ表示
+ * 2. 新規登録/ログインタブ切り替え
+ * 3. メールアドレス入力フィールド
+ * 4. 送信ボタンクリック → Magic Link送信（モードに応じたチェック）
+ * 5. 成功時は「メールを確認してください」メッセージ表示
+ * 6. 失敗時はエラーメッセージ表示
  *
  * 【依存関係】
- * - lib/supabase/client: クライアントサイドSupabase
- * - lib/validation/user.schema: バリデーションスキーマ
- * - shadcn-ui: Button, Input, Card
+ * - app/actions/sendMagicLink: Magic Link送信Server Action
+ * - shadcn-ui: Button, Input, Card, Tabs
  *
- * @see specs/001-event-creation/spec.md - User Story 4 受入シナリオ1,2
+ * @see Issue #51 - Phase 0: 認証機能の修正（Magic Link認証への移行）
  */
 
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import { createUserProfileSchema } from '@/lib/validation/user.schema';
+import { sendMagicLink, AuthMode } from '@/app/actions/sendMagicLink';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function WelcomePage() {
-  const router = useRouter();
-  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isEmailSent, setIsEmailSent] = useState(false);
+  const [activeTab, setActiveTab] = useState<AuthMode>('login');
 
   /**
-   * 「はじめる」ボタンクリック時の処理
+   * 送信ボタンクリック時の処理
    *
    * 【処理フロー】
-   * 1. クライアント側でSupabase匿名認証を実行
-   * 2. usersテーブルにプロフィールを作成
-   * 3. 成功時はタイムライン画面にリダイレクト
-   * 4. 失敗時はエラーメッセージを表示
+   * 1. Server ActionでMagic Linkを送信（モード指定）
+   * 2. 成功時は確認メッセージを表示
+   * 3. 失敗時はエラーメッセージを表示
    */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,103 +55,153 @@ export default function WelcomePage() {
     setIsLoading(true);
 
     try {
-      // Step 1: 表示名のバリデーション
-      const validationResult = createUserProfileSchema.safeParse({
-        display_name: displayName,
-      });
+      // Step 1: Magic Link送信（モード指定）
+      const result = await sendMagicLink(email, activeTab);
 
-      if (!validationResult.success) {
-        setError(validationResult.error.issues[0].message);
+      if (!result.success) {
+        setError(result.message);
         setIsLoading(false);
         return;
       }
 
-      const supabase = createClient();
-
-      // Step 2: Supabase匿名サインイン
-      const { data: authData, error: signInError } = await supabase.auth.signInAnonymously();
-
-      if (signInError || !authData.user) {
-        setError('サインインに失敗しました。再度お試しください。');
-        setIsLoading(false);
-        return;
-      }
-
-      // Step 3: usersテーブルにプロフィールを作成
-      const { error: profileError } = await supabase.from('users').upsert({
-        id: authData.user.id,
-        display_name: validationResult.data.display_name,
-        enabled_categories: validationResult.data.enabled_categories,
-        notification_preferences: validationResult.data.notification_preferences,
-      });
-
-      if (profileError) {
-        // プロフィール作成失敗時は認証もロールバック
-        const { error: signOutError } = await supabase.auth.signOut();
-        if (signOutError) {
-          console.error('Failed to rollback authentication:', signOutError);
-        }
-        setError('ユーザー情報の保存に失敗しました。再度お試しください。');
-        setIsLoading(false);
-        return;
-      }
-
-      // Step 4: タイムライン画面にリダイレクト
-      router.push('/');
-      router.refresh();
+      // Step 2: 成功時は確認メッセージを表示
+      setIsEmailSent(true);
+      setIsLoading(false);
     } catch (err) {
-      console.error('Sign in error:', err);
+      console.error('Magic Link送信エラー:', err);
       setError('予期しないエラーが発生しました。再度お試しください。');
       setIsLoading(false);
     }
   };
 
+  /**
+   * タブ切り替え時の処理
+   */
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as AuthMode);
+    setError(null);
+  };
+
+  // メール送信完了画面
+  if (isEmailSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">メールを確認してください</CardTitle>
+            <CardDescription>
+              <span className="block mt-2">{email}</span>
+              <span className="block mt-2">に{activeTab === 'signup' ? '登録' : 'ログイン'}リンクを送信しました。</span>
+              <span className="block mt-2">メール内のリンクをクリックして{activeTab === 'signup' ? '登録を完了' : 'ログイン'}してください。</span>
+            </CardDescription>
+          </CardHeader>
+
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                setIsEmailSent(false);
+                setEmail('');
+              }}
+            >
+              別のメールアドレスで試す
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  // メールアドレス入力画面
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">ゆるぼへようこそ</CardTitle>
           <CardDescription>
-            表示名を入力してはじめましょう
-            <br />
-            メールアドレスは不要です
+            メールアドレスで簡単にログインできます
           </CardDescription>
         </CardHeader>
 
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {/* 表示名入力フィールド (T157) */}
-            <div className="space-y-2">
-              <label htmlFor="displayName" className="text-sm font-medium">
-                表示名 <span className="text-destructive">*</span>
-              </label>
-              <Input
-                id="displayName"
-                type="text"
-                placeholder="例: ゆるぼ太郎"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                maxLength={50}
-                disabled={isLoading}
-                required
-              />
-              <p className="text-xs text-muted-foreground">1〜50文字で入力してください</p>
-            </div>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mx-4" style={{ width: 'calc(100% - 2rem)' }}>
+            <TabsTrigger value="login">ログイン</TabsTrigger>
+            <TabsTrigger value="signup">新規登録</TabsTrigger>
+          </TabsList>
 
-            {/* エラーメッセージ表示 (T158) */}
-            {error && (
-              <div className="rounded-md bg-destructive/10 p-3">
-                <p className="text-sm text-destructive">{error}</p>
-              </div>
-            )}
-          </CardContent>
+          <TabsContent value="login">
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label htmlFor="email-login" className="text-sm font-medium">
+                    メールアドレス <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    id="email-login"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    登録済みのメールアドレスを入力してください
+                  </p>
+                </div>
 
-          <CardFooter>
-            <Button type="submit" className="w-full" disabled={isLoading || !displayName.trim()}>
-              {isLoading ? '処理中...' : 'はじめる'}
-            </Button>
-          </CardFooter>
-        </form>
+                {error && (
+                  <div className="rounded-md bg-destructive/10 p-3">
+                    <p className="text-sm text-destructive">{error}</p>
+                  </div>
+                )}
+              </CardContent>
+
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading || !email.trim()}>
+                  {isLoading ? '送信中...' : 'ログインリンクを送信'}
+                </Button>
+              </CardFooter>
+            </form>
+          </TabsContent>
+
+          <TabsContent value="signup">
+            <form onSubmit={handleSubmit}>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <label htmlFor="email-signup" className="text-sm font-medium">
+                    メールアドレス <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    id="email-signup"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={isLoading}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    新しいメールアドレスを入力してください
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="rounded-md bg-destructive/10 p-3">
+                    <p className="text-sm text-destructive">{error}</p>
+                  </div>
+                )}
+              </CardContent>
+
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading || !email.trim()}>
+                  {isLoading ? '送信中...' : '登録リンクを送信'}
+                </Button>
+              </CardFooter>
+            </form>
+          </TabsContent>
+        </Tabs>
       </Card>
     </div>
   );
