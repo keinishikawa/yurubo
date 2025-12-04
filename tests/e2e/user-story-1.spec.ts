@@ -224,6 +224,9 @@ test.describe('User Story 1: 匿名イベント投稿', () => {
 
       // モーダルが閉じることを確認（投稿成功の証拠）
       await expect(page.locator('text=イベントを投稿')).not.toBeVisible({ timeout: 10000 })
+
+      // トースト通知が消えるのを待つ（次のボタンクリックをブロックしないように）
+      await page.locator('[data-sonner-toast]').waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {})
     }
 
     // When: 4件目を投稿しようとする
