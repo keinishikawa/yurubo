@@ -2,50 +2,15 @@
  * ファイル名: types.ts
  *
  * 【概要】
- * Supabaseデータベーススキーマから自動生成されたTypeScript型定義
- * `npx supabase gen types typescript --local` コマンドで生成
+ * Supabaseの型定義ファイル（自動生成）
  *
- * 【処理フロー】
- * このファイルは手動編集せず、スキーマ変更時に再生成する
- * 1. マイグレーションでスキーマ変更
- * 2. `npx supabase gen types typescript --local > lib/supabase/types.ts` 実行
- * 3. 型定義が自動更新される
+ * 【生成コマンド】
+ * supabase gen types typescript --local > lib/supabase/types.ts
  *
- * 【主要型定義】
- * - Database: 全スキーマの型定義（public, graphql_publicなど）
- * - Tables<T>: テーブル行の型（SELECT結果）
- * - TablesInsert<T>: INSERT用の型（デフォルト値を持つカラムはオプション）
- * - TablesUpdate<T>: UPDATE用の型（すべてのカラムがオプション）
- * - Json: JSONB型のTypeScript表現
- *
- * 【使用例】
- * import { Database, Tables } from '@/lib/supabase/types'
- *
- * // イベント行の型
- * type Event = Tables<'events'>
- *
- * // イベント作成時の型（INSERT用）
- * type EventInsert = TablesInsert<'events'>
- *
- * // Supabaseクライアントに型を適用
- * const supabase = createClient<Database>()
- *
- * 【依存関係】
- * - Supabaseデータベーススキーマ（supabase/migrations/）
- * - @supabase/supabase-js（クライアントライブラリ）
+ * 【注意】
+ * このファイルは自動生成されます。手動編集しないでください。
  */
 
-/**
- * Json型
- *
- * 【用途】PostgreSQLのJSONB型をTypeScriptで表現
- * 【例】notification_preferences, category_flagsなど
- *
- * 【型定義の意味】
- * - string | number | boolean | null: プリミティブ値
- * - { [key: string]: Json | undefined }: オブジェクト（再帰的）
- * - Json[]: 配列（再帰的）
- */
 export type Json =
   | string
   | number
@@ -105,6 +70,48 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      connection_requests: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          message: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          message?: string | null
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_requests_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connection_requests_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       connections: {
         Row: {
@@ -217,12 +224,54 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          data: Json
+          id: string
+          is_read: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          data?: Json
+          id?: string
+          is_read?: boolean
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          data?: Json
+          id?: string
+          is_read?: boolean
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string
           display_name: string
+          email: string | null
           enabled_categories: string[]
           id: string
           notification_preferences: Json
@@ -233,6 +282,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name: string
+          email?: string | null
           enabled_categories?: string[]
           id: string
           notification_preferences?: Json
@@ -243,6 +293,7 @@ export type Database = {
           bio?: string | null
           created_at?: string
           display_name?: string
+          email?: string | null
           enabled_categories?: string[]
           id?: string
           notification_preferences?: Json
@@ -255,7 +306,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_bidirectional_connection: {
+        Args: { category_flags?: Json; partner_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       [_ in never]: never
