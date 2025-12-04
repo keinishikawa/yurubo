@@ -34,10 +34,10 @@
 
 **⚠️ CRITICAL**: このフェーズが完了するまでUser Story実装は開始不可
 
-- [ ] T006 connection_requestsテーブルのマイグレーションを作成 `supabase/migrations/20251203000001_create_connection_requests_table.sql`
-- [ ] T007 [P] notificationsテーブルのマイグレーションを作成 `supabase/migrations/20251203000002_create_notifications_table.sql`
-- [ ] T008 マイグレーション適用とSupabase型定義を再生成 `supabase db reset && supabase gen types typescript --local`
-- [ ] T009 connection_requestsとnotificationsテーブルのRLSポリシーが正しく設定されていることを確認
+- [x] T006 connection_requestsテーブルのマイグレーションを作成 `supabase/migrations/20251203000001_create_connection_requests_table.sql`
+- [x] T007 [P] notificationsテーブルのマイグレーションを作成 `supabase/migrations/20251203000002_create_notifications_table.sql`
+- [x] T008 マイグレーション適用とSupabase型定義を再生成 `supabase db reset && supabase gen types typescript --local`
+- [x] T009 connection_requestsとnotificationsテーブルのRLSポリシーが正しく設定されていることを確認
 
 **Checkpoint**: データベース準備完了 - User Story実装開始可能
 
