@@ -20,11 +20,11 @@
 
 **Purpose**: プロジェクト構造の準備とディレクトリ作成
 
-- [ ] T001 つながり機能用ディレクトリを作成 `app/actions/connections/`
-- [ ] T002 [P] 通知機能用ディレクトリを作成 `app/actions/notifications/`
-- [ ] T003 [P] つながりコンポーネント用ディレクトリを作成 `components/connections/`
-- [ ] T004 [P] つながりページ用ディレクトリを作成 `app/(auth)/connections/`
-- [ ] T005 Zodバリデーションスキーマを作成 `lib/validation/connections.ts`
+- [X] T001 つながり機能用ディレクトリを作成 `app/actions/connections/`
+- [X] T002 [P] 通知機能用ディレクトリを作成 `app/actions/notifications/`
+- [X] T003 [P] つながりコンポーネント用ディレクトリを作成 `components/connections/`
+- [X] T004 [P] つながりページ用ディレクトリを作成 `app/(auth)/connections/`
+- [X] T005 Zodバリデーションスキーマを作成 `lib/validation/connections.ts`
 
 ---
 
