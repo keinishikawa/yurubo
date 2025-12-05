@@ -19,7 +19,12 @@
 
 import { test, expect } from "@playwright/test";
 import { signInWithMagicLink } from "../helpers/auth";
-import { createTestUser, seedConnection, cleanupTestData } from "../helpers/seed";
+import {
+  createTestUser,
+  seedConnection,
+  cleanupTestData,
+  isSeedAvailable,
+} from "../helpers/seed";
 
 /**
  * テストスイート: User Story 4 - つながりリストの閲覧・管理
@@ -29,13 +34,19 @@ import { createTestUser, seedConnection, cleanupTestData } from "../helpers/seed
  * 【設計方針】
  * - 各テストで独自のテストユーザーを作成し、Magic Linkのレート制限を回避
  * - テストは並列実行可能（独立したデータを使用）
+ * - CI環境ではSUPABASE_SERVICE_ROLE_KEYがないためスキップ
  */
 test.describe("User Story 4: つながりリストの閲覧・管理", () => {
+  // シードヘルパーが利用不可の場合はスイート全体をスキップ
+  test.skip(!isSeedAvailable(), "シードヘルパーが利用不可（CI環境）");
+
   /**
    * テストスイート終了後にテストデータをクリーンアップ
    */
   test.afterAll(async () => {
-    await cleanupTestData();
+    if (isSeedAvailable()) {
+      await cleanupTestData();
+    }
   });
 
   /**

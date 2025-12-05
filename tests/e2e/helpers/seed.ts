@@ -28,6 +28,20 @@ import type { Database } from "../../../lib/supabase/types";
 const createdUserIds: Set<string> = new Set();
 
 /**
+ * シードヘルパーが利用可能かどうかをチェック
+ *
+ * @returns シードヘルパーが利用可能な場合はtrue
+ *
+ * 【使用例】
+ * test.skip(!isSeedAvailable(), 'シードヘルパーが利用不可')
+ */
+export function isSeedAvailable(): boolean {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  return !!(supabaseUrl && serviceRoleKey);
+}
+
+/**
  * Supabase Admin Clientを取得
  *
  * @returns service_role_keyを使用したSupabase Admin Client

@@ -20,7 +20,13 @@
 
 import { test, expect } from "@playwright/test";
 import { signIn, signInWithMagicLink } from "./helpers/auth";
-import { createTestUser, seedConnection, seedEvent, cleanupTestData } from "./helpers/seed";
+import {
+  createTestUser,
+  seedConnection,
+  seedEvent,
+  cleanupTestData,
+  isSeedAvailable,
+} from "./helpers/seed";
 
 /**
  * テストスイート: User Story 1 - 匿名イベント投稿
@@ -32,7 +38,9 @@ test.describe("User Story 1: 匿名イベント投稿", () => {
    * テストスイート終了後にテストデータをクリーンアップ
    */
   test.afterAll(async () => {
-    await cleanupTestData();
+    if (isSeedAvailable()) {
+      await cleanupTestData();
+    }
   });
 
   /**
@@ -152,6 +160,8 @@ test.describe("User Story 1: 匿名イベント投稿", () => {
    * Then: 投稿が表示される
    */
   test("T064: つながりリストでカテゴリOKのユーザーには投稿が表示される", async ({ browser }) => {
+    test.skip(!isSeedAvailable(), "シードヘルパーが利用不可（CI環境）");
+
     // テストユーザーを作成
     const userA = await createTestUser("イベント投稿者A");
     const userB = await createTestUser("飲みOKユーザーB");
@@ -190,6 +200,8 @@ test.describe("User Story 1: 匿名イベント投稿", () => {
    * Then: 投稿は表示されない
    */
   test("T065: つながりリストでカテゴリNGのユーザーには投稿が非表示", async ({ browser }) => {
+    test.skip(!isSeedAvailable(), "シードヘルパーが利用不可（CI環境）");
+
     // テストユーザーを作成
     const userA = await createTestUser("イベント投稿者A2");
     const userC = await createTestUser("飲みNGユーザーC");
@@ -332,6 +344,8 @@ test.describe("User Story 1: 匿名イベント投稿", () => {
    * Then: 警告メッセージは表示されない
    */
   test("FR-019-2: つながりリストが存在する場合、警告は表示されない", async ({ browser }) => {
+    test.skip(!isSeedAvailable(), "シードヘルパーが利用不可（CI環境）");
+
     // テストユーザーを作成
     const userA = await createTestUser("つながり有りユーザーA");
     const userB = await createTestUser("つながり相手B");
