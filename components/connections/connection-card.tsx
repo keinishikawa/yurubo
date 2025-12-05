@@ -21,7 +21,7 @@
 import Image from 'next/image'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Settings } from 'lucide-react'
 
 /**
  * カテゴリ情報の型
@@ -46,6 +46,8 @@ type ConnectionCardProps = {
   categoryFlags: Record<string, boolean>
   /** 利用可能なカテゴリ一覧（表示用） */
   availableCategories: CategoryInfo[]
+  /** カテゴリ編集ボタンクリック時のコールバック */
+  onEditCategories: (targetId: string, targetName: string) => void
   /** 削除ボタンクリック時のコールバック */
   onDelete: (targetId: string) => void
   /** 削除中フラグ */
@@ -67,6 +69,7 @@ export function ConnectionCard({
   avatarUrl,
   categoryFlags,
   availableCategories,
+  onEditCategories,
   onDelete,
   isDeleting = false,
 }: ConnectionCardProps) {
@@ -127,8 +130,20 @@ export function ConnectionCard({
             )}
           </div>
 
-          {/* 削除ボタン */}
-          <div className="flex-shrink-0">
+          {/* アクションボタン */}
+          <div className="flex-shrink-0 flex gap-1">
+            {/* カテゴリ編集ボタン */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onEditCategories(targetId, displayName)}
+              aria-label={`${displayName}のカテゴリを編集`}
+              data-testid="edit-categories-button"
+            >
+              <Settings className="h-4 w-4 text-muted-foreground hover:text-primary" />
+            </Button>
+
+            {/* 削除ボタン */}
             <Button
               variant="ghost"
               size="icon"

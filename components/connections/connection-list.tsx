@@ -50,6 +50,8 @@ type ConnectionListProps = {
   connections: ConnectionItem[]
   /** 利用可能なカテゴリ一覧 */
   availableCategories: CategoryInfo[]
+  /** カテゴリ編集ボタンクリック時のコールバック */
+  onEditCategories: (targetId: string, targetName: string) => void
   /** 削除ボタンクリック時のコールバック */
   onDelete: (targetId: string) => void
   /** 削除中のターゲットID */
@@ -69,6 +71,7 @@ type ConnectionListProps = {
 export function ConnectionList({
   connections,
   availableCategories,
+  onEditCategories,
   onDelete,
   deletingTargetId = null,
   isLoading = false,
@@ -112,6 +115,7 @@ export function ConnectionList({
           avatarUrl={connection.target.avatar_url}
           categoryFlags={connection.category_flags}
           availableCategories={availableCategories}
+          onEditCategories={onEditCategories}
           onDelete={onDelete}
           isDeleting={deletingTargetId === connection.target.id}
         />

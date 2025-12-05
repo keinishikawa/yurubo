@@ -50,6 +50,8 @@ export type GetConnectionsResult = {
       created_at: string
     }>
     total: number
+    /** 現在ユーザーの有効カテゴリ（カテゴリ編集用） */
+    enabledCategories: string[]
   }
 } | {
   success: false
@@ -100,6 +102,24 @@ export async function getConnections(
   const { category, search, limit, offset } = validated.data
 
   try {
+    // 【ステップ2.5】現在ユーザーのenabled_categoriesを取得
+    const { data: currentUser, error: userError } = await supabase
+      .from('users')
+      .select('enabled_categories')
+      .eq('id', user.id)
+      .single()
+
+    if (userError) {
+      console.error('Failed to fetch user:', userError)
+      return {
+        success: false,
+        message: 'ユーザー情報の取得に失敗しました',
+        code: 'FETCH_ERROR'
+      }
+    }
+
+    const enabledCategories = currentUser?.enabled_categories ?? []
+
     // 【ステップ3】つながりリストを取得
     let query = supabase
       .from('connections')
@@ -175,7 +195,8 @@ export async function getConnections(
         connections: formattedConnections,
         total: search
           ? formattedConnections.length
-          : (count ?? formattedConnections.length)
+          : (count ?? formattedConnections.length),
+        enabledCategories
       }
     }
   } catch (error) {

@@ -35,6 +35,13 @@ import { useRouter } from 'next/navigation'
 import { ConnectionList, type ConnectionItem } from '@/components/connections/connection-list'
 import { getConnections } from '@/app/actions/connections/get-connections'
 import { deleteConnection } from '@/app/actions/connections/delete-connection'
+import { CategoryEditor } from '@/components/connections/category-editor'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -81,11 +88,17 @@ export default function ConnectionsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [totalCount, setTotalCount] = useState(0)
+  const [enabledCategories, setEnabledCategories] = useState<string[]>([])
 
   // 削除確認ダイアログの状態
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleteTargetName, setDeleteTargetName] = useState<string>('')
   const [isDeleting, setIsDeleting] = useState(false)
+
+  // カテゴリ編集ダイアログの状態
+  const [editTargetId, setEditTargetId] = useState<string | null>(null)
+  const [editTargetName, setEditTargetName] = useState<string>('')
+  const [editCurrentFlags, setEditCurrentFlags] = useState<Record<string, boolean>>({})
 
   // マウントフラグ（初回レンダリング判定用）
   const isMounted = useRef(false)
@@ -110,6 +123,7 @@ export default function ConnectionsPage() {
       if (result.success) {
         setConnections(result.data.connections)
         setTotalCount(result.data.total)
+        setEnabledCategories(result.data.enabledCategories)
       } else {
         if (result.code === 'UNAUTHORIZED') {
           router.push('/welcome')
@@ -179,6 +193,53 @@ export default function ConnectionsPage() {
   const handleCancelDelete = () => {
     setDeleteTargetId(null)
     setDeleteTargetName('')
+  }
+
+  /**
+   * カテゴリ編集ボタンクリック時のハンドラ
+   */
+  const handleEditCategoriesClick = (targetId: string, targetName: string) => {
+    const target = connections.find((c) => c.target.id === targetId)
+    if (target) {
+      setEditTargetId(targetId)
+      setEditTargetName(targetName)
+      setEditCurrentFlags(target.category_flags)
+    }
+  }
+
+  /**
+   * カテゴリ編集完了時のハンドラ
+   */
+  const handleCategoryEditorComplete = () => {
+    // ダイアログを閉じる
+    setEditTargetId(null)
+    setEditTargetName('')
+    setEditCurrentFlags({})
+
+    // つながりリストを再読み込み
+    const fetchConnections = async () => {
+      const result = await getConnections({
+        category: categoryFilter || undefined,
+        search: debouncedSearch || undefined,
+      })
+
+      if (result.success) {
+        setConnections(result.data.connections)
+        setTotalCount(result.data.total)
+        setEnabledCategories(result.data.enabledCategories)
+      }
+    }
+
+    fetchConnections()
+  }
+
+  /**
+   * カテゴリ編集キャンセル時のハンドラ
+   */
+  const handleCancelEditCategories = () => {
+    setEditTargetId(null)
+    setEditTargetName('')
+    setEditCurrentFlags({})
   }
 
   /**
@@ -259,6 +320,7 @@ export default function ConnectionsPage() {
       <ConnectionList
         connections={connections}
         availableCategories={CATEGORIES}
+        onEditCategories={handleEditCategoriesClick}
         onDelete={handleDeleteClick}
         deletingTargetId={isDeleting ? deleteTargetId : null}
         isLoading={isLoading}
@@ -298,6 +360,30 @@ export default function ConnectionsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* カテゴリ編集ダイアログ (T029) */}
+      <Dialog
+        open={editTargetId !== null}
+        onOpenChange={(open) => {
+          if (!open) handleCancelEditCategories()
+        }}
+      >
+        <DialogContent data-testid="category-editor-dialog">
+          <DialogHeader>
+            <DialogTitle>{editTargetName}さんのカテゴリ設定</DialogTitle>
+          </DialogHeader>
+          {editTargetId && (
+            <CategoryEditor
+              targetId={editTargetId}
+              targetName={editTargetName}
+              currentFlags={editCurrentFlags}
+              enabledCategories={enabledCategories}
+              onComplete={handleCategoryEditorComplete}
+              onCancel={handleCancelEditCategories}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
