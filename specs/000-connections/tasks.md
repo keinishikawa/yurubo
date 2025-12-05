@@ -100,14 +100,14 @@
 
 ### E2Eテスト for User Story 3
 
-- [ ] T027 [US3] カテゴリ設定のE2Eテストを作成 `tests/e2e/connections/us3-category-settings.spec.ts`
+- [x] T027 [US3] カテゴリ設定のE2Eテストを作成 `tests/e2e/connections/us3-category-settings.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T028 [US3] updateConnectionCategories Server Actionを実装 `app/actions/connections/update-categories.ts`
-- [ ] T029 [US3] CategoryEditorコンポーネントを作成 `components/connections/category-editor.tsx`
-- [ ] T030 [US3] ユーザーのenabled_categoriesに基づいてカテゴリをフィルタリング（自分のカテゴリのみ表示）
-- [ ] T031 [US3] category_flagsをユーザーのenabled_categoriesに対してバリデーション `update-categories.ts`
+- [x] T028 [US3] updateConnectionCategories Server Actionを実装 `app/actions/connections/update-categories.ts`
+- [x] T029 [US3] CategoryEditorコンポーネントを作成 `components/connections/category-editor.tsx`
+- [x] T030 [US3] ユーザーのenabled_categoriesに基づいてカテゴリをフィルタリング（自分のカテゴリのみ表示）
+- [x] T031 [US3] category_flagsをユーザーのenabled_categoriesに対してバリデーション `update-categories.ts`
 
 **Checkpoint**: User Story 3完了 - カテゴリ設定が機能
 
