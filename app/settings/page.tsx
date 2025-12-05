@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 
 /**
@@ -152,9 +153,21 @@ export default function SettingsPage() {
                 つながりのあるユーザーを管理し、カテゴリ設定を変更できます
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col gap-3">
+                <Link href="/connections/search">
+                  <Button variant="outline" className="w-full justify-start">
+                    友人を検索・追加
+                  </Button>
+                </Link>
+                <Link href="/connections/requests">
+                  <Button variant="outline" className="w-full justify-start">
+                    受信リクエスト一覧
+                  </Button>
+                </Link>
+              </div>
               <p className="text-sm text-muted-foreground">
-                ※つながりリスト管理機能は今後実装予定です
+                ※つながりリスト一覧は今後実装予定です
               </p>
             </CardContent>
           </Card>

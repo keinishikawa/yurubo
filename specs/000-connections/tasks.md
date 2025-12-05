@@ -51,19 +51,19 @@
 
 ### E2Eテスト for User Story 1
 
-- [ ] T010 [US1] ユーザー検索とリクエスト送信フローのE2Eテストを作成 `tests/e2e/connections/us1-add-connection.spec.ts`
+- [X] T010 [US1] ユーザー検索とリクエスト送信フローのE2Eテストを作成 `tests/e2e/connections/us1-add-connection.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T011 [P] [US1] searchUsers Server Actionを実装 `app/actions/connections/search-users.ts`
-- [ ] T012 [P] [US1] sendConnectionRequest Server Actionを実装 `app/actions/connections/send-request.ts`
-- [ ] T013 [US1] getReceivedRequests Server Actionを実装 `app/actions/connections/get-requests.ts`
-- [ ] T014 [US1] acceptConnectionRequest Server Actionを実装 `app/actions/connections/accept-request.ts`
-- [ ] T015 [P] [US1] UserSearchInputコンポーネントを作成 `components/connections/user-search-input.tsx`
-- [ ] T016 [P] [US1] UserSearchResultコンポーネントを作成 `components/connections/user-search-result.tsx`
-- [ ] T017 [US1] ユーザー検索ページを作成 `app/(auth)/connections/search/page.tsx`
-- [ ] T018 [US1] 既につながりのある相手に「友人」ラベルを表示し、リクエストボタンを非表示にする
-- [ ] T019 [US1] 同時リクエスト検出ロジックを実装（相互リクエスト時は自動でつながり成立） `send-request.ts`
+- [X] T011 [P] [US1] searchUsers Server Actionを実装 `app/actions/connections/search-users.ts`
+- [X] T012 [P] [US1] sendConnectionRequest Server Actionを実装 `app/actions/connections/send-request.ts`
+- [X] T013 [US1] getReceivedRequests Server Actionを実装 `app/actions/connections/get-requests.ts`
+- [X] T014 [US1] acceptConnectionRequest Server Actionを実装 `app/actions/connections/accept-request.ts`
+- [X] T015 [P] [US1] UserSearchInputコンポーネントを作成 `components/connections/user-search-input.tsx`
+- [X] T016 [P] [US1] UserSearchResultコンポーネントを作成 `components/connections/user-search-result.tsx`
+- [X] T017 [US1] ユーザー検索ページを作成 `app/(auth)/connections/search/page.tsx`
+- [X] T018 [US1] 既につながりのある相手に「友人」ラベルを表示し、リクエストボタンを非表示にする
+- [X] T019 [US1] 同時リクエスト検出ロジックを実装（相互リクエスト時は自動でつながり成立） `send-request.ts`
 
 **Checkpoint**: User Story 1完了 - 友人検索・リクエスト送信・承認が機能
 
