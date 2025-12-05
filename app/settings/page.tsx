@@ -155,6 +155,11 @@ export default function SettingsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col gap-3">
+                <Link href="/connections">
+                  <Button variant="outline" className="w-full justify-start">
+                    つながりリスト一覧
+                  </Button>
+                </Link>
                 <Link href="/connections/search">
                   <Button variant="outline" className="w-full justify-start">
                     友人を検索・追加
@@ -166,9 +171,6 @@ export default function SettingsPage() {
                   </Button>
                 </Link>
               </div>
-              <p className="text-sm text-muted-foreground">
-                ※つながりリスト一覧は今後実装予定です
-              </p>
             </CardContent>
           </Card>
         </TabsContent>

@@ -27,6 +27,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { RequestCard } from '@/components/connections/request-card'
 import { getReceivedRequests } from '@/app/actions/connections/get-requests'
@@ -107,10 +109,22 @@ export default function RequestsPage() {
     }
   }
 
+  const headerContent = (
+    <div className="flex items-center gap-3 mb-6">
+      <Link
+        href="/connections"
+        className="inline-flex items-center justify-center rounded-md w-8 h-8 hover:bg-accent"
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Link>
+      <h1 className="text-2xl font-bold">つながりリクエスト</h1>
+    </div>
+  )
+
   if (isLoading) {
     return (
       <div className="container max-w-lg mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">つながりリクエスト</h1>
+        {headerContent}
         <div className="text-center py-8 text-muted-foreground">読み込み中...</div>
       </div>
     )
@@ -118,7 +132,7 @@ export default function RequestsPage() {
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">つながりリクエスト</h1>
+      {headerContent}
 
       {requests.length === 0 ? (
         <div

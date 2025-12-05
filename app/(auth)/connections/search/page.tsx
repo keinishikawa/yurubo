@@ -30,6 +30,8 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
+import { ArrowLeft } from 'lucide-react'
 import { toast } from 'sonner'
 import { UserSearchInput } from '@/components/connections/user-search-input'
 import { UserSearchResult } from '@/components/connections/user-search-result'
@@ -122,7 +124,15 @@ export default function UserSearchPage() {
 
   return (
     <div className="container max-w-lg mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold mb-6">ユーザー検索</h1>
+      <div className="flex items-center gap-3 mb-6">
+        <Link
+          href="/connections"
+          className="inline-flex items-center justify-center rounded-md w-8 h-8 hover:bg-accent"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Link>
+        <h1 className="text-2xl font-bold">ユーザー検索</h1>
+      </div>
 
       {/* 検索入力 */}
       <div className="mb-6">
