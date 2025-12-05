@@ -28,28 +28,23 @@
  * @spec FR-009: つながり削除機能
  */
 
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import { ConnectionList, type ConnectionItem } from '@/components/connections/connection-list'
-import { getConnections } from '@/app/actions/connections/get-connections'
-import { deleteConnection } from '@/app/actions/connections/delete-connection'
-import { CategoryEditor } from '@/components/connections/category-editor'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { ConnectionList, type ConnectionItem } from "@/components/connections/connection-list";
+import { getConnections } from "@/app/actions/connections/get-connections";
+import { deleteConnection } from "@/app/actions/connections/delete-connection";
+import { CategoryEditor } from "@/components/connections/category-editor";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,195 +54,195 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { toast } from 'sonner'
-import { Search, Users, UserPlus, Bell } from 'lucide-react'
-import Link from 'next/link'
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { Search, Users, UserPlus, Bell } from "lucide-react";
+import Link from "next/link";
 
 /**
  * カテゴリ情報（マスタデータ）
  * 本来はAPIから取得するが、現時点では固定値
  */
 const CATEGORIES = [
-  { value: 'drinking', label: '飲み', emoji: '🍶' },
-  { value: 'travel', label: '旅行', emoji: '✈️' },
-  { value: 'tennis', label: 'テニス', emoji: '🎾' },
-  { value: 'other', label: 'その他', emoji: '📌' },
-]
+  { value: "drinking", label: "飲み", emoji: "🍶" },
+  { value: "travel", label: "旅行", emoji: "✈️" },
+  { value: "tennis", label: "テニス", emoji: "🎾" },
+  { value: "other", label: "その他", emoji: "📌" },
+];
 
 /**
  * つながりリストページコンポーネント
  */
 export default function ConnectionsPage() {
-  const router = useRouter()
+  const router = useRouter();
 
   // 状態管理
-  const [connections, setConnections] = useState<ConnectionItem[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [categoryFilter, setCategoryFilter] = useState<string>('')
-  const [searchQuery, setSearchQuery] = useState('')
-  const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [totalCount, setTotalCount] = useState(0)
-  const [enabledCategories, setEnabledCategories] = useState<string[]>([])
+  const [connections, setConnections] = useState<ConnectionItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [totalCount, setTotalCount] = useState(0);
+  const [enabledCategories, setEnabledCategories] = useState<string[]>([]);
 
   // 削除確認ダイアログの状態
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
-  const [deleteTargetName, setDeleteTargetName] = useState<string>('')
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteTargetName, setDeleteTargetName] = useState<string>("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // カテゴリ編集ダイアログの状態
-  const [editTargetId, setEditTargetId] = useState<string | null>(null)
-  const [editTargetName, setEditTargetName] = useState<string>('')
-  const [editCurrentFlags, setEditCurrentFlags] = useState<Record<string, boolean>>({})
+  const [editTargetId, setEditTargetId] = useState<string | null>(null);
+  const [editTargetName, setEditTargetName] = useState<string>("");
+  const [editCurrentFlags, setEditCurrentFlags] = useState<Record<string, boolean>>({});
 
   // マウントフラグ（初回レンダリング判定用）
-  const isMounted = useRef(false)
+  const isMounted = useRef(false);
 
   // 初回読み込みとフィルタ変更時にデータ取得
   useEffect(() => {
-    let isCancelled = false
+    let isCancelled = false;
 
     const fetchConnections = async () => {
       if (!isMounted.current) {
-        isMounted.current = true
+        isMounted.current = true;
       }
-      setIsLoading(true)
+      setIsLoading(true);
 
       const result = await getConnections({
         category: categoryFilter || undefined,
         search: debouncedSearch || undefined,
-      })
+      });
 
-      if (isCancelled) return
+      if (isCancelled) return;
 
       if (result.success) {
-        setConnections(result.data.connections)
-        setTotalCount(result.data.total)
-        setEnabledCategories(result.data.enabledCategories)
+        setConnections(result.data.connections);
+        setTotalCount(result.data.total);
+        setEnabledCategories(result.data.enabledCategories);
       } else {
-        if (result.code === 'UNAUTHORIZED') {
-          router.push('/welcome')
-          return
+        if (result.code === "UNAUTHORIZED") {
+          router.push("/welcome");
+          return;
         }
-        toast.error(result.message)
+        toast.error(result.message);
       }
 
-      setIsLoading(false)
-    }
+      setIsLoading(false);
+    };
 
-    fetchConnections()
+    fetchConnections();
 
     return () => {
-      isCancelled = true
-    }
-  }, [categoryFilter, debouncedSearch, router])
+      isCancelled = true;
+    };
+  }, [categoryFilter, debouncedSearch, router]);
 
   // 検索クエリのデバウンス処理
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery)
-    }, 300)
+      setDebouncedSearch(searchQuery);
+    }, 300);
 
-    return () => clearTimeout(timer)
-  }, [searchQuery])
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   /**
    * 削除ボタンクリック時のハンドラ
    * 確認ダイアログを表示
    */
   const handleDeleteClick = (targetId: string) => {
-    const target = connections.find((c) => c.target.id === targetId)
+    const target = connections.find((c) => c.target.id === targetId);
     if (target) {
-      setDeleteTargetId(targetId)
-      setDeleteTargetName(target.target.display_name)
+      setDeleteTargetId(targetId);
+      setDeleteTargetName(target.target.display_name);
     }
-  }
+  };
 
   /**
    * 削除確認後のハンドラ
    */
   const handleConfirmDelete = async () => {
-    if (!deleteTargetId) return
+    if (!deleteTargetId) return;
 
-    setIsDeleting(true)
+    setIsDeleting(true);
 
-    const result = await deleteConnection(deleteTargetId)
+    const result = await deleteConnection(deleteTargetId);
 
     if (result.success) {
-      toast.success(result.message)
+      toast.success(result.message);
       // リストから削除
-      setConnections((prev) => prev.filter((c) => c.target.id !== deleteTargetId))
-      setTotalCount((prev) => prev - 1)
+      setConnections((prev) => prev.filter((c) => c.target.id !== deleteTargetId));
+      setTotalCount((prev) => prev - 1);
     } else {
-      toast.error(result.message)
+      toast.error(result.message);
     }
 
-    setIsDeleting(false)
-    setDeleteTargetId(null)
-    setDeleteTargetName('')
-  }
+    setIsDeleting(false);
+    setDeleteTargetId(null);
+    setDeleteTargetName("");
+  };
 
   /**
    * 削除キャンセル時のハンドラ
    */
   const handleCancelDelete = () => {
-    setDeleteTargetId(null)
-    setDeleteTargetName('')
-  }
+    setDeleteTargetId(null);
+    setDeleteTargetName("");
+  };
 
   /**
    * カテゴリ編集ボタンクリック時のハンドラ
    */
   const handleEditCategoriesClick = (targetId: string, targetName: string) => {
-    const target = connections.find((c) => c.target.id === targetId)
+    const target = connections.find((c) => c.target.id === targetId);
     if (target) {
-      setEditTargetId(targetId)
-      setEditTargetName(targetName)
-      setEditCurrentFlags(target.category_flags)
+      setEditTargetId(targetId);
+      setEditTargetName(targetName);
+      setEditCurrentFlags(target.category_flags);
     }
-  }
+  };
 
   /**
    * カテゴリ編集完了時のハンドラ
    */
   const handleCategoryEditorComplete = () => {
     // ダイアログを閉じる
-    setEditTargetId(null)
-    setEditTargetName('')
-    setEditCurrentFlags({})
+    setEditTargetId(null);
+    setEditTargetName("");
+    setEditCurrentFlags({});
 
     // つながりリストを再読み込み
     const fetchConnections = async () => {
       const result = await getConnections({
         category: categoryFilter || undefined,
         search: debouncedSearch || undefined,
-      })
+      });
 
       if (result.success) {
-        setConnections(result.data.connections)
-        setTotalCount(result.data.total)
-        setEnabledCategories(result.data.enabledCategories)
+        setConnections(result.data.connections);
+        setTotalCount(result.data.total);
+        setEnabledCategories(result.data.enabledCategories);
       }
-    }
+    };
 
-    fetchConnections()
-  }
+    fetchConnections();
+  };
 
   /**
    * カテゴリ編集キャンセル時のハンドラ
    */
   const handleCancelEditCategories = () => {
-    setEditTargetId(null)
-    setEditTargetName('')
-    setEditCurrentFlags({})
-  }
+    setEditTargetId(null);
+    setEditTargetName("");
+    setEditCurrentFlags({});
+  };
 
   /**
    * カテゴリフィルタ変更時のハンドラ
    */
   const handleCategoryChange = (value: string) => {
-    setCategoryFilter(value === 'all' ? '' : value)
-  }
+    setCategoryFilter(value === "all" ? "" : value);
+  };
 
   return (
     <div className="container max-w-2xl mx-auto px-4 py-6">
@@ -257,9 +252,7 @@ export default function ConnectionsPage() {
           <Users className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold">つながりリスト</h1>
           {totalCount > 0 && (
-            <span className="text-sm text-muted-foreground">
-              ({totalCount}人)
-            </span>
+            <span className="text-sm text-muted-foreground">({totalCount}人)</span>
           )}
         </div>
       </div>
@@ -285,17 +278,20 @@ export default function ConnectionsPage() {
       {/* フィルタ・検索エリア */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         {/* カテゴリフィルタ (T038) */}
-        <Select
-          value={categoryFilter || 'all'}
-          onValueChange={handleCategoryChange}
-        >
+        <Select value={categoryFilter || "all"} onValueChange={handleCategoryChange}>
           <SelectTrigger className="w-full sm:w-[180px]" data-testid="category-filter">
             <SelectValue placeholder="カテゴリで絞り込み" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">すべて</SelectItem>
+            <SelectItem value="all" data-testid="category-option-all">
+              すべて
+            </SelectItem>
             {CATEGORIES.map((cat) => (
-              <SelectItem key={cat.value} value={cat.value}>
+              <SelectItem
+                key={cat.value}
+                value={cat.value}
+                data-testid={`category-option-${cat.value}`}
+              >
                 {cat.emoji} {cat.label}
               </SelectItem>
             ))}
@@ -330,15 +326,14 @@ export default function ConnectionsPage() {
       <AlertDialog
         open={deleteTargetId !== null}
         onOpenChange={(open) => {
-          if (!open) handleCancelDelete()
+          if (!open) handleCancelDelete();
         }}
       >
         <AlertDialogContent data-testid="delete-confirmation-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>つながりを削除しますか？</AlertDialogTitle>
             <AlertDialogDescription>
-              {deleteTargetName}さんとのつながりを削除します。
-              この操作は取り消せません。
+              {deleteTargetName}さんとのつながりを削除します。 この操作は取り消せません。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -355,7 +350,7 @@ export default function ConnectionsPage() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               data-testid="confirm-delete-button"
             >
-              {isDeleting ? '削除中...' : '削除'}
+              {isDeleting ? "削除中..." : "削除"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -365,7 +360,7 @@ export default function ConnectionsPage() {
       <Dialog
         open={editTargetId !== null}
         onOpenChange={(open) => {
-          if (!open) handleCancelEditCategories()
+          if (!open) handleCancelEditCategories();
         }}
       >
         <DialogContent data-testid="category-editor-dialog">
@@ -385,5 +380,5 @@ export default function ConnectionsPage() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

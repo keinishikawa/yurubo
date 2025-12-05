@@ -19,35 +19,18 @@
 
 import { test, expect } from "@playwright/test";
 import { signInWithMagicLink } from "../helpers/auth";
-import { createTestUser, seedConnection, cleanupTestData, TestUser } from "../helpers/seed";
+import { createTestUser, seedConnection, cleanupTestData } from "../helpers/seed";
 
 /**
  * テストスイート: User Story 4 - つながりリストの閲覧・管理
  *
  * 【設計根拠】spec.md User Story 4の受入シナリオ
+ *
+ * 【設計方針】
+ * - 各テストで独自のテストユーザーを作成し、Magic Linkのレート制限を回避
+ * - テストは並列実行可能（独立したデータを使用）
  */
 test.describe("User Story 4: つながりリストの閲覧・管理", () => {
-  // テスト用ユーザー（スイート全体で共有）
-  let userA: TestUser;
-  let userB: TestUser;
-  let userC: TestUser;
-
-  /**
-   * テストスイート開始前にテストデータを作成
-   */
-  test.beforeAll(async () => {
-    // テストユーザーを作成
-    userA = await createTestUser("テストユーザーA");
-    userB = await createTestUser("飲み友達B");
-    userC = await createTestUser("旅行仲間C");
-
-    // つながりを作成
-    // A-B: 飲みカテゴリのみOK
-    await seedConnection(userA.id, userB.id, { drinking: true });
-    // A-C: 旅行カテゴリのみOK
-    await seedConnection(userA.id, userC.id, { travel: true });
-  });
-
   /**
    * テストスイート終了後にテストデータをクリーンアップ
    */
@@ -85,8 +68,11 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
    * Then: つながりリストページが表示される
    */
   test("T032-1: つながりリストページが表示される", async ({ page }) => {
-    // Given: userAでログイン
-    await signInWithMagicLink(page, userA.email);
+    // このテスト用に新規ユーザーを作成
+    const testUser = await createTestUser("T032-1テストユーザー");
+
+    // Given: testUserでログイン
+    await signInWithMagicLink(page, testUser.email);
 
     // When: つながりリストページにアクセス
     await page.goto("/connections");
@@ -124,6 +110,13 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
    * Then: すべてのつながりが表示される
    */
   test("T032-3: カテゴリフィルタ「すべて」で全つながりが表示される", async ({ page }) => {
+    // このテスト用に新規ユーザーとつながりを作成
+    const userA = await createTestUser("T032-3ユーザーA");
+    const userB = await createTestUser("T032-3飲み友達B");
+    const userC = await createTestUser("T032-3旅行仲間C");
+    await seedConnection(userA.id, userB.id, { drinking: true });
+    await seedConnection(userA.id, userC.id, { travel: true });
+
     // Given: userAでログイン
     await signInWithMagicLink(page, userA.email);
     await page.goto("/connections");
@@ -144,6 +137,13 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
   test("T032-4: カテゴリフィルタで「飲み」を選択すると、飲みOKのつながりのみ表示される", async ({
     page,
   }) => {
+    // このテスト用に新規ユーザーとつながりを作成
+    const userA = await createTestUser("T032-4ユーザーA");
+    const userB = await createTestUser("T032-4飲み友達B");
+    const userC = await createTestUser("T032-4旅行仲間C");
+    await seedConnection(userA.id, userB.id, { drinking: true });
+    await seedConnection(userA.id, userC.id, { travel: true });
+
     // Given: userAでログイン
     await signInWithMagicLink(page, userA.email);
     await page.goto("/connections");
@@ -168,12 +168,19 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
   test("T032-5: 検索ボックスに名前を入力すると、該当するつながりのみ表示される", async ({
     page,
   }) => {
+    // このテスト用に新規ユーザーとつながりを作成
+    const userA = await createTestUser("T032-5ユーザーA");
+    const userB = await createTestUser("T032-5飲み友達B");
+    const userC = await createTestUser("T032-5旅行仲間C");
+    await seedConnection(userA.id, userB.id, { drinking: true });
+    await seedConnection(userA.id, userC.id, { travel: true });
+
     // Given: userAでログイン
     await signInWithMagicLink(page, userA.email);
     await page.goto("/connections");
 
     // When: 「飲み友達」で検索
-    await page.locator('[data-testid="search-input"]').fill("飲み友達");
+    await page.locator('[data-testid="search-input"]').fill("T032-5飲み友達");
 
     // Then: Bのみが表示される
     await expect(page.locator(`text=${userB.displayName}`)).toBeVisible({ timeout: 10000 });
@@ -189,6 +196,11 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
    * Then: 削除確認ダイアログが表示される
    */
   test("T032-6: 削除ボタンクリックで確認ダイアログが表示される", async ({ page }) => {
+    // このテスト用に新規ユーザーとつながりを作成
+    const userA = await createTestUser("T032-6ユーザーA");
+    const userB = await createTestUser("T032-6飲み友達B");
+    await seedConnection(userA.id, userB.id, { drinking: true });
+
     // Given: userAでログイン
     await signInWithMagicLink(page, userA.email);
     await page.goto("/connections");
@@ -200,10 +212,12 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
     const connectionCard = page.locator(
       `[data-testid="connection-card"]:has-text("${userB.displayName}")`
     );
-    await connectionCard.locator('[data-testid="delete-button"]').click();
+    await connectionCard.locator('[data-testid="delete-connection-button"]').click();
 
     // Then: 確認ダイアログが表示される
-    await expect(page.locator('[data-testid="confirm-dialog"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="delete-confirmation-dialog"]')).toBeVisible({
+      timeout: 5000,
+    });
     await expect(page.locator("text=つながりを削除しますか")).toBeVisible();
   });
 
@@ -233,9 +247,12 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
     const connectionCard = page.locator(
       `[data-testid="connection-card"]:has-text("${deleteTestUserB.displayName}")`
     );
-    await connectionCard.locator('[data-testid="delete-button"]').click();
+    await connectionCard.locator('[data-testid="delete-connection-button"]').click();
 
     // When: 確認ダイアログで「削除」をクリック
+    await expect(page.locator('[data-testid="delete-confirmation-dialog"]')).toBeVisible({
+      timeout: 5000,
+    });
     await page.locator('[data-testid="confirm-delete-button"]').click();
 
     // Then: つながりがリストから消える
@@ -275,16 +292,18 @@ test.describe("User Story 4: つながりリストの閲覧・管理", () => {
     const connectionCard = page.locator(
       `[data-testid="connection-card"]:has-text("${cancelTestUserB.displayName}")`
     );
-    await connectionCard.locator('[data-testid="delete-button"]').click();
+    await connectionCard.locator('[data-testid="delete-connection-button"]').click();
 
     // 確認ダイアログが表示される
-    await expect(page.locator('[data-testid="confirm-dialog"]')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('[data-testid="delete-confirmation-dialog"]')).toBeVisible({
+      timeout: 5000,
+    });
 
     // When: 確認ダイアログで「キャンセル」をクリック
-    await page.locator('[data-testid="cancel-button"]').click();
+    await page.locator('[data-testid="cancel-delete-button"]').click();
 
     // Then: ダイアログが閉じる
-    await expect(page.locator('[data-testid="confirm-dialog"]')).not.toBeVisible();
+    await expect(page.locator('[data-testid="delete-confirmation-dialog"]')).not.toBeVisible();
 
     // Then: つながりは削除されず、リストに残っている
     await expect(page.locator(`text=${cancelTestUserB.displayName}`)).toBeVisible();
