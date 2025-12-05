@@ -121,18 +121,18 @@
 
 ### E2Eテスト for User Story 4
 
-- [ ] T032 [US4] つながりリスト管理のE2Eテストを作成 `tests/e2e/connections/us4-list-management.spec.ts`
+- [X] T032 [US4] つながりリスト管理のE2Eテストを作成 `tests/e2e/connections/us4-list-management.spec.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] getConnections Server Actionを実装 `app/actions/connections/get-connections.ts`
-- [ ] T034 [US4] deleteConnection Server Actionを実装 `app/actions/connections/delete-connection.ts`
-- [ ] T035 [P] [US4] ConnectionCardコンポーネントを作成 `components/connections/connection-card.tsx`
-- [ ] T036 [P] [US4] ConnectionListコンポーネントを作成 `components/connections/connection-list.tsx`
-- [ ] T037 [US4] つながりリストページを作成 `app/(auth)/connections/page.tsx`
-- [ ] T038 [US4] カテゴリフィルタ機能をつながりリストに追加
-- [ ] T039 [US4] 名前検索機能をつながりリストに追加
-- [ ] T040 [US4] 削除確認ダイアログを追加
+- [X] T033 [US4] getConnections Server Actionを実装 `app/actions/connections/get-connections.ts`
+- [X] T034 [US4] deleteConnection Server Actionを実装 `app/actions/connections/delete-connection.ts`
+- [X] T035 [P] [US4] ConnectionCardコンポーネントを作成 `components/connections/connection-card.tsx`
+- [X] T036 [P] [US4] ConnectionListコンポーネントを作成 `components/connections/connection-list.tsx`
+- [X] T037 [US4] つながりリストページを作成 `app/(auth)/connections/page.tsx`
+- [X] T038 [US4] カテゴリフィルタ機能をつながりリストに追加
+- [X] T039 [US4] 名前検索機能をつながりリストに追加
+- [X] T040 [US4] 削除確認ダイアログを追加
 
 **Checkpoint**: User Story 4完了 - つながりリスト管理が機能
 
