@@ -335,6 +335,67 @@ export async function cleanupTestUsersByEmailPrefix(
 }
 
 /**
+ * テスト間独立性（Test Isolation）のためのクリーンアップ
+ *
+ * 【処理内容】
+ * 1. 追跡リストに登録されたユーザーを削除（createdUserIds）
+ * 2. `test-`で始まるメールアドレスのユーザーを削除（Magic Link認証経由で作成されたユーザー）
+ * 3. `e2e-test-`で始まるメールアドレスのユーザーを削除（シードヘルパー経由で作成されたユーザー）
+ *
+ * 【使用例】
+ * test.beforeEach(async () => {
+ *   if (isSeedAvailable()) {
+ *     await cleanupForTestIsolation()
+ *   }
+ * })
+ *
+ * 【注意】
+ * - auth.usersの削除によりON DELETE CASCADEで関連データも削除される
+ *   - users（プロフィール）
+ *   - connections（つながり）
+ *   - connection_requests（リクエスト）
+ *   - events（イベント）
+ *
+ * @see Issue #25 - E2Eテスト間のデータ分離
+ */
+export async function cleanupForTestIsolation(): Promise<void> {
+  const adminClient = getAdminClient();
+
+  // 1. 追跡リストのユーザーを削除
+  for (const userId of createdUserIds) {
+    try {
+      await adminClient.auth.admin.deleteUser(userId);
+    } catch {
+      // 既に削除されている場合は無視
+    }
+  }
+  createdUserIds.clear();
+
+  // 2. テストユーザーを一括削除
+  const { data, error } = await adminClient.auth.admin.listUsers({
+    perPage: 1000,
+  });
+
+  if (error) {
+    console.error("テストユーザー一覧取得エラー:", error);
+    return;
+  }
+
+  // test- または e2e-test- で始まるユーザーを削除
+  const testUsers = data.users.filter(
+    (user) => user.email?.startsWith("test-") || user.email?.startsWith("e2e-test-")
+  );
+
+  for (const user of testUsers) {
+    try {
+      await adminClient.auth.admin.deleteUser(user.id);
+    } catch {
+      // 既に削除されている場合は無視
+    }
+  }
+}
+
+/**
  * 匿名IDを生成
  *
  * @param category - カテゴリ名（'drinking', 'travel', 'tennis', 'other'）

@@ -18,8 +18,19 @@
 
 import { test, expect } from "@playwright/test";
 import { signIn } from "./helpers/auth";
+import { cleanupForTestIsolation, isSeedAvailable } from "./helpers/seed";
 
 test.describe("User Story 3: イベント編集", () => {
+  /**
+   * テスト開始前にテストデータをクリーンアップ（Test Isolation）
+   * @see Issue #25 - E2Eテスト間のデータ分離
+   */
+  test.beforeEach(async () => {
+    if (isSeedAvailable()) {
+      await cleanupForTestIsolation();
+    }
+  });
+
   /**
    * T108: 編集画面表示（シナリオ1）
    *

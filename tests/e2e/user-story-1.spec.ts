@@ -25,6 +25,7 @@ import {
   seedConnection,
   seedEvent,
   cleanupTestData,
+  cleanupForTestIsolation,
   isSeedAvailable,
 } from "./helpers/seed";
 
@@ -44,9 +45,15 @@ test.describe("User Story 1: 匿名イベント投稿", () => {
   });
 
   /**
-   * ブラウザコンソールログとエラーをキャプチャ（デバッグ用）
+   * テスト開始前にテストデータをクリーンアップ（Test Isolation）
+   * @see Issue #25 - E2Eテスト間のデータ分離
    */
   test.beforeEach(async ({ page }) => {
+    // テストデータのクリーンアップ
+    if (isSeedAvailable()) {
+      await cleanupForTestIsolation();
+    }
+
     // ブラウザコンソールログをキャプチャ
     page.on("console", (msg) => {
       console.log(`[BROWSER ${msg.type().toUpperCase()}] ${msg.text()}`);
