@@ -17,17 +17,21 @@
  * - SEOメタデータ
  * - レスポンシブナビゲーション
  * - トースト通知機能
+ * - 通知バッジ表示
  *
  * 【依存関係】
  * - next/font/google: Google Fonts読み込み
  * - @/components/ui/sonner: Toast通知
+ * - @/components/layout/header-notifications: 通知バッジ
  * - ./globals.css: Tailwind CSSスタイル
  */
 
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Toaster } from '@/components/ui/sonner'
+import { HeaderNotifications } from '@/components/layout/header-notifications'
 import './globals.css'
 
 /**
@@ -104,9 +108,16 @@ export default function RootLayout({
               <Link href="/my" className="text-sm font-medium hover:underline">
                 マイイベント
               </Link>
+              <Link href="/connections" className="text-sm font-medium hover:underline">
+                つながり
+              </Link>
               <Link href="/settings" className="text-sm font-medium hover:underline">
                 設定
               </Link>
+              {/* 通知バッジ */}
+              <Suspense fallback={null}>
+                <HeaderNotifications />
+              </Suspense>
             </div>
           </div>
         </nav>
