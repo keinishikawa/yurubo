@@ -146,14 +146,14 @@
 
 ### E2Eテスト for Notifications
 
-- [ ] T041 通知フローのE2Eテストを作成 `tests/e2e/connections/notifications.spec.ts`
+- [X] T041 通知フローのE2Eテストを作成 `tests/e2e/connections/notifications.spec.ts`
 
 ### Implementation for Notifications
 
-- [ ] T042 getNotifications Server Actionを実装 `app/actions/notifications/get-notifications.ts`
-- [ ] T043 [P] markNotificationAsRead Server Actionを実装 `app/actions/notifications/mark-as-read.ts`
-- [ ] T044 NotificationBadgeコンポーネントを作成 `components/connections/notification-badge.tsx`
-- [ ] T045 通知バッジをヘッダー/ナビゲーションに統合
+- [X] T042 getNotifications Server Actionを実装 `app/actions/notifications/get-notifications.ts`
+- [X] T043 [P] markNotificationAsRead Server Actionを実装 `app/actions/notifications/mark-as-read.ts`
+- [X] T044 NotificationBadgeコンポーネントを作成 `components/connections/notification-badge.tsx`
+- [X] T045 通知バッジをヘッダー/ナビゲーションに統合
 
 **Checkpoint**: 通知機能完了
 
