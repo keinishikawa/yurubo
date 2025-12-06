@@ -18,6 +18,7 @@
  */
 
 import { test, expect, Page } from '@playwright/test'
+import { cleanupForTestIsolation, isSeedAvailable } from '../helpers/seed'
 
 /**
  * テストユーザーとしてログインするヘルパー関数
@@ -43,9 +44,15 @@ async function loginAsTestUser(page: Page, displayName: string = 'テストユ�
 // TODO: 認証フローのE2Eテストセットアップを修正後、skipを解除する
 test.describe.skip('User Story 1: つながりの追加', () => {
   /**
-   * ブラウザコンソールログとエラーをキャプチャ（デバッグ用）
+   * テスト開始前にテストデータをクリーンアップ（Test Isolation）
+   * @see Issue #25 - E2Eテスト間のデータ分離
    */
   test.beforeEach(async ({ page }) => {
+    // テストデータのクリーンアップ
+    if (isSeedAvailable()) {
+      await cleanupForTestIsolation();
+    }
+
     // ブラウザコンソールログをキャプチャ
     page.on('console', (msg) => {
       console.log(`[BROWSER ${msg.type().toUpperCase()}] ${msg.text()}`)

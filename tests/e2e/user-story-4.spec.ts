@@ -20,6 +20,7 @@
 
 import { test, expect } from '@playwright/test'
 import { signIn } from './helpers/auth'
+import { cleanupForTestIsolation, isSeedAvailable } from './helpers/seed'
 
 /**
  * テストスイート: 認証機能（Magic Link）
@@ -27,6 +28,16 @@ import { signIn } from './helpers/auth'
  * 【設計根拠】Issue #51の完了条件
  */
 test.describe('認証機能（Magic Link）', () => {
+  /**
+   * テスト開始前にテストデータをクリーンアップ（Test Isolation）
+   * @see Issue #25 - E2Eテスト間のデータ分離
+   */
+  test.beforeEach(async () => {
+    if (isSeedAvailable()) {
+      await cleanupForTestIsolation();
+    }
+  });
+
   /**
    * 初回訪問時のウェルカム画面表示
    *

@@ -19,6 +19,7 @@
 import { test, expect, Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/types'
+import { cleanupForTestIsolation, isSeedAvailable } from '../helpers/seed'
 
 // テスト用のSupabaseクライアント（Service Role Key使用）
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321'
@@ -43,6 +44,16 @@ const supabase = createClient<Database>(supabaseUrl, supabaseServiceKey)
 test.describe.skip('User Story 3: アクティビティ単位の関係設定', () => {
   let testUserAId: string
   let testUserBId: string
+
+  /**
+   * テスト開始前にテストデータをクリーンアップ（Test Isolation）
+   * @see Issue #25 - E2Eテスト間のデータ分離
+   */
+  test.beforeEach(async () => {
+    if (isSeedAvailable()) {
+      await cleanupForTestIsolation();
+    }
+  });
 
   /**
    * テスト前のセットアップ
