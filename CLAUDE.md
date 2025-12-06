@@ -62,10 +62,11 @@ git gtr new <branch> # ワークツリー作成
 | テスト作成 | [constitution.md III](.specify/memory/constitution.md) | 現在フェーズの戦略 |
 | ブランチ作成 | [constitution.md ブランチ戦略](.specify/memory/constitution.md) | 命名規則 |
 
-### PR作成時
-1. `npm run precheck` 全チェック通過
-2. PRに `Closes #<issue>` を含める
-3. CI通過を確認してからマージ依頼
+### コミット・PR作成時
+1. 重要な変更時は `code-reviewer` サブエージェントでセルフレビュー
+2. `npm run precheck` 全チェック通過
+3. PRに `Closes #<issue>` を含める
+4. CI通過を確認してからマージ依頼
 
 ### セッション再開時
 ```bash
